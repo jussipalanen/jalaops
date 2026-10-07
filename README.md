@@ -93,6 +93,8 @@ jalaops/
 
 ## API
 
+Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/api.json`).
+
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
 | GET    | `/api/health`        | API and database health     |
