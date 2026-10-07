@@ -14,6 +14,16 @@ const router = createRouter({
       name: 'requests',
       component: () => import('../views/RequestListView.vue'),
     },
+    {
+      path: '/requests/new',
+      name: 'request-create',
+      component: () => import('../views/RequestCreateView.vue'),
+    },
+    {
+      path: '/requests/:id/edit',
+      name: 'request-edit',
+      component: () => import('../views/RequestEditView.vue'),
+    },
   ],
 })
 
