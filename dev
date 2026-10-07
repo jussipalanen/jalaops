@@ -1,0 +1,71 @@
+#!/usr/bin/env sh
+# Shortcuts for the Docker development environment.
+# Usage: ./dev <command> [arguments]   (run ./dev help for the list)
+set -e
+
+cd "$(dirname "$0")"
+
+COMPOSE="docker compose"
+
+usage() {
+    cat <<'EOF'
+Usage: ./dev <command> [arguments]
+
+Environment:
+  up [args]          Start all services in the background (docker compose up -d)
+  down [args]        Stop and remove the containers
+  stop               Stop the containers without removing them
+  restart [service]  Restart all services or one service
+  build [args]       Rebuild the images
+  ps                 Show the running services
+  logs [service]     Follow the logs of all services or one service
+  reset              Remove the containers AND the database volume
+
+Backend (Laravel):
+  artisan <args>     Run an Artisan command, e.g. ./dev artisan route:list
+  composer <args>    Run Composer in the backend container
+  migrate            Run database migrations
+  fresh              Drop all tables, migrate and seed the database
+  shell              Open a shell in the backend container
+  db                 Open the MariaDB client
+
+Frontend (Vue):
+  npm <args>         Run npm in the frontend container
+
+Tests:
+  test               Run the backend and frontend tests
+  test:backend       Run the backend tests
+  test:frontend      Run the frontend tests
+
+Any other command is passed to docker compose, e.g. ./dev exec backend php -v
+EOF
+}
+
+command="${1:-help}"
+[ $# -gt 0 ] && shift
+
+case "$command" in
+    up)            $COMPOSE up -d "$@" ;;
+    down)          $COMPOSE down "$@" ;;
+    stop)          $COMPOSE stop "$@" ;;
+    restart)       $COMPOSE restart "$@" ;;
+    build)         $COMPOSE build "$@" ;;
+    ps)            $COMPOSE ps "$@" ;;
+    logs)          $COMPOSE logs -f "$@" ;;
+    reset)         $COMPOSE down -v "$@" ;;
+    artisan)       $COMPOSE exec backend php artisan "$@" ;;
+    composer)      $COMPOSE exec backend composer "$@" ;;
+    migrate)       $COMPOSE exec backend php artisan migrate "$@" ;;
+    fresh)         $COMPOSE exec backend php artisan migrate:fresh --seed "$@" ;;
+    shell)         $COMPOSE exec backend bash ;;
+    db)            $COMPOSE exec db mariadb -u jalaops -psecret jalaops ;;
+    npm)           $COMPOSE exec frontend npm "$@" ;;
+    test)
+        $COMPOSE exec backend php artisan test
+        $COMPOSE exec frontend npm run test
+        ;;
+    test:backend)  $COMPOSE exec backend php artisan test "$@" ;;
+    test:frontend) $COMPOSE exec frontend npm run test -- "$@" ;;
+    help|-h|--help) usage ;;
+    *)             $COMPOSE "$command" "$@" ;;
+esac
