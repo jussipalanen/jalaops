@@ -58,6 +58,8 @@ If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
 | Command                | Does                                         |
 |------------------------|----------------------------------------------|
 | `./dev up` / `down`    | Start / stop the services                    |
+| `./dev restart`        | Recreate the services (reruns their startup steps) |
+| `./dev rebuild`        | Rebuild the images and recreate the services |
 | `./dev logs [service]` | Follow the logs                              |
 | `./dev artisan <args>` | Run an Artisan command                       |
 | `./dev composer <args>`| Run Composer in the backend container        |

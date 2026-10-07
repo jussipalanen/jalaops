@@ -6,6 +6,17 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-07
+
+### Fixed
+- The backend container failed to start when new Composer packages had been added since `vendor/` was installed (for example Scramble in 0.4.0). It now runs `composer install` on every start, which does nothing when everything is already installed.
+
+### Changed
+- `./dev restart` recreates the containers instead of only restarting them, so startup steps and changes to `docker-compose.yml` take effect.
+
+### Added
+- `./dev rebuild` rebuilds the images and recreates the containers.
+
 ## [0.4.0] - 2026-10-07
 
 ### Added
@@ -46,7 +57,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/jussipalanen/jalaops/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jussipalanen/jalaops/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/jussipalanen/jalaops/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jussipalanen/jalaops/compare/v0.1.0...v0.2.0

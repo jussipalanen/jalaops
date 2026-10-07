@@ -15,8 +15,9 @@ Environment:
   up [args]          Start all services in the background (docker compose up -d)
   down [args]        Stop and remove the containers
   stop               Stop the containers without removing them
-  restart [service]  Restart all services or one service
-  build [args]       Rebuild the images
+  restart [service]  Recreate all services or one service (reruns their startup steps)
+  rebuild [service]  Rebuild the images and recreate the services
+  build [args]       Rebuild the images without restarting
   ps                 Show the running services
   logs [service]     Follow the logs of all services or one service
   reset              Remove the containers AND the database volume
@@ -48,7 +49,8 @@ case "$command" in
     up)            $COMPOSE up -d "$@" ;;
     down)          $COMPOSE down "$@" ;;
     stop)          $COMPOSE stop "$@" ;;
-    restart)       $COMPOSE restart "$@" ;;
+    restart)       $COMPOSE up -d --force-recreate "$@" ;;
+    rebuild)       $COMPOSE up -d --build --force-recreate "$@" ;;
     build)         $COMPOSE build "$@" ;;
     ps)            $COMPOSE ps "$@" ;;
     logs)          $COMPOSE logs -f "$@" ;;
