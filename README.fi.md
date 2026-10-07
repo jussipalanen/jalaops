@@ -2,7 +2,7 @@
 
 [English](README.md) | **Suomi**
 
-[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Tiekartta](#tiekartta)
+[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Julkaisu](#julkaisu) · [Tiekartta](#tiekartta)
 
 > **Tila:** kehitys on alkuvaiheessa. Katso [tiekartta](ROADMAP.md) ja [issuet](https://github.com/jussipalanen/jalaops/issues).
 
@@ -108,6 +108,12 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/dashboard`     | Pyyntöjen määrät tiloittain   |
 
 Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`
+
+## Julkaisu
+
+Sovelluksen voi julkaista ilmaiseksi: frontend Verceliin ja backend Renderiin. Oletuksena julkaistu backend käyttää demodataa, joka palautuu jokaisella uudelleenkäynnistyksellä (`DEMO_MODE=true`), joten erillistä tietokantapalvelua ei tarvita. Asettamalla `DEMO_MODE=false` ja `DB_*`-muuttujat käyttöön tulee oikea tietokanta.
+
+Vaiheittainen ohje (englanniksi): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Tiekartta
 

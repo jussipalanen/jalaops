@@ -6,6 +6,19 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-07
+
+### Added
+- Production Docker image for the backend (`docker/production/Dockerfile`) with a start script, for hosting on Render.
+- `DEMO_MODE` setting: `true` runs on demo data in SQLite that resets on every start, `false` uses the database configured with `DB_*`. `SEED_DEMO_DATA=true` seeds the demo requests once into an empty database.
+- A notice in the app when it runs in demo mode, and a `demo` field in `/api/health`.
+- `frontend/vercel.json` for hosting the frontend on Vercel: forwards `/api/*` to the backend and serves `index.html` for app routes.
+- Deployment guide for Vercel and Render in `docs/DEPLOYMENT.md`.
+- `DEMO_MODE`, `SEED_DEMO_DATA` and `MYSQL_ATTR_SSL_CA` in `backend/.env.example`.
+
+### Changed
+- Running the seeder again no longer duplicates the demo requests.
+
 ## [0.6.0] - 2026-10-07
 
 ### Added
@@ -77,7 +90,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/jussipalanen/jalaops/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/jussipalanen/jalaops/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/jussipalanen/jalaops/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/jussipalanen/jalaops/compare/v0.4.0...v0.4.1

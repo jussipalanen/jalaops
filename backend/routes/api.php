@@ -7,16 +7,25 @@ use Illuminate\Support\Facades\Route;
 /**
  * Health check.
  *
- * Reports whether the API and its database connection work.
+ * Reports whether the API and its database connection work, and whether the
+ * app runs in demo mode.
  */
 Route::get('/health', function () {
     try {
         DB::connection()->getPdo();
     } catch (Throwable) {
-        return response()->json(['status' => 'error', 'database' => 'error'], 503);
+        return response()->json([
+            'status' => 'error',
+            'database' => 'error',
+            'demo' => config('app.demo_mode'),
+        ], 503);
     }
 
-    return response()->json(['status' => 'ok', 'database' => 'ok']);
+    return response()->json([
+        'status' => 'ok',
+        'database' => 'ok',
+        'demo' => config('app.demo_mode'),
+    ]);
 });
 
 // The model is ServiceRequest, but the public API uses /api/requests.

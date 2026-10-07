@@ -2,7 +2,7 @@
 
 **English** | [Suomi](README.fi.md)
 
-[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Roadmap](#roadmap)
+[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Deployment](#deployment) · [Roadmap](#roadmap)
 
 > **Status:** in early development. See the [roadmap](ROADMAP.md) and [issues](https://github.com/jussipalanen/jalaops/issues).
 
@@ -108,6 +108,12 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/dashboard`     | Request counts by status    |
 
 Filters: `/api/requests?status=open`, `/api/requests?priority=high`
+
+## Deployment
+
+The app can be hosted for free with the frontend on Vercel and the backend on Render. By default the hosted backend runs on demo data that resets on every restart (`DEMO_MODE=true`), so no database service is needed. Set `DEMO_MODE=false` and the `DB_*` variables to use a real database.
+
+Step-by-step guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Roadmap
 

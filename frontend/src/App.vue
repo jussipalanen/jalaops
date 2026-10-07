@@ -1,8 +1,11 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import DemoBanner from '@/components/DemoBanner.vue'
 </script>
 
 <template>
+  <DemoBanner />
+
   <header class="app-header">
     <div class="container header-inner">
       <RouterLink to="/" class="brand">
