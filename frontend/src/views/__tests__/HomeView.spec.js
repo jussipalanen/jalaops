@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
 import HomeView from '../HomeView.vue'
 
 function mockFetch(response) {
@@ -14,7 +14,7 @@ describe('HomeView', () => {
   it('shows that the API connection works', async () => {
     mockFetch({ ok: true, json: () => Promise.resolve({ status: 'ok' }) })
 
-    const wrapper = mount(HomeView)
+    const wrapper = mount(HomeView, { global: { stubs: { RouterLink: RouterLinkStub } } })
     await flushPromises()
 
     expect(fetch).toHaveBeenCalledWith('/api/health', expect.any(Object))
@@ -24,7 +24,7 @@ describe('HomeView', () => {
   it('shows an error when the API cannot be reached', async () => {
     mockFetch({ ok: false, status: 500 })
 
-    const wrapper = mount(HomeView)
+    const wrapper = mount(HomeView, { global: { stubs: { RouterLink: RouterLinkStub } } })
     await flushPromises()
 
     expect(wrapper.text()).toContain('API-yhteys ei toimi.')

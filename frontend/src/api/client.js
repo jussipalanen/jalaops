@@ -1,6 +1,7 @@
 // Small wrapper around fetch for calling the Laravel API.
-export async function apiGet(path) {
+async function apiRequest(method, path) {
   const response = await fetch(`/api${path}`, {
+    method,
     headers: { Accept: 'application/json' },
   })
 
@@ -8,5 +9,14 @@ export async function apiGet(path) {
     throw new Error(`API request failed with status ${response.status}`)
   }
 
-  return response.json()
+  // 204 No Content has no body to parse.
+  return response.status === 204 ? null : response.json()
+}
+
+export function apiGet(path) {
+  return apiRequest('GET', path)
+}
+
+export function apiDelete(path) {
+  return apiRequest('DELETE', path)
 }

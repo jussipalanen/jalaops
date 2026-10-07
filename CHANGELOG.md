@@ -6,6 +6,17 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-07
+
+### Added
+- Request list at `/requests`: title, priority, status and due date in a table, with Finnish labels for priority and status (#5).
+- Edit and delete actions for each request; deleting asks for confirmation first.
+- Navigation between the home page and the request list.
+
+### Changed
+- New light, modern theme with a sky-blue primary color, cards and shared button and badge styles.
+- Mobile and tablet friendly layout: on phones each request is shown as a card with large touch targets.
+
 ## [0.4.1] - 2026-10-07
 
 ### Fixed
@@ -57,7 +68,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/jussipalanen/jalaops/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/jussipalanen/jalaops/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jussipalanen/jalaops/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/jussipalanen/jalaops/compare/v0.2.0...v0.3.0
