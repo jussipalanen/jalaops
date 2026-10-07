@@ -158,4 +158,60 @@ class ServiceRequestApiTest extends TestCase
             ->assertNotFound()
             ->assertExactJson(['message' => 'Osoitetta ei löytynyt.']);
     }
+
+    private function createFilterFixtures(): void
+    {
+        ServiceRequest::factory()->create(['title' => 'Avoin kiireellinen', 'status' => 'open', 'priority' => 'high']);
+        ServiceRequest::factory()->create(['title' => 'Avoin tavallinen', 'status' => 'open', 'priority' => 'normal']);
+        ServiceRequest::factory()->create(['title' => 'Valmis kiireellinen', 'status' => 'completed', 'priority' => 'high']);
+        ServiceRequest::factory()->create(['title' => 'Työn alla matala', 'status' => 'in_progress', 'priority' => 'low']);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function listedTitles(string $query): array
+    {
+        return collect($this->getJson("/api/requests{$query}")->assertOk()->json('data'))
+            ->pluck('title')
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    public function test_filters_by_status(): void
+    {
+        $this->createFilterFixtures();
+
+        $this->assertSame(['Avoin kiireellinen', 'Avoin tavallinen'], $this->listedTitles('?status=open'));
+    }
+
+    public function test_filters_by_priority(): void
+    {
+        $this->createFilterFixtures();
+
+        $this->assertSame(['Avoin kiireellinen', 'Valmis kiireellinen'], $this->listedTitles('?priority=high'));
+    }
+
+    public function test_filters_by_status_and_priority(): void
+    {
+        $this->createFilterFixtures();
+
+        $this->assertSame(['Avoin kiireellinen'], $this->listedTitles('?status=open&priority=high'));
+    }
+
+    public function test_empty_filters_list_all_requests(): void
+    {
+        $this->createFilterFixtures();
+
+        $this->assertCount(4, $this->listedTitles('?status=&priority='));
+    }
+
+    public function test_rejects_invalid_filter_values(): void
+    {
+        $this->getJson('/api/requests?status=done&priority=urgent')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['status', 'priority'])
+            ->assertJsonPath('errors.status.0', 'Kentän tila arvo on virheellinen.');
+    }
 }

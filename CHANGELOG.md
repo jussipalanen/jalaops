@@ -6,6 +6,12 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-07
+
+### Added
+- Filter requests by status and/or priority: `GET /api/requests?status=open&priority=high` (#7). Invalid filter values return a Finnish validation error.
+- Status and priority filters on the request list, with a button to clear them. The filters are kept in the address, so a filtered list survives a reload and can be shared as a link.
+
 ## [0.7.0] - 2026-10-07
 
 ### Added
@@ -90,7 +96,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/jussipalanen/jalaops/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/jussipalanen/jalaops/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/jussipalanen/jalaops/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/jussipalanen/jalaops/compare/v0.4.1...v0.5.0

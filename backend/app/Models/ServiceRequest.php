@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\RequestPriority;
 use App\Enums\RequestStatus;
 use Database\Factories\ServiceRequestFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -44,5 +46,27 @@ class ServiceRequest extends Model
             'status' => RequestStatus::class,
             'due_date' => 'date:Y-m-d',
         ];
+    }
+
+    /**
+     * Only requests with the given status.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function withStatus(Builder $query, RequestStatus $status): void
+    {
+        $query->where('status', $status);
+    }
+
+    /**
+     * Only requests with the given priority.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function withPriority(Builder $query, RequestPriority $priority): void
+    {
+        $query->where('priority', $priority);
     }
 }
