@@ -47,6 +47,7 @@ onMounted(loadRequests)
           {{ requests.length }} {{ requests.length === 1 ? 'pyyntö' : 'pyyntöä' }}
         </p>
       </div>
+      <RouterLink to="/requests/new" class="btn btn-primary new-button">+ Uusi pyyntö</RouterLink>
     </header>
 
     <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
@@ -183,6 +184,10 @@ onMounted(loadRequests)
 
 /* Phone: each request becomes its own card with labelled fields. */
 @media (max-width: 639px) {
+  .new-button {
+    width: 100%;
+  }
+
   .table-card {
     background: transparent;
     border: 0;

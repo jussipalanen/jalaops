@@ -6,6 +6,15 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-07
+
+### Added
+- Create a request at `/requests/new` and edit one at `/requests/:id/edit`, including changing its status (#6).
+- Reusable request form with title, description, priority, status and due date.
+- The backend's Finnish validation errors are shown next to each field.
+- "Uusi pyyntö" button on the request list.
+- A "not found" message when editing a request that doesn't exist.
+
 ## [0.5.0] - 2026-10-07
 
 ### Added
@@ -68,7 +77,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/jussipalanen/jalaops/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/jussipalanen/jalaops/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/jussipalanen/jalaops/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/jussipalanen/jalaops/compare/v0.3.0...v0.4.0
