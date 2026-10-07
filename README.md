@@ -38,8 +38,39 @@ Requirements: Docker and Docker Compose.
 ```bash
 git clone git@github.com:jussipalanen/jalaops.git
 cd jalaops
-docker compose up
+./dev up        # or: docker compose up -d
 ```
+
+The first start installs the dependencies and runs the database migrations, so it takes a moment. Then open:
+
+| Service  | URL                              |
+|----------|----------------------------------|
+| Frontend | http://localhost:5173            |
+| API      | http://localhost:8000/api/health |
+| MariaDB  | `localhost:3306` (user `jalaops`, password `secret`, database `jalaops`) |
+
+If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
+
+### The `dev` helper
+
+`./dev` is a shortcut for common Docker commands. Run `./dev help` for the full list.
+
+| Command                | Does                                         |
+|------------------------|----------------------------------------------|
+| `./dev up` / `down`    | Start / stop the services                    |
+| `./dev logs [service]` | Follow the logs                              |
+| `./dev artisan <args>` | Run an Artisan command                       |
+| `./dev composer <args>`| Run Composer in the backend container        |
+| `./dev npm <args>`     | Run npm in the frontend container            |
+| `./dev migrate`        | Run database migrations                      |
+| `./dev fresh`          | Recreate the database and seed it            |
+| `./dev db`             | Open the MariaDB client                      |
+| `./dev test`           | Run the backend and frontend tests           |
+| `./dev reset`          | Remove the containers and the database data  |
+
+On Windows, run `./dev` in Git Bash or WSL, or use the `docker compose` commands directly.
+
+Tests always use an in-memory SQLite database, never the MariaDB development data.
 
 ## Architecture
 
@@ -56,13 +87,15 @@ jalaops/
 ├── backend/             Laravel API
 ├── frontend/            Vue application
 ├── docker/              Docker configuration
-└── docker-compose.yml
+├── docker-compose.yml
+└── dev                  Docker command shortcuts
 ```
 
 ## API
 
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
+| GET    | `/api/health`        | API and database health     |
 | GET    | `/api/requests`      | List requests               |
 | GET    | `/api/requests/{id}` | Get a single request        |
 | POST   | `/api/requests`      | Create a request            |
