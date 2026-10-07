@@ -58,6 +58,8 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 | Komento                | Toiminto                                     |
 |------------------------|----------------------------------------------|
 | `./dev up` / `down`    | Käynnistä / pysäytä palvelut                 |
+| `./dev restart`        | Luo palvelut uudelleen (ajaa käynnistysvaiheet uudelleen) |
+| `./dev rebuild`        | Rakenna imaget uudelleen ja luo palvelut uudelleen |
 | `./dev logs [palvelu]` | Seuraa lokeja                                |
 | `./dev artisan <args>` | Aja Artisan-komento                          |
 | `./dev composer <args>`| Aja Composer backend-kontissa                |
