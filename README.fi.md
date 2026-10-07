@@ -93,6 +93,8 @@ jalaops/
 
 ## API
 
+Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/docs/api.json`).
+
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET    | `/api/health`        | API:n ja tietokannan tila     |

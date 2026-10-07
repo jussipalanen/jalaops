@@ -7,7 +7,18 @@ use App\Enums\RequestStatus;
 use Database\Factories\ServiceRequestFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property string|null $description
+ * @property RequestPriority $priority
+ * @property RequestStatus $status
+ * @property Carbon|null $due_date
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class ServiceRequest extends Model
 {
     /** @use HasFactory<ServiceRequestFactory> */
