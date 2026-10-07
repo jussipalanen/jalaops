@@ -23,6 +23,14 @@ class ServiceRequestTest extends TestCase
         $this->assertSame(RequestStatus::Open, $request->status);
     }
 
+    public function test_seeding_twice_does_not_duplicate_requests(): void
+    {
+        $this->seed();
+        $this->seed();
+
+        $this->assertDatabaseCount('service_requests', 15);
+    }
+
     public function test_seeded_requests_cover_every_status_and_priority(): void
     {
         $this->seed();

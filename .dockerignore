@@ -1,0 +1,11 @@
+# Keeps local files out of the production image (docker/production/Dockerfile).
+.git
+backend/vendor
+backend/.env
+backend/database/*.sqlite
+backend/storage/logs/*
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/.phpunit.cache
+frontend

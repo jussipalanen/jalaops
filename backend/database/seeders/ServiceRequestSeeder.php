@@ -15,6 +15,11 @@ class ServiceRequestSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed only an empty table, so seeding again never duplicates the demo data.
+        if (ServiceRequest::query()->exists()) {
+            return;
+        }
+
         $requests = [
             ['Vaihda ilmansuodatin', 'Vaihda varaston ilmanvaihtokoneen ilmansuodatin.', 'high', 'open', 8],
             ['Tarkasta varaston nosto-ovi', 'Nosto-ovi pysähtyy puoliväliin. Tarkasta jouset ja turvatunnistimet.', 'high', 'in_progress', 2],
