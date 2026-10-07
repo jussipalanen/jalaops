@@ -3,13 +3,14 @@ import { fileURLToPath, URL } from 'node:url'
 import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    plugins: [vue()],
+    plugins: [vue(), tailwindcss()],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

@@ -51,17 +51,17 @@ async function update(data) {
 </script>
 
 <template>
-  <section class="form-page">
+  <section class="max-w-3xl">
     <header class="page-header">
       <h1 class="page-title">Muokkaa pyyntöä</h1>
     </header>
 
-    <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+    <p v-if="error" class="alert-error" role="alert">{{ error }}</p>
 
-    <div v-if="loading" class="card card-body muted">Ladataan pyyntöä…</div>
+    <div v-if="loading" class="card card-body text-slate-500 dark:text-slate-400">Ladataan pyyntöä…</div>
 
     <div v-else-if="notFound" class="card card-body">
-      <p>Pyyntöä ei löytynyt.</p>
+      <p class="mb-4">Pyyntöä ei löytynyt.</p>
       <RouterLink to="/requests" class="btn btn-secondary">Takaisin pyyntöihin</RouterLink>
     </div>
 
@@ -76,9 +76,3 @@ async function update(data) {
     </div>
   </section>
 </template>
-
-<style scoped>
-.form-page {
-  max-width: 760px;
-}
-</style>

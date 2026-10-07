@@ -26,7 +26,7 @@ Sovelluksen käyttöliittymä on suomeksi.
 | Kerros       | Teknologia                     |
 |--------------|--------------------------------|
 | Backend      | PHP, Laravel, REST API         |
-| Frontend     | Vue 3, Vite, Vue Router        |
+| Frontend     | Vue 3, Vite, Vue Router, Tailwind CSS |
 | Tietokanta   | MariaDB                        |
 | Kehitysympäristö | Docker, Docker Compose     |
 | CI           | GitHub Actions                 |

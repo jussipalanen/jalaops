@@ -72,18 +72,23 @@ watch(filters, loadRequests, { immediate: true, deep: true })
     <header class="page-header">
       <div>
         <h1 class="page-title">Pyynnöt</h1>
-        <p v-if="!loading && requests.length > 0" class="page-subtitle">
+        <p v-if="!loading && requests.length > 0" class="page-subtitle mt-1">
           {{ requests.length }} {{ requests.length === 1 ? 'pyyntö' : 'pyyntöä' }}
         </p>
       </div>
-      <RouterLink to="/requests/new" class="btn btn-primary new-button">+ Uusi pyyntö</RouterLink>
+      <RouterLink to="/requests/new" class="btn btn-primary w-full sm:w-auto">+ Uusi pyyntö</RouterLink>
     </header>
 
-    <div class="filters card" role="search" aria-label="Suodata pyyntöjä">
-      <div class="filter">
-        <label for="filter-status">Tila</label>
+    <div
+      class="card mb-4 flex flex-wrap items-end gap-x-4 gap-y-3 p-4"
+      role="search"
+      aria-label="Suodata pyyntöjä"
+    >
+      <div class="grid flex-[1_1_10rem] gap-1 sm:max-w-64">
+        <label for="filter-status" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Tila</label>
         <select
           id="filter-status"
+          class="form-control lg:min-h-9 lg:py-1.5"
           :value="filters.status"
           @change="setFilter('status', $event.target.value)"
         >
@@ -94,10 +99,11 @@ watch(filters, loadRequests, { immediate: true, deep: true })
         </select>
       </div>
 
-      <div class="filter">
-        <label for="filter-priority">Prioriteetti</label>
+      <div class="grid flex-[1_1_10rem] gap-1 sm:max-w-64">
+        <label for="filter-priority" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Prioriteetti</label>
         <select
           id="filter-priority"
+          class="form-control lg:min-h-9 lg:py-1.5"
           :value="filters.priority"
           @change="setFilter('priority', $event.target.value)"
         >
@@ -108,20 +114,30 @@ watch(filters, loadRequests, { immediate: true, deep: true })
         </select>
       </div>
 
-      <button v-if="hasFilters" type="button" class="btn btn-secondary" @click="clearFilters">
+      <button v-if="hasFilters" type="button" class="btn btn-secondary w-full sm:w-auto" @click="clearFilters">
         Tyhjennä suodattimet
       </button>
     </div>
 
-    <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+    <p v-if="error" class="alert-error" role="alert">{{ error }}</p>
 
-    <div v-if="loading" class="card card-body muted">Ladataan pyyntöjä…</div>
+    <div v-if="loading" class="card card-body text-slate-500 dark:text-slate-400">Ladataan pyyntöjä…</div>
 
-    <div v-else-if="requests.length === 0 && !error" class="card card-body muted">
-      {{ hasFilters ? 'Ei suodattimia vastaavia pyyntöjä.' : 'Ei pyyntöjä.' }}
+    <div v-else-if="requests.length === 0 && !error" class="card px-6 py-12 text-center">
+      <template v-if="hasFilters">
+        <p class="font-semibold">Ei suodattimia vastaavia pyyntöjä.</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Kokeile muita suodattimia tai tyhjennä ne.</p>
+      </template>
+      <template v-else>
+        <p class="font-semibold">Ei pyyntöjä.</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Luo ensimmäinen pyyntö yllä olevasta painikkeesta.</p>
+      </template>
     </div>
 
-    <div v-else-if="requests.length > 0" class="card table-card">
+    <div
+      v-else-if="requests.length > 0"
+      class="card overflow-hidden max-sm:overflow-visible max-sm:border-0 max-sm:bg-transparent max-sm:shadow-none max-sm:dark:bg-transparent"
+    >
       <table class="request-table">
         <thead>
           <tr>
@@ -129,7 +145,7 @@ watch(filters, loadRequests, { immediate: true, deep: true })
             <th>Prioriteetti</th>
             <th>Tila</th>
             <th>Määräpäivä</th>
-            <th><span class="visually-hidden">Toiminnot</span></th>
+            <th><span class="sr-only">Toiminnot</span></th>
           </tr>
         </thead>
         <tbody>
@@ -145,9 +161,9 @@ watch(filters, loadRequests, { immediate: true, deep: true })
                 {{ statusLabels[request.status] }}
               </span>
             </td>
-            <td data-label="Määräpäivä">{{ formatDate(request.due_date) }}</td>
+            <td data-label="Määräpäivä" class="tabular-nums">{{ formatDate(request.due_date) }}</td>
             <td class="cell-actions">
-              <div class="actions">
+              <div class="flex justify-end gap-2 max-sm:*:flex-1">
                 <RouterLink :to="`/requests/${request.id}/edit`" class="btn btn-secondary">
                   Muokkaa
                 </RouterLink>
@@ -162,217 +178,3 @@ watch(filters, loadRequests, { immediate: true, deep: true })
     </div>
   </section>
 </template>
-
-<style scoped>
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  padding: 1rem;
-}
-
-.filter {
-  display: grid;
-  gap: 0.25rem;
-  flex: 1 1 10rem;
-  max-width: 16rem;
-}
-
-.filter label {
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.filter select {
-  min-height: 44px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-}
-
-.filter select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(2 132 199 / 0.2);
-  outline: none;
-}
-
-@media (min-width: 1024px) {
-  .filter select {
-    min-height: 36px;
-  }
-}
-
-.table-card {
-  overflow: hidden;
-}
-
-.request-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.request-table th {
-  padding: 0.75rem 1rem;
-  background: var(--color-primary-softer);
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.request-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  vertical-align: middle;
-}
-
-.request-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.request-table tbody tr:hover {
-  background: var(--color-primary-softer);
-}
-
-.cell-title {
-  font-weight: 600;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.priority-low {
-  background: var(--color-neutral-soft);
-  color: var(--color-neutral);
-}
-
-.priority-normal {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-hover);
-}
-
-.priority-high {
-  background: var(--color-danger-soft);
-  color: #b91c1c;
-}
-
-.status-open {
-  background: var(--color-warning-soft);
-  color: var(--color-warning);
-}
-
-.status-in_progress {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-hover);
-}
-
-.status-completed {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-}
-
-/* Tablet: tighter cells so all columns fit. */
-@media (max-width: 1023px) {
-  .request-table th,
-  .request-table td {
-    padding: 0.625rem 0.75rem;
-  }
-}
-
-/* Phone: each request becomes its own card with labelled fields. */
-@media (max-width: 639px) {
-  .new-button {
-    width: 100%;
-  }
-
-  .filter {
-    max-width: none;
-  }
-
-  .filters .btn {
-    width: 100%;
-  }
-
-  .table-card {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-  }
-
-  .request-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-  }
-
-  .request-table,
-  .request-table tbody,
-  .request-table tr,
-  .request-table td {
-    display: block;
-  }
-
-  .request-table tbody tr {
-    margin-bottom: 0.75rem;
-    padding: 1rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
-  }
-
-  .request-table tbody tr:hover {
-    background: var(--color-surface);
-  }
-
-  .request-table td,
-  .request-table tbody tr:last-child td {
-    padding: 0.375rem 0;
-    border-bottom: 0;
-  }
-
-  .request-table td[data-label] {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .request-table td[data-label]::before {
-    content: attr(data-label);
-    color: var(--color-muted);
-    font-size: 0.875rem;
-  }
-
-  .cell-title {
-    margin-bottom: 0.25rem;
-    font-size: 1.0625rem;
-  }
-
-  .cell-actions {
-    margin-top: 0.5rem;
-  }
-
-  .actions {
-    justify-content: stretch;
-  }
-
-  .actions > * {
-    flex: 1;
-  }
-}
-</style>

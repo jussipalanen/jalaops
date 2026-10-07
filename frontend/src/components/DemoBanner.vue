@@ -15,19 +15,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="demo" class="demo-banner" role="status">
+  <div
+    v-if="demo"
+    class="demo-banner border-b border-sky-200 bg-sky-50 px-4 py-2.5 text-center text-sm text-sky-800 sm:px-6 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-200"
+    role="status"
+  >
     <strong>Demotila:</strong> voit kokeilla vapaasti. Muutokset eivät tallennu pysyvästi, vaan
     demodata palautuu, kun palvelin käynnistyy uudelleen.
   </div>
 </template>
-
-<style scoped>
-.demo-banner {
-  padding: 0.625rem var(--page-gutter);
-  background: var(--color-primary-soft);
-  border-bottom: 1px solid #bae6fd;
-  color: var(--color-primary-hover);
-  font-size: 0.875rem;
-  text-align: center;
-}
-</style>

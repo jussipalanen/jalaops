@@ -26,7 +26,7 @@ The application UI is in Finnish.
 | Layer    | Technology                     |
 |----------|--------------------------------|
 | Backend  | PHP, Laravel, REST API         |
-| Frontend | Vue 3, Vite, Vue Router        |
+| Frontend | Vue 3, Vite, Vue Router, Tailwind CSS |
 | Database | MariaDB                        |
 | Dev env  | Docker, Docker Compose         |
 | CI       | GitHub Actions                 |

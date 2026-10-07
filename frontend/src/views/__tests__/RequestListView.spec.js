@@ -139,7 +139,7 @@ describe('RequestListView', () => {
       expect.anything(),
     )
 
-    await wrapper.find('.filters .btn').trigger('click')
+    await wrapper.find('[role="search"] .btn').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.query).toEqual({})
     expect(fetchMock).toHaveBeenLastCalledWith('/api/requests', expect.anything())

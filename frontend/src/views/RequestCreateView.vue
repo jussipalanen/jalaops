@@ -32,12 +32,12 @@ async function create(data) {
 </script>
 
 <template>
-  <section class="form-page">
+  <section class="max-w-3xl">
     <header class="page-header">
       <h1 class="page-title">Uusi pyyntö</h1>
     </header>
 
-    <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+    <p v-if="error" class="alert-error" role="alert">{{ error }}</p>
 
     <div class="card card-body">
       <RequestForm
@@ -50,9 +50,3 @@ async function create(data) {
     </div>
   </section>
 </template>
-
-<style scoped>
-.form-page {
-  max-width: 760px;
-}
-</style>
