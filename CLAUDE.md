@@ -17,3 +17,5 @@
 - Follow semantic versioning (`MAJOR.MINOR.PATCH`). Until `1.0.0`, every merged feature is a new minor version (`0.x.0`) and a fix-only release is a patch (`0.x.y`). `1.0.0` is the release defined in ROADMAP.md's Definition of Done.
 - Every pull request that changes behaviour adds its entry to `CHANGELOG.md` under the next version (Added, Changed, Fixed, Removed), and updates the version in `frontend/package.json` and the API docs version in `backend/config/scramble.php`.
 - After a pull request is merged, tag the merge commit on `main` with an annotated tag such as `v0.4.0`.
+- Then publish a GitHub release for that tag, titled with the plain version number (`0.4.0`), with the version's `CHANGELOG.md` section as the notes and a "Full changelog" compare link to the previous tag.
+- Every pull request that adds a version also adds its compare link at the bottom of `CHANGELOG.md` and moves the `[Unreleased]` link to start from the new tag.
