@@ -137,7 +137,7 @@ The feature is off by default. Turn it on in `backend/.env` and pick the provide
 | `AI_INSIGHTS_CACHE_MINUTES` | How long an overview is reused while the requests stay the same (default 60) |
 | `AI_INSIGHTS_MAX_PER_HOUR` | Upper limit of AI calls per hour for the whole app (default 20) |
 
-The key stays on the backend; the browser only talks to `/api/dashboard/ai-overview`. Overviews are cached until the requests change, refreshing is limited to three times per minute per visitor, and past the hourly limit the previous overview is shown. Request titles are sent to the AI provider, so use demo data only with free tiers that may use the data for training.
+The key stays on the backend; the browser only talks to `/api/dashboard/ai-overview`. The AI can take several seconds, so the latest overview is always shown right away: when the requests have changed, it is marked as outdated and a new one is generated in the background. The production image writes the first overview at startup (`php artisan ai-overview:warm`). Refreshing is limited to three times per minute per visitor, and past the hourly limit the previous overview is shown. Request titles are sent to the AI provider, so use demo data only with free tiers that may use the data for training.
 
 ## Deployment
 

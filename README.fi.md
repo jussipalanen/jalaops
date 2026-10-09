@@ -137,7 +137,7 @@ Ominaisuus on oletuksena pois päältä. Ota se käyttöön tiedostossa `backend
 | `AI_INSIGHTS_CACHE_MINUTES` | Kuinka kauan katsausta käytetään uudelleen, kun pyynnöt eivät muutu (oletus 60) |
 | `AI_INSIGHTS_MAX_PER_HOUR` | Tekoälykutsujen enimmäismäärä tunnissa koko sovellukselle (oletus 20) |
 
-Avain pysyy taustapalvelussa; selain kutsuu vain osoitetta `/api/dashboard/ai-overview`. Katsaus tallennetaan välimuistiin, kunnes pyynnöt muuttuvat. Päivitys on rajattu kolmeen kertaan minuutissa kävijää kohden, ja kun tuntiraja täyttyy, näytetään edellinen katsaus. Pyyntöjen otsikot lähetetään tekoälypalveluun, joten ilmaisversioissa, joissa dataa voidaan käyttää mallien kehittämiseen, kannattaa käyttää vain demodataa.
+Avain pysyy taustapalvelussa; selain kutsuu vain osoitetta `/api/dashboard/ai-overview`. Tekoälyltä voi kulua useita sekunteja, joten viimeisin katsaus näytetään aina heti: jos pyyntöjä on muutettu, se merkitään vanhentuneeksi ja uusi luodaan taustalla. Tuotantokuva kirjoittaa ensimmäisen katsauksen käynnistyksen yhteydessä (`php artisan ai-overview:warm`). Päivitys on rajattu kolmeen kertaan minuutissa kävijää kohden, ja kun tuntiraja täyttyy, näytetään edellinen katsaus. Pyyntöjen otsikot lähetetään tekoälypalveluun, joten ilmaisversioissa, joissa dataa voidaan käyttää mallien kehittämiseen, kannattaa käyttää vain demodataa.
 
 ## Julkaisu
 

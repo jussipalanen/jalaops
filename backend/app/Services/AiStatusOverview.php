@@ -7,6 +7,8 @@ use App\Enums\RequestStatus;
 use App\Models\ServiceRequest;
 use App\Services\Ai\AiClient;
 use App\Services\Ai\AiException;
+use Closure;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
@@ -18,14 +20,17 @@ use Illuminate\Support\Str;
  *
  * The facts (counts, overdue and upcoming requests) are computed here, so the
  * numbers are always right; the AI only turns them into a summary with
- * suggested actions. Overviews are cached until the requests or the model
- * change or the cache expires, and the number of AI calls per hour is capped.
+ * suggested actions. A cached overview is always returned right away; when it
+ * is out of date, the frontend asks for a refresh in the background. AI calls
+ * run one at a time under a lock, and their number per hour is capped.
  */
 class AiStatusOverview
 {
     private const CACHE_KEY = 'ai-status-overview';
 
     private const RATE_LIMIT_KEY = 'ai-status-overview-generations';
+
+    private const LOCK_KEY = 'ai-status-overview-lock';
 
     private const LIST_LIMIT = 10;
 
@@ -55,49 +60,118 @@ class AiStatusOverview
     }
 
     /**
-     * Returns the current overview, generating a new one when needed.
+     * Returns the cached overview right away, marked `outdated` when the
+     * requests have changed or it has expired; the caller can then ask for a
+     * refresh. Only when there is no overview yet does this wait for the AI.
      *
-     * @param  bool  $refresh  generate a new overview even if the cached one is current
-     * @return array{summary: string, actions: list<string>, risks: list<string>, generated_at: string, provider: string, model: string, stale: bool}
+     * @return array{summary: string, actions: list<string>, risks: list<string>, generated_at: string, provider: string, model: string, stale: bool, outdated: bool}
      *
-     * @throws AiException when the AI call fails and there's no earlier overview
-     * @throws AiOverviewLimitException when the hourly limit is used up and there's no earlier overview
+     * @throws AiException when the AI call fails
+     * @throws AiOverviewLimitException when the hourly limit is used up
      */
-    public function get(bool $refresh = false): array
+    public function get(): array
     {
-        $facts = $this->facts();
-        // Facts include today's date, so a new day also gets a new overview,
-        // and switching the provider or model starts over too.
-        $fingerprint = md5(json_encode([$facts, $this->ai->provider(), $this->ai->model()]));
+        [$facts, $fingerprint] = $this->factsWithFingerprint();
         $cached = Cache::get(self::CACHE_KEY);
 
-        if (! $refresh && $cached && $cached['fingerprint'] === $fingerprint && ! $this->isExpired($cached)) {
-            return $this->present($cached, stale: false);
+        if ($cached) {
+            return $this->present($cached, stale: false, outdated: ! $this->isCurrent($cached, $fingerprint));
         }
 
-        $limit = config('ai_overview.max_generations_per_hour');
+        // Another request may have generated it while this one waited for the lock.
+        return $this->generateLocked($facts, $fingerprint, fn (?array $cached) => $cached !== null);
+    }
 
-        if ($limit < 1 || RateLimiter::tooManyAttempts(self::RATE_LIMIT_KEY, $limit)) {
+    /**
+     * Generates a new overview. An overview generated for the same requests
+     * within the last minute is reused, so simultaneous refreshes (or a refresh
+     * right after the startup warm-up) cause only one AI call.
+     *
+     * @return array{summary: string, actions: list<string>, risks: list<string>, generated_at: string, provider: string, model: string, stale: bool, outdated: bool}
+     *
+     * @throws AiException when the AI call fails
+     * @throws AiOverviewLimitException when the hourly limit is used up and there's no earlier overview
+     */
+    public function refresh(): array
+    {
+        [$facts, $fingerprint] = $this->factsWithFingerprint();
+
+        return $this->generateLocked($facts, $fingerprint, fn (?array $cached) => $cached !== null
+            && $this->isCurrent($cached, $fingerprint)
+            && Carbon::parse($cached['generated_at'])->gt(now()->subMinute()));
+    }
+
+    /**
+     * Generates and caches an overview while holding a lock, unless `$reuse`
+     * accepts the overview that is cached by the time the lock is acquired.
+     *
+     * @param  array<string, mixed>  $facts
+     * @param  Closure(array<string, mixed>|null): bool  $reuse
+     * @return array{summary: string, actions: list<string>, risks: list<string>, generated_at: string, provider: string, model: string, stale: bool, outdated: bool}
+     */
+    private function generateLocked(array $facts, string $fingerprint, Closure $reuse): array
+    {
+        try {
+            return Cache::lock(self::LOCK_KEY, 90)->block(60, function () use ($facts, $fingerprint, $reuse) {
+                $cached = Cache::get(self::CACHE_KEY);
+
+                if ($reuse($cached)) {
+                    return $this->present($cached, stale: false, outdated: ! $this->isCurrent($cached, $fingerprint));
+                }
+
+                $limit = config('ai_overview.max_generations_per_hour');
+
+                if ($limit < 1 || RateLimiter::tooManyAttempts(self::RATE_LIMIT_KEY, $limit)) {
+                    if ($cached) {
+                        return $this->present($cached, stale: true, outdated: ! $this->isCurrent($cached, $fingerprint));
+                    }
+
+                    throw new AiOverviewLimitException;
+                }
+
+                RateLimiter::hit(self::RATE_LIMIT_KEY, 3600);
+
+                $overview = [
+                    ...$this->generate($facts),
+                    'fingerprint' => $fingerprint,
+                    'generated_at' => now()->toIso8601String(),
+                    'provider' => $this->ai->provider(),
+                    'model' => $this->ai->model(),
+                ];
+
+                Cache::forever(self::CACHE_KEY, $overview);
+
+                return $this->present($overview, stale: false, outdated: false);
+            });
+        } catch (LockTimeoutException) {
+            $cached = Cache::get(self::CACHE_KEY);
+
             if ($cached) {
-                return $this->present($cached, stale: true);
+                return $this->present($cached, stale: false, outdated: ! $this->isCurrent($cached, $fingerprint));
             }
 
-            throw new AiOverviewLimitException;
+            throw new AiException('Timed out waiting for another AI overview to finish.');
         }
+    }
 
-        RateLimiter::hit(self::RATE_LIMIT_KEY, 3600);
+    /**
+     * @return array{0: array<string, mixed>, 1: string}
+     */
+    private function factsWithFingerprint(): array
+    {
+        $facts = $this->facts();
 
-        $overview = [
-            ...$this->generate($facts),
-            'fingerprint' => $fingerprint,
-            'generated_at' => now()->toIso8601String(),
-            'provider' => $this->ai->provider(),
-            'model' => $this->ai->model(),
-        ];
+        // Facts include today's date, so a new day also gets a new overview,
+        // and switching the provider or model starts over too.
+        return [$facts, md5(json_encode([$facts, $this->ai->provider(), $this->ai->model()]))];
+    }
 
-        Cache::forever(self::CACHE_KEY, $overview);
-
-        return $this->present($overview, stale: false);
+    /**
+     * @param  array<string, mixed>  $overview
+     */
+    private function isCurrent(array $overview, string $fingerprint): bool
+    {
+        return $overview['fingerprint'] === $fingerprint && ! $this->isExpired($overview);
     }
 
     /**
@@ -220,9 +294,9 @@ class AiStatusOverview
 
     /**
      * @param  array<string, mixed>  $overview
-     * @return array{summary: string, actions: list<string>, risks: list<string>, generated_at: string, provider: string, model: string, stale: bool}
+     * @return array{summary: string, actions: list<string>, risks: list<string>, generated_at: string, provider: string, model: string, stale: bool, outdated: bool}
      */
-    private function present(array $overview, bool $stale): array
+    private function present(array $overview, bool $stale, bool $outdated): array
     {
         return [
             'summary' => $overview['summary'],
@@ -232,6 +306,7 @@ class AiStatusOverview
             'provider' => $overview['provider'],
             'model' => $overview['model'],
             'stale' => $stale,
+            'outdated' => $outdated,
         ];
     }
 }
