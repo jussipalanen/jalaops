@@ -6,6 +6,15 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-09
+
+### Added
+- AI-tilannekatsaus on the home page: a short Finnish summary of the requests with up to three suggested actions and things to watch, written by an AI model. Laravel computes the facts (counts, overdue requests, requests due within 7 days, open high-priority requests) and the AI only writes the text.
+- Two AI providers, chosen with `AI_INSIGHTS_PROVIDER`: `gemini` (Google Gemini, `GEMINI_API_KEY`) and `puter` (Puter AI through its OpenAI-compatible API, `PUTER_AUTH_TOKEN`). The models can be changed with `GEMINI_MODEL` and `PUTER_MODEL`; the defaults are `gemini-3.1-flash-lite` (Gemini free tier) and `google/gemma-4-31b-it` (listed at $0 on Puter; server-side use of Puter needs a Puter subscription).
+- `GET /api/dashboard/ai-overview` and `POST /api/dashboard/ai-overview/refresh`. Without `AI_INSIGHTS_ENABLED=true` and the provider's key, the endpoint returns `{"enabled": false}` and the card stays hidden.
+- Overviews are cached until the requests, the provider or the model change (or after `AI_INSIGHTS_CACHE_MINUTES`). Refreshing is limited to three times per minute per visitor, and AI calls are capped per hour for the whole app (`AI_INSIGHTS_MAX_PER_HOUR`); past the cap the previous overview is shown.
+- AI settings in `backend/.env.example`, the READMEs and `docs/DEPLOYMENT.md`.
+
 ## [0.10.0] - 2026-10-09
 
 ### Added
@@ -119,7 +128,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/jussipalanen/jalaops/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/jussipalanen/jalaops/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/jussipalanen/jalaops/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/jussipalanen/jalaops/compare/v0.7.0...v0.8.0

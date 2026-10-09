@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
+        'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 30),
+    ],
+
+    'puter' => [
+        'auth_token' => env('PUTER_AUTH_TOKEN'),
+        'model' => env('PUTER_MODEL', 'google/gemma-4-31b-it'),
+        'base_url' => env('PUTER_BASE_URL', 'https://api.puter.com/puterai/openai/v1'),
+        'timeout' => (int) env('PUTER_TIMEOUT', 30),
+    ],
+
 ];
