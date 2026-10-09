@@ -17,7 +17,7 @@ onMounted(async () => {
 <template>
   <div
     v-if="demo"
-    class="demo-banner border-b border-sky-200 bg-sky-50 px-4 py-2.5 text-center text-sm text-sky-800 sm:px-6 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-200"
+    class="demo-banner border-b border-primary-200 bg-primary-50 px-4 py-2.5 text-center text-sm text-primary-800 sm:px-6 dark:border-primary-900 dark:bg-primary-950 dark:text-primary-200"
     role="status"
   >
     <strong>Demotila:</strong> voit kokeilla vapaasti. Muutokset eivät tallennu pysyvästi, vaan

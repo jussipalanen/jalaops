@@ -58,7 +58,7 @@ If the name `jalaops-api` was taken, Render gives the service a different addres
 
 ## 2. Frontend on Vercel
 
-1. If your Render address is not `https://jalaops-api.onrender.com`, change the `destination` in [`frontend/vercel.json`](../frontend/vercel.json) to your address and push the change.
+1. If your Render address is not `https://jalaops-api.onrender.com`, change the `destination` in [`frontend/vercel.json`](../frontend/vercel.json) and `VITE_API_DOCS_URL` in [`frontend/.env.production`](../frontend/.env.production) to your address and push the change.
 2. Sign in at [vercel.com](https://vercel.com) with GitHub.
 3. Choose **Add New → Project** and import the `jalaops` repository.
 4. Fill in:

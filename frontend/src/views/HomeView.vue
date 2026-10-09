@@ -28,12 +28,12 @@ onMounted(async () => {
     <div class="card relative overflow-hidden">
       <!-- Decorative glow behind the hero text. -->
       <div
-        class="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-sky-400/20 blur-3xl dark:bg-sky-500/15"
+        class="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-primary-400/20 blur-3xl dark:bg-primary-500/15"
         aria-hidden="true"
       ></div>
 
       <div class="relative p-6 sm:p-10">
-        <p class="mb-2 text-sm font-semibold tracking-wide text-sky-600 uppercase dark:text-sky-400">
+        <p class="mb-2 text-sm font-semibold tracking-wide text-primary-600 uppercase dark:text-primary-400">
           Huoltopyyntöjen hallinta
         </p>
         <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Tervetuloa JalaOpsiin</h1>
@@ -70,7 +70,7 @@ onMounted(async () => {
       <div class="grid gap-4 md:grid-cols-3">
         <article class="card card-body">
           <span
-            class="mb-3 grid size-9 place-items-center rounded-lg bg-sky-100 text-sm font-bold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300"
+            class="mb-3 grid size-9 place-items-center rounded-lg bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
             aria-hidden="true"
           >
             1
@@ -83,7 +83,7 @@ onMounted(async () => {
 
         <article class="card card-body">
           <span
-            class="mb-3 grid size-9 place-items-center rounded-lg bg-sky-100 text-sm font-bold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300"
+            class="mb-3 grid size-9 place-items-center rounded-lg bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
             aria-hidden="true"
           >
             2
@@ -101,7 +101,7 @@ onMounted(async () => {
 
         <article class="card card-body">
           <span
-            class="mb-3 grid size-9 place-items-center rounded-lg bg-sky-100 text-sm font-bold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300"
+            class="mb-3 grid size-9 place-items-center rounded-lg bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
             aria-hidden="true"
           >
             3

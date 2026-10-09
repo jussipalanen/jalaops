@@ -1,10 +1,26 @@
-/* JalaOps theme: Tailwind CSS with a sky-blue primary color and slate neutrals.
+/* JalaOps theme: Tailwind CSS with slate neutrals and a primary color that is
+   sky blue in the light theme and emerald green in the dark theme.
    Views style themselves with utility classes; the shared building blocks
    (cards, buttons, badges, form controls) are defined below. */
 @import 'tailwindcss';
 
 /* Dark mode follows the `dark` class on <html>, set by src/theme.js. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* `primary-*` utilities switch palette with the theme (see `.dark` below). */
+  --color-primary-50: var(--color-sky-50);
+  --color-primary-100: var(--color-sky-100);
+  --color-primary-200: var(--color-sky-200);
+  --color-primary-300: var(--color-sky-300);
+  --color-primary-400: var(--color-sky-400);
+  --color-primary-500: var(--color-sky-500);
+  --color-primary-600: var(--color-sky-600);
+  --color-primary-700: var(--color-sky-700);
+  --color-primary-800: var(--color-sky-800);
+  --color-primary-900: var(--color-sky-900);
+  --color-primary-950: var(--color-sky-950);
+}
 
 @layer base {
   html {
@@ -14,14 +30,30 @@
 
   html.dark {
     color-scheme: dark;
+    --color-primary-50: var(--color-emerald-50);
+    --color-primary-100: var(--color-emerald-100);
+    --color-primary-200: var(--color-emerald-200);
+    --color-primary-300: var(--color-emerald-300);
+    --color-primary-400: var(--color-emerald-400);
+    --color-primary-500: var(--color-emerald-500);
+    --color-primary-600: var(--color-emerald-600);
+    --color-primary-700: var(--color-emerald-700);
+    --color-primary-800: var(--color-emerald-800);
+    --color-primary-900: var(--color-emerald-900);
+    --color-primary-950: var(--color-emerald-950);
   }
 
   body {
     @apply min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
   }
 
+  /* Header, page and footer: the footer stays at the bottom on short pages. */
+  #app {
+    @apply flex min-h-screen flex-col;
+  }
+
   :focus-visible {
-    @apply outline-3 outline-offset-2 outline-sky-500/50;
+    @apply outline-3 outline-offset-2 outline-primary-500/50;
   }
 }
 
@@ -52,7 +84,7 @@
   }
 
   .nav-link.active {
-    @apply bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300;
+    @apply bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300;
   }
 
   /* Buttons: 44px touch targets, more compact on desktop. */
@@ -61,11 +93,11 @@
   }
 
   .btn-primary {
-    @apply bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400;
+    @apply bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:text-slate-950 dark:hover:bg-primary-400;
   }
 
   .btn-secondary {
-    @apply bg-sky-100 text-sky-800 hover:bg-sky-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+    @apply bg-primary-100 text-primary-800 hover:bg-primary-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
   }
 
   .btn-danger {
@@ -103,7 +135,7 @@
 
   /* Form controls */
   .form-control {
-    @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 transition-[border-color,box-shadow] focus:border-sky-500 focus:ring-3 focus:ring-sky-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100;
+    @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 transition-[border-color,box-shadow] focus:border-primary-500 focus:ring-3 focus:ring-primary-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100;
   }
 
   .form-control[aria-invalid='true'] {

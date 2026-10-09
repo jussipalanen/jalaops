@@ -1,4 +1,4 @@
-# JalaOps
+# <img src="docs/logo.svg" alt="JalaOps" height="48">
 
 [English](README.md) | **Suomi**
 
