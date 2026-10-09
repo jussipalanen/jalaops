@@ -1,230 +1,219 @@
-/* JalaOps theme: light and modern, built around a sky-blue primary color. */
-:root {
-  --color-primary: #0284c7;
-  --color-primary-hover: #0369a1;
-  --color-primary-soft: #e0f2fe;
-  --color-primary-softer: #f0f9ff;
+/* JalaOps theme: Tailwind CSS with slate neutrals and a primary color that is
+   sky blue in the light theme and emerald green in the dark theme.
+   Views style themselves with utility classes; the shared building blocks
+   (cards, buttons, badges, form controls) are defined below. */
+@import 'tailwindcss';
 
-  --color-background: #f3f8fd;
-  --color-surface: #ffffff;
-  --color-text: #0f2a3f;
-  --color-muted: #5b7186;
-  --color-border: #dbe7f2;
+/* Dark mode follows the `dark` class on <html>, set by src/theme.js. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  --color-danger: #dc2626;
-  --color-danger-soft: #fee2e2;
-  --color-success: #15803d;
-  --color-success-soft: #dcfce7;
-  --color-warning: #a16207;
-  --color-warning-soft: #fef3c7;
-  --color-neutral: #475569;
-  --color-neutral-soft: #eef2f6;
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --shadow-card: 0 1px 2px rgb(15 42 63 / 0.04), 0 4px 16px rgb(2 132 199 / 0.06);
-
-  --page-gutter: 16px;
-  --content-width: 1120px;
+@theme {
+  /* `primary-*` utilities switch palette with the theme (see `.dark` below). */
+  --color-primary-50: var(--color-sky-50);
+  --color-primary-100: var(--color-sky-100);
+  --color-primary-200: var(--color-sky-200);
+  --color-primary-300: var(--color-sky-300);
+  --color-primary-400: var(--color-sky-400);
+  --color-primary-500: var(--color-sky-500);
+  --color-primary-600: var(--color-sky-600);
+  --color-primary-700: var(--color-sky-700);
+  --color-primary-800: var(--color-sky-800);
+  --color-primary-900: var(--color-sky-900);
+  --color-primary-950: var(--color-sky-950);
 }
 
-@media (min-width: 640px) {
-  :root {
-    --page-gutter: 24px;
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    --color-primary-50: var(--color-emerald-50);
+    --color-primary-100: var(--color-emerald-100);
+    --color-primary-200: var(--color-emerald-200);
+    --color-primary-300: var(--color-emerald-300);
+    --color-primary-400: var(--color-emerald-400);
+    --color-primary-500: var(--color-emerald-500);
+    --color-primary-600: var(--color-emerald-600);
+    --color-primary-700: var(--color-emerald-700);
+    --color-primary-800: var(--color-emerald-800);
+    --color-primary-900: var(--color-emerald-900);
+    --color-primary-950: var(--color-emerald-950);
+  }
+
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  /* Header, page and footer: the footer stays at the bottom on short pages. */
+  #app {
+    @apply flex min-h-screen flex-col;
+  }
+
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-primary-500/50;
   }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer components {
+  /* Layout */
+  .page-header {
+    @apply mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-3;
+  }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family:
-    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--color-text);
-  background: var(--color-background);
-}
-
-h1,
-h2,
-h3 {
-  margin: 0;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-}
-
-a {
-  color: var(--color-primary);
-}
-
-a:hover {
-  color: var(--color-primary-hover);
-}
-
-:focus-visible {
-  outline: 3px solid rgb(2 132 199 / 0.4);
-  outline-offset: 2px;
-}
-
-/* Layout */
-.container {
-  width: 100%;
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 0 var(--page-gutter);
-}
-
-.page-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-@media (min-width: 640px) {
   .page-title {
-    font-size: 1.875rem;
+    @apply text-2xl font-bold tracking-tight sm:text-3xl;
   }
-}
 
-.page-subtitle {
-  margin: 0;
-  color: var(--color-muted);
-}
+  .page-subtitle {
+    @apply text-slate-500 dark:text-slate-400;
+  }
 
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-}
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none;
+  }
 
-.card-body {
-  padding: 1.25rem;
-}
-
-@media (min-width: 640px) {
   .card-body {
-    padding: 1.5rem;
+    @apply p-5 sm:p-6;
   }
-}
 
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  min-height: 44px;
-  padding: 0 1rem;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  font: inherit;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
+  .nav-link {
+    @apply inline-flex min-h-10 items-center rounded-full px-3 text-[0.9375rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:px-3.5 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
+  }
 
-@media (min-width: 1024px) {
+  .nav-link.active {
+    @apply bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300;
+  }
+
+  /* Buttons: 44px touch targets, more compact on desktop. */
   .btn {
-    min-height: 36px;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-transparent px-4 text-[0.9375rem] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 lg:min-h-9;
   }
-}
 
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
-}
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:text-slate-950 dark:hover:bg-primary-400;
+  }
 
-.btn-primary:hover {
-  background: var(--color-primary-hover);
-  color: #fff;
-}
+  .btn-secondary {
+    @apply bg-primary-100 text-primary-800 hover:bg-primary-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+  }
 
-.btn-secondary {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-hover);
-}
+  .btn-danger {
+    @apply border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10;
+  }
 
-.btn-secondary:hover {
-  background: #bae6fd;
-  color: var(--color-primary-hover);
-}
+  /* Badges for priority and status. */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[0.8125rem] font-semibold whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current before:content-[''];
+  }
 
-.btn-danger {
-  background: transparent;
-  border-color: #fecaca;
-  color: var(--color-danger);
-}
+  .priority-low {
+    @apply bg-slate-100 text-slate-600 dark:bg-slate-700/50 dark:text-slate-300;
+  }
 
-.btn-danger:hover {
-  background: var(--color-danger-soft);
-}
+  .priority-normal {
+    @apply bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300;
+  }
 
-/* Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.1875rem 0.625rem;
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
+  .priority-high {
+    @apply bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300;
+  }
 
-.badge::before {
-  content: '';
-  width: 0.4375rem;
-  height: 0.4375rem;
-  border-radius: 50%;
-  background: currentColor;
-}
+  .status-open {
+    @apply bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300;
+  }
 
-/* Messages */
-.alert {
-  margin: 0 0 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
-}
+  .status-in_progress {
+    @apply bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300;
+  }
 
-.alert-error {
-  background: var(--color-danger-soft);
-  color: #991b1b;
-}
+  .status-completed {
+    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300;
+  }
 
-.muted {
-  color: var(--color-muted);
-}
+  /* Form controls */
+  .form-control {
+    @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 transition-[border-color,box-shadow] focus:border-primary-500 focus:ring-3 focus:ring-primary-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100;
+  }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+  .form-control[aria-invalid='true'] {
+    @apply border-red-500 focus:ring-red-500/20 dark:border-red-400;
+  }
+
+  /* Request table: a regular table on desktop and tablet; on phones each
+     request becomes its own card with labelled fields. */
+  .request-table {
+    @apply w-full border-collapse;
+  }
+
+  .request-table th {
+    @apply border-b border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase max-lg:px-3 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400;
+  }
+
+  .request-table td {
+    @apply border-b border-slate-200 px-4 py-3 align-middle max-lg:px-3 max-lg:py-2.5 dark:border-slate-800;
+  }
+
+  .request-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .request-table tbody tr {
+    @apply transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40;
+  }
+
+  .cell-title {
+    @apply font-semibold;
+  }
+
+  @media (width < 40rem) {
+    .request-table thead {
+      @apply sr-only;
+    }
+
+    .request-table,
+    .request-table tbody,
+    .request-table tr,
+    .request-table td {
+      @apply block;
+    }
+
+    .request-table tbody tr {
+      @apply mb-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/5 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-900;
+    }
+
+    .request-table td,
+    .request-table tbody tr:last-child td {
+      @apply border-b-0 px-0 py-1.5;
+    }
+
+    .request-table td[data-label] {
+      @apply flex items-center justify-between gap-4;
+    }
+
+    .request-table td[data-label]::before {
+      content: attr(data-label);
+      @apply text-sm text-slate-500;
+    }
+
+    /* `dark:` can't be nested inside a pseudo-element, so its selector is spelled out. */
+    .dark .request-table td[data-label]::before {
+      @apply text-slate-400;
+    }
+
+    .cell-title {
+      @apply mb-1 text-[1.0625rem];
+    }
+
+    .cell-actions {
+      @apply mt-2;
+    }
+  }
+
+  /* Messages */
+  .alert-error {
+    @apply mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300;
+  }
 }

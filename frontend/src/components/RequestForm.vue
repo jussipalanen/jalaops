@@ -36,39 +36,42 @@ function fieldError(field) {
 </script>
 
 <template>
-  <form class="request-form" novalidate @submit.prevent="submit">
-    <div class="field">
-      <label for="title">Otsikko <span class="required" aria-hidden="true">*</span></label>
+  <form class="grid gap-5" novalidate @submit.prevent="submit">
+    <div class="grid min-w-0 content-start gap-1.5">
+      <label for="title" class="text-[0.9375rem] font-semibold">Otsikko <span class="text-red-600 dark:text-red-400" aria-hidden="true">*</span></label>
       <input
         id="title"
+        class="form-control"
         v-model="form.title"
         type="text"
         maxlength="255"
         :aria-invalid="Boolean(fieldError('title'))"
         :aria-describedby="fieldError('title') ? 'title-error' : undefined"
       />
-      <p v-if="fieldError('title')" id="title-error" class="field-error">{{ fieldError('title') }}</p>
+      <p v-if="fieldError('title')" id="title-error" class="text-sm text-red-600 dark:text-red-400">{{ fieldError('title') }}</p>
     </div>
 
-    <div class="field">
-      <label for="description">Kuvaus</label>
+    <div class="grid min-w-0 content-start gap-1.5">
+      <label for="description" class="text-[0.9375rem] font-semibold">Kuvaus</label>
       <textarea
         id="description"
+        class="form-control resize-y"
         v-model="form.description"
         rows="4"
         :aria-invalid="Boolean(fieldError('description'))"
         :aria-describedby="fieldError('description') ? 'description-error' : undefined"
       ></textarea>
-      <p v-if="fieldError('description')" id="description-error" class="field-error">
+      <p v-if="fieldError('description')" id="description-error" class="text-sm text-red-600 dark:text-red-400">
         {{ fieldError('description') }}
       </p>
     </div>
 
-    <div class="field-row">
-      <div class="field">
-        <label for="priority">Prioriteetti</label>
+    <div class="grid gap-5 sm:grid-cols-3">
+      <div class="grid min-w-0 content-start gap-1.5">
+        <label for="priority" class="text-[0.9375rem] font-semibold">Prioriteetti</label>
         <select
           id="priority"
+          class="form-control"
           v-model="form.priority"
           :aria-invalid="Boolean(fieldError('priority'))"
           :aria-describedby="fieldError('priority') ? 'priority-error' : undefined"
@@ -77,15 +80,16 @@ function fieldError(field) {
             {{ label }}
           </option>
         </select>
-        <p v-if="fieldError('priority')" id="priority-error" class="field-error">
+        <p v-if="fieldError('priority')" id="priority-error" class="text-sm text-red-600 dark:text-red-400">
           {{ fieldError('priority') }}
         </p>
       </div>
 
-      <div class="field">
-        <label for="status">Tila</label>
+      <div class="grid min-w-0 content-start gap-1.5">
+        <label for="status" class="text-[0.9375rem] font-semibold">Tila</label>
         <select
           id="status"
+          class="form-control"
           v-model="form.status"
           :aria-invalid="Boolean(fieldError('status'))"
           :aria-describedby="fieldError('status') ? 'status-error' : undefined"
@@ -94,27 +98,28 @@ function fieldError(field) {
             {{ label }}
           </option>
         </select>
-        <p v-if="fieldError('status')" id="status-error" class="field-error">
+        <p v-if="fieldError('status')" id="status-error" class="text-sm text-red-600 dark:text-red-400">
           {{ fieldError('status') }}
         </p>
       </div>
 
-      <div class="field">
-        <label for="due_date">Määräpäivä</label>
+      <div class="grid min-w-0 content-start gap-1.5">
+        <label for="due_date" class="text-[0.9375rem] font-semibold">Määräpäivä</label>
         <input
           id="due_date"
+          class="form-control"
           v-model="form.due_date"
           type="date"
           :aria-invalid="Boolean(fieldError('due_date'))"
           :aria-describedby="fieldError('due_date') ? 'due_date-error' : undefined"
         />
-        <p v-if="fieldError('due_date')" id="due_date-error" class="field-error">
+        <p v-if="fieldError('due_date')" id="due_date-error" class="text-sm text-red-600 dark:text-red-400">
           {{ fieldError('due_date') }}
         </p>
       </div>
     </div>
 
-    <div class="form-actions">
+    <div class="flex flex-col gap-3 pt-2 sm:flex-row">
       <button type="submit" class="btn btn-primary" :disabled="saving">
         {{ saving ? 'Tallennetaan…' : submitLabel }}
       </button>
@@ -124,96 +129,3 @@ function fieldError(field) {
     </div>
   </form>
 </template>
-
-<style scoped>
-.request-form {
-  display: grid;
-  gap: 1.25rem;
-}
-
-.field {
-  display: grid;
-  gap: 0.375rem;
-  min-width: 0;
-}
-
-.field label {
-  font-size: 0.9375rem;
-  font-weight: 600;
-}
-
-.required {
-  color: var(--color-danger);
-}
-
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  min-height: 44px;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
-.field textarea {
-  resize: vertical;
-}
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(2 132 199 / 0.2);
-  outline: none;
-}
-
-.field [aria-invalid='true'] {
-  border-color: var(--color-danger);
-}
-
-.field [aria-invalid='true']:focus {
-  box-shadow: 0 0 0 3px rgb(220 38 38 / 0.2);
-}
-
-.field-error {
-  margin: 0;
-  color: #b91c1c;
-  font-size: 0.875rem;
-}
-
-.field-row {
-  display: grid;
-  gap: 1.25rem;
-}
-
-@media (min-width: 640px) {
-  .field-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.form-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 0.5rem;
-}
-
-@media (min-width: 640px) {
-  .form-actions {
-    flex-direction: row;
-  }
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-</style>

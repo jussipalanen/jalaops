@@ -1,5 +1,14 @@
 # JalaOps
 
+<img src="docs/logo.svg" alt="JalaOps logo" height="56">
+
+[![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
+[![Vue](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![MariaDB](https://img.shields.io/badge/MariaDB-11.8-003545?style=flat-square&logo=mariadb&logoColor=white)](https://mariadb.org)
+
 **English** | [Suomi](README.fi.md)
 
 [Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Deployment](#deployment) · [Roadmap](#roadmap)
@@ -26,7 +35,7 @@ The application UI is in Finnish.
 | Layer    | Technology                     |
 |----------|--------------------------------|
 | Backend  | PHP, Laravel, REST API         |
-| Frontend | Vue 3, Vite, Vue Router        |
+| Frontend | Vue 3, Vite, Vue Router, Tailwind CSS |
 | Database | MariaDB                        |
 | Dev env  | Docker, Docker Compose         |
 | CI       | GitHub Actions                 |

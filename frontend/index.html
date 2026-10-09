@@ -2,9 +2,22 @@
 <html lang="fi">
   <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f3f8fd">
+    <meta name="theme-color" content="#f8fafc">
+    <script>
+      // Apply the saved or system theme before the app loads to avoid a flash
+      // of the wrong theme. src/theme.js takes over once the app starts.
+      (function () {
+        var theme = null
+        try {
+          theme = localStorage.getItem('theme')
+        } catch (e) {}
+        var dark = theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', dark)
+      })()
+    </script>
     <title>JalaOps</title>
   </head>
   <body>

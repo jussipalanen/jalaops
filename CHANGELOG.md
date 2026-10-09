@@ -6,6 +6,20 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-09
+
+### Added
+- Dark mode. The app follows the system setting, and a button in the header switches between light and dark; the choice is remembered in the browser. The dark theme uses an emerald-green primary color, the light theme keeps sky blue.
+- JalaOps logo: a gear with a check mark, used in the header, as the SVG favicon and as a wordmark in `docs/logo.svg` below the README title.
+- Footer that tells this is a demo application, with a link to the API documentation and the app version. The docs link is set with `VITE_API_DOCS_URL`.
+- Redesigned home page: a clearer introduction, shortcuts to the request list and a new request, and a short guide to priorities and statuses.
+- A friendlier empty state on the request list.
+
+### Changed
+- The frontend is styled with Tailwind CSS (v4, through its Vite plugin) instead of hand-written CSS. Shared building blocks such as cards, buttons, badges and form fields are defined in `src/assets/main.css`.
+- Refreshed look across the app with slate neutrals and the existing sky-blue primary color.
+- On very narrow phones the header shows only the logo so the navigation fits.
+
 ## [0.8.0] - 2026-10-07
 
 ### Added
