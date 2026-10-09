@@ -2,6 +2,8 @@
 
 <img src="docs/logo.svg" alt="JalaOps logo" height="56">
 
+[![CI](https://github.com/jussipalanen/jalaops/actions/workflows/ci.yml/badge.svg)](https://github.com/jussipalanen/jalaops/actions/workflows/ci.yml)
+[![Security](https://github.com/jussipalanen/jalaops/actions/workflows/security.yml/badge.svg)](https://github.com/jussipalanen/jalaops/actions/workflows/security.yml)
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
 [![Vue](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org)
@@ -137,7 +139,27 @@ The feature is off by default. Turn it on in `backend/.env` and pick the provide
 | `AI_INSIGHTS_CACHE_MINUTES` | How long an overview is reused while the requests stay the same (default 60) |
 | `AI_INSIGHTS_MAX_PER_HOUR` | Upper limit of AI calls per hour for the whole app (default 20) |
 
-The key stays on the backend; the browser only talks to `/api/dashboard/ai-overview`. Overviews are cached until the requests change, refreshing is limited to three times per minute per visitor, and past the hourly limit the previous overview is shown. Request titles are sent to the AI provider, so use demo data only with free tiers that may use the data for training.
+The key stays on the backend; the browser only talks to `/api/dashboard/ai-overview`. The AI can take several seconds, so the latest overview is always shown right away: when the requests have changed, it is marked as outdated and a new one is generated in the background. The production image writes the first overview at startup (`php artisan ai-overview:warm`). Refreshing is limited to three times per minute per visitor, and past the hourly limit the previous overview is shown. Request titles are sent to the AI provider, so use demo data only with free tiers that may use the data for training.
+
+## Continuous integration
+
+GitHub Actions checks every pull request and every push to `main`. A pull request can't be merged while a check fails.
+
+| Workflow | Job | Checks |
+|---|---|---|
+| [CI](.github/workflows/ci.yml) | Backend | Code style (Pint), Laravel tests, known vulnerabilities in Composer packages (`composer audit`) |
+| | Frontend | Code style (ESLint), Vitest tests, production build, known vulnerabilities in npm packages (`npm audit`, high and critical) |
+| [Security](.github/workflows/security.yml) | CodeQL | Static security analysis of the JavaScript/Vue code and the workflows; also weekly |
+| | Dependency review | Blocks pull requests that add dependencies with known high or critical vulnerabilities |
+
+Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) opens monthly grouped update pull requests for Composer, npm, GitHub Actions and Docker images, and security fixes as soon as an advisory is published. GitHub secret scanning with push protection blocks pushes that contain keys or tokens.
+
+Run the same checks locally:
+
+```bash
+cd backend && vendor/bin/pint --test && php artisan test && composer audit
+cd frontend && npm run lint:check && npm test && npm run build && npm audit --audit-level=high
+```
 
 ## Deployment
 

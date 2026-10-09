@@ -40,6 +40,8 @@ class GeminiClient extends AiClient
             throw new AiException('Gemini API could not be reached.', previous: $exception);
         }
 
+        $this->logTiming($response);
+
         if ($response->failed()) {
             throw new AiException(trim("Gemini API returned status {$response->status()}: ".$response->json('error.message', '')));
         }

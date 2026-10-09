@@ -11,6 +11,7 @@ const overview = {
   provider: 'Gemini',
   model: 'gemini-3.1-flash-lite',
   stale: false,
+  outdated: false,
 }
 
 function jsonResponse(body, status = 200) {
@@ -115,5 +116,58 @@ describe('AiStatusOverview', () => {
     await flushPromises()
 
     expect(wrapper.find('[role="alert"]').text()).toContain('päivitetty liian usein')
+  })
+
+  it('shows an outdated overview right away and updates it in the background', async () => {
+    let finishRefresh
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse({ ...overview, outdated: true }))
+        .mockReturnValueOnce(new Promise((resolve) => (finishRefresh = resolve))),
+    )
+
+    const wrapper = mount(AiStatusOverview)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(overview.summary)
+    expect(wrapper.text()).toContain('Päivitetään…')
+    expect(fetch).toHaveBeenLastCalledWith(
+      '/api/dashboard/ai-overview/refresh',
+      expect.objectContaining({ method: 'POST' }),
+    )
+
+    finishRefresh(jsonResponse({ ...overview, summary: 'Ajantasainen katsaus.' }))
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Ajantasainen katsaus.')
+    expect(wrapper.text()).not.toContain('Pyyntöjä on muutettu')
+  })
+
+  it('keeps the outdated overview without an error when the background update fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse({ ...overview, outdated: true }))
+        .mockResolvedValueOnce(jsonResponse({ message: 'Too Many Attempts.' }, 429)),
+    )
+
+    const wrapper = mount(AiStatusOverview)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(overview.summary)
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Pyyntöjä on muutettu tämän katsauksen jälkeen.')
+  })
+
+  it('does not refresh an up-to-date overview', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(overview)))
+
+    mount(AiStatusOverview)
+    await flushPromises()
+
+    expect(fetch).toHaveBeenCalledTimes(1)
   })
 })

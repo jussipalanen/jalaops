@@ -6,6 +6,30 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-09
+
+### Added
+- GitHub Actions CI (`.github/workflows/ci.yml`) for every pull request and push to `main` (#10). The backend job runs Pint, the Laravel tests and `composer audit`; the frontend job runs ESLint, the Vitest tests, the production build and `npm audit` (high and critical).
+- Security workflow (`.github/workflows/security.yml`): CodeQL analysis of the JavaScript/Vue code and the workflows on every change and weekly, and dependency review that blocks pull requests adding dependencies with known high or critical vulnerabilities.
+- Dependabot configuration for monthly grouped updates of Composer, npm, GitHub Actions and Docker images.
+- `npm run lint:check` runs ESLint without fixing files, for CI.
+- CI and Security badges and a "Continuous integration" section in the READMEs.
+- `AGENTS.md` with the instructions for AI coding agents (project overview, check commands, language, branch, versioning and secret-handling rules). `CLAUDE.md` now imports it, so all tools share one set of rules.
+
+### Fixed
+- `php artisan test` failed because `phpunit.xml` listed a `tests/Unit` suite whose folder doesn't exist. The empty suite is removed.
+
+## [0.11.1] - 2026-10-09
+
+### Fixed
+- The AI-tilannekatsaus no longer makes visitors wait for the AI after the requests change. The previous overview is shown right away with a "Päivitetään…" note, and the new one replaces it when ready. Gemini can take from a couple of seconds to over ten seconds per overview.
+- The first visitor after a deploy or restart no longer waits for the first overview: the production image generates it in the background at startup (`php artisan ai-overview:warm`).
+
+### Changed
+- `GET /api/dashboard/ai-overview` returns the cached overview immediately with a new `outdated` flag instead of generating a new one. `POST …/refresh` generates it, and it reuses an overview generated for the same requests in the last minute, so simultaneous visitors cause only one AI call. AI calls run one at a time under a lock.
+- The loading state says that the AI is writing the overview.
+- Each AI call logs its duration, split into DNS lookup, connection, TLS and waiting for the reply.
+
 ## [0.11.0] - 2026-10-09
 
 ### Added
@@ -128,7 +152,9 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/jussipalanen/jalaops/compare/v0.11.1...v0.12.0
+[0.11.1]: https://github.com/jussipalanen/jalaops/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/jussipalanen/jalaops/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/jussipalanen/jalaops/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/jussipalanen/jalaops/compare/v0.8.0...v0.9.0

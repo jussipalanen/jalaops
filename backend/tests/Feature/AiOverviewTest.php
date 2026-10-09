@@ -109,6 +109,7 @@ class AiOverviewTest extends TestCase
                 'provider' => 'Gemini',
                 'model' => 'gemini-test',
                 'stale' => false,
+                'outdated' => false,
             ])
             ->assertJsonStructure(['generated_at']);
 
@@ -142,16 +143,38 @@ class AiOverviewTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    public function test_it_generates_a_new_overview_when_the_requests_change(): void
+    public function test_it_returns_the_cached_overview_right_away_when_the_requests_change(): void
     {
         $request = ServiceRequest::factory()->create(['status' => RequestStatus::Open]);
         $this->fakeGemini();
 
-        $this->getJson('/api/dashboard/ai-overview')->assertOk();
+        $this->getJson('/api/dashboard/ai-overview')->assertOk()->assertJsonPath('outdated', false);
         $request->update(['status' => RequestStatus::InProgress]);
-        $this->getJson('/api/dashboard/ai-overview')->assertOk();
+
+        // The old overview comes back immediately, marked outdated, without an AI call.
+        $this->getJson('/api/dashboard/ai-overview')
+            ->assertOk()
+            ->assertJsonPath('outdated', true)
+            ->assertJsonPath('summary', 'Avoimia pyyntöjä on 2, joista yksi on myöhässä.');
+
+        Http::assertSentCount(1);
+
+        $this->postJson('/api/dashboard/ai-overview/refresh')->assertOk()->assertJsonPath('outdated', false);
+        $this->getJson('/api/dashboard/ai-overview')->assertJsonPath('outdated', false);
 
         Http::assertSentCount(2);
+    }
+
+    public function test_an_expired_overview_is_marked_outdated(): void
+    {
+        $this->fakeGemini();
+
+        $this->getJson('/api/dashboard/ai-overview')->assertJsonPath('outdated', false);
+        $this->travel(61)->minutes();
+
+        $this->getJson('/api/dashboard/ai-overview')->assertJsonPath('outdated', true);
+
+        Http::assertSentCount(1);
     }
 
     public function test_refresh_generates_a_new_overview(): void
@@ -159,9 +182,42 @@ class AiOverviewTest extends TestCase
         $this->fakeGemini();
 
         $this->getJson('/api/dashboard/ai-overview')->assertOk();
+        $this->travel(2)->minutes();
         $this->postJson('/api/dashboard/ai-overview/refresh')->assertOk()->assertJsonPath('enabled', true);
 
         Http::assertSentCount(2);
+    }
+
+    public function test_refresh_reuses_an_overview_generated_in_the_last_minute(): void
+    {
+        $this->fakeGemini();
+
+        $this->getJson('/api/dashboard/ai-overview')->assertOk();
+        $this->postJson('/api/dashboard/ai-overview/refresh')->assertOk();
+        $this->postJson('/api/dashboard/ai-overview/refresh')->assertOk();
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_warm_up_command_generates_the_overview_ahead_of_time(): void
+    {
+        $this->fakeGemini();
+
+        $this->artisan('ai-overview:warm')->expectsOutputToContain('AI status overview ready')->assertSuccessful();
+        $this->artisan('ai-overview:warm')->assertSuccessful();
+        $this->getJson('/api/dashboard/ai-overview')->assertJsonPath('outdated', false);
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_warm_up_command_does_nothing_when_the_feature_is_off(): void
+    {
+        config(['ai_overview.enabled' => false]);
+        Http::fake();
+
+        $this->artisan('ai-overview:warm')->expectsOutputToContain('off')->assertSuccessful();
+
+        Http::assertNothingSent();
     }
 
     public function test_refresh_is_throttled_per_visitor(): void
@@ -184,9 +240,10 @@ class AiOverviewTest extends TestCase
         $this->getJson('/api/dashboard/ai-overview')->assertOk()->assertJsonPath('stale', false);
         $request->update(['status' => RequestStatus::Completed]);
 
-        $this->getJson('/api/dashboard/ai-overview')
+        $this->postJson('/api/dashboard/ai-overview/refresh')
             ->assertOk()
             ->assertJsonPath('stale', true)
+            ->assertJsonPath('outdated', true)
             ->assertJsonPath('summary', 'Avoimia pyyntöjä on 2, joista yksi on myöhässä.');
 
         Http::assertSentCount(1);
@@ -327,6 +384,10 @@ class AiOverviewTest extends TestCase
         config(['ai_overview.provider' => 'puter']);
 
         $this->getJson('/api/dashboard/ai-overview')
+            ->assertJsonPath('provider', 'Gemini')
+            ->assertJsonPath('outdated', true);
+
+        $this->postJson('/api/dashboard/ai-overview/refresh')
             ->assertJsonPath('provider', 'Puter')
             ->assertJsonPath('summary', 'Puterin katsaus.');
     }

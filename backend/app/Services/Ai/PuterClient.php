@@ -47,6 +47,8 @@ class PuterClient extends AiClient
             throw new AiException('Puter API could not be reached.', previous: $exception);
         }
 
+        $this->logTiming($response);
+
         if ($response->failed()) {
             throw new AiException(trim("Puter API returned status {$response->status()}: ".$response->json('error.message', '')));
         }
