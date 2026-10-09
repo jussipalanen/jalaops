@@ -48,6 +48,7 @@ In demo mode the app shows the visitor a notice that changes are not kept perman
    | Key | Value |
    |---|---|
    | `APP_URL` | `https://jalaops-api.onrender.com` (your service's address) |
+   | `FRONTEND_URL` | Your Vercel address, e.g. `https://jalaops.vercel.app` (optional: the backend home page links to it) |
 
    That is all demo mode needs. `DEMO_MODE=true` is the image's default, and an app key is generated on start if `APP_KEY` is not set.
 

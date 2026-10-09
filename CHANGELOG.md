@@ -6,6 +6,15 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-09
+
+### Added
+- Backend home page at `/`: a dashboard with the API version, database status, demo mode and the number of requests per status, links to the API documentation (`/docs`), the OpenAPI specification, the health check and the request list, and a "Siirry sovellukseen" link to the frontend. The footer tells it is a demo application powered by Laravel.
+- `FRONTEND_URL` setting for the backend (`config('app.frontend_url')`), used by the home page link.
+
+### Changed
+- `/` returns HTML in the browser; API clients that ask for JSON still get the previous JSON with the API and docs links.
+
 ## [0.9.0] - 2026-10-09
 
 ### Added
