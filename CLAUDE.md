@@ -9,6 +9,7 @@
 ## Branches and pull requests
 
 - Create one branch per GitHub issue from the latest `main`, named by type: `feature/…`, `fix/…`, `docs/…` or `chore/…`.
+- Run the CI checks locally before opening a pull request (see "Continuous integration" in README.md); pull requests can't be merged while CI fails.
 - Open a pull request when the work is ready. Never merge pull requests; the developer reviews and merges them.
 - Commits and pull requests are authored as the developer and must not mention AI tools.
 

@@ -2,6 +2,8 @@
 
 <img src="docs/logo.svg" alt="JalaOps logo" height="56">
 
+[![CI](https://github.com/jussipalanen/jalaops/actions/workflows/ci.yml/badge.svg)](https://github.com/jussipalanen/jalaops/actions/workflows/ci.yml)
+[![Security](https://github.com/jussipalanen/jalaops/actions/workflows/security.yml/badge.svg)](https://github.com/jussipalanen/jalaops/actions/workflows/security.yml)
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
 [![Vue](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org)
@@ -138,6 +140,26 @@ Ominaisuus on oletuksena pois päältä. Ota se käyttöön tiedostossa `backend
 | `AI_INSIGHTS_MAX_PER_HOUR` | Tekoälykutsujen enimmäismäärä tunnissa koko sovellukselle (oletus 20) |
 
 Avain pysyy taustapalvelussa; selain kutsuu vain osoitetta `/api/dashboard/ai-overview`. Tekoälyltä voi kulua useita sekunteja, joten viimeisin katsaus näytetään aina heti: jos pyyntöjä on muutettu, se merkitään vanhentuneeksi ja uusi luodaan taustalla. Tuotantokuva kirjoittaa ensimmäisen katsauksen käynnistyksen yhteydessä (`php artisan ai-overview:warm`). Päivitys on rajattu kolmeen kertaan minuutissa kävijää kohden, ja kun tuntiraja täyttyy, näytetään edellinen katsaus. Pyyntöjen otsikot lähetetään tekoälypalveluun, joten ilmaisversioissa, joissa dataa voidaan käyttää mallien kehittämiseen, kannattaa käyttää vain demodataa.
+
+## Jatkuva integraatio
+
+GitHub Actions tarkistaa jokaisen pull requestin ja jokaisen `main`-haaraan tehdyn pushin. Pull requestia ei voi yhdistää, jos jokin tarkistus epäonnistuu.
+
+| Työnkulku | Työ | Tarkistukset |
+|---|---|---|
+| [CI](.github/workflows/ci.yml) | Backend | Koodityyli (Pint), Laravel-testit, Composer-pakettien tunnetut haavoittuvuudet (`composer audit`) |
+| | Frontend | Koodityyli (ESLint), Vitest-testit, tuotantokäännös, npm-pakettien tunnetut haavoittuvuudet (`npm audit`, vakavat ja kriittiset) |
+| [Security](.github/workflows/security.yml) | CodeQL | JavaScript/Vue-koodin ja työnkulkujen staattinen tietoturva-analyysi; myös viikoittain |
+| | Dependency review | Estää pull requestit, jotka lisäävät riippuvuuksia, joissa on tunnettuja vakavia tai kriittisiä haavoittuvuuksia |
+
+Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) avaa kuukausittain ryhmitellyt päivitys-pull requestit Composer-, npm-, GitHub Actions- ja Docker-riippuvuuksille sekä tietoturvakorjaukset heti, kun haavoittuvuus julkaistaan. GitHubin salaisuuksien skannaus estää pushit, joissa on avaimia tai tunnuksia.
+
+Samat tarkistukset paikallisesti:
+
+```bash
+cd backend && vendor/bin/pint --test && php artisan test && composer audit
+cd frontend && npm run lint:check && npm test && npm run build && npm audit --audit-level=high
+```
 
 ## Julkaisu
 

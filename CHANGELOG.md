@@ -6,6 +6,18 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-09
+
+### Added
+- GitHub Actions CI (`.github/workflows/ci.yml`) for every pull request and push to `main` (#10). The backend job runs Pint, the Laravel tests and `composer audit`; the frontend job runs ESLint, the Vitest tests, the production build and `npm audit` (high and critical).
+- Security workflow (`.github/workflows/security.yml`): CodeQL analysis of the JavaScript/Vue code and the workflows on every change and weekly, and dependency review that blocks pull requests adding dependencies with known high or critical vulnerabilities.
+- Dependabot configuration for monthly grouped updates of Composer, npm, GitHub Actions and Docker images.
+- `npm run lint:check` runs ESLint without fixing files, for CI.
+- CI and Security badges and a "Continuous integration" section in the READMEs.
+
+### Fixed
+- `php artisan test` failed because `phpunit.xml` listed a `tests/Unit` suite whose folder doesn't exist. The empty suite is removed.
+
 ## [0.11.1] - 2026-10-09
 
 ### Fixed
@@ -139,7 +151,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/jussipalanen/jalaops/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/jussipalanen/jalaops/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/jussipalanen/jalaops/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/jussipalanen/jalaops/compare/v0.9.0...v0.10.0
