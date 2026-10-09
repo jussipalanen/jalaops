@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { apiGet } from '@/api/client'
+import AiStatusOverview from '@/components/AiStatusOverview.vue'
 import { priorityLabels, statusLabels } from '@/labels'
 
 // 'loading' | 'ok' | 'error'
@@ -63,6 +64,8 @@ onMounted(async () => {
         </p>
       </div>
     </div>
+
+    <AiStatusOverview />
 
     <div>
       <h2 class="mb-3 text-lg font-semibold">Näin JalaOps toimii</h2>

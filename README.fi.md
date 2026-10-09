@@ -27,6 +27,7 @@ Käyttäjä voi:
 - vaihtaa pyynnön tilaa
 - suodattaa pyyntöjä tilan ja prioriteetin mukaan
 - tarkastella yksinkertaista koontinäkymää
+- lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
 
@@ -115,8 +116,28 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
 | DELETE | `/api/requests/{id}` | Poista pyyntö                 |
 | GET    | `/api/dashboard`     | Pyyntöjen määrät tiloittain   |
+| GET    | `/api/dashboard/ai-overview` | AI-tilannekatsaus (kun käytössä) |
+| POST   | `/api/dashboard/ai-overview/refresh` | Luo uusi AI-tilannekatsaus |
 
 Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`
+
+## AI-tilannekatsaus
+
+Etusivulla voi näkyä **AI-tilannekatsaus**: lyhyt suomenkielinen yhteenveto pyynnöistä, suositellut toimet ja huomioitavat asiat. Laravel laskee tiedot (määrät, myöhässä olevat pyynnöt, seuraavan 7 päivän aikana erääntyvät ja avoimet korkean prioriteetin pyynnöt), ja tekoäly kirjoittaa vain tekstin, joten luvut tulevat tietokannasta.
+
+Ominaisuus on oletuksena pois päältä. Ota se käyttöön tiedostossa `backend/.env` ja valitse palveluntarjoaja:
+
+| Muuttuja | Arvo |
+|---|---|
+| `AI_INSIGHTS_ENABLED` | `true` näyttää katsauksen |
+| `AI_INSIGHTS_PROVIDER` | `gemini` (Google Gemini, oletus) tai `puter` (Puter AI) |
+| `GEMINI_API_KEY` | Gemini-API-avain [Google AI Studiosta](https://aistudio.google.com/apikey), kun palveluntarjoaja on `gemini` |
+| `PUTER_AUTH_TOKEN` | Puterin tunnus [Puterin hallintapaneelista](https://puter.com/dashboard), kun palveluntarjoaja on `puter` |
+| `GEMINI_MODEL` / `PUTER_MODEL` | Valinnainen malli (oletukset: `gemini-3.1-flash-lite` ja Puterissa ilmainen `google/gemma-4-31b-it`) |
+| `AI_INSIGHTS_CACHE_MINUTES` | Kuinka kauan katsausta käytetään uudelleen, kun pyynnöt eivät muutu (oletus 60) |
+| `AI_INSIGHTS_MAX_PER_HOUR` | Tekoälykutsujen enimmäismäärä tunnissa koko sovellukselle (oletus 20) |
+
+Avain pysyy taustapalvelussa; selain kutsuu vain osoitetta `/api/dashboard/ai-overview`. Katsaus tallennetaan välimuistiin, kunnes pyynnöt muuttuvat. Päivitys on rajattu kolmeen kertaan minuutissa kävijää kohden, ja kun tuntiraja täyttyy, näytetään edellinen katsaus. Pyyntöjen otsikot lähetetään tekoälypalveluun, joten ilmaisversioissa, joissa dataa voidaan käyttää mallien kehittämiseen, kannattaa käyttää vain demodataa.
 
 ## Julkaisu
 

@@ -52,6 +52,17 @@ In demo mode the app shows the visitor a notice that changes are not kept perman
 
    That is all demo mode needs. `DEMO_MODE=true` is the image's default, and an app key is generated on start if `APP_KEY` is not set.
 
+   Optional, for the **AI-tilannekatsaus** on the dashboard (see the [README](../README.md#ai-status-overview)):
+
+   | Key | Value |
+   |---|---|
+   | `AI_INSIGHTS_ENABLED` | `true` |
+   | `AI_INSIGHTS_PROVIDER` | `gemini` or `puter` |
+   | `GEMINI_API_KEY` | Your Gemini API key (provider `gemini`) |
+   | `PUTER_AUTH_TOKEN` | Your Puter auth token (provider `puter`) |
+
+   The key is only needed on Render; Vercel never sees it.
+
 5. Choose **Deploy Web Service**. The first build takes a few minutes.
 6. Check that `https://jalaops-api.onrender.com/api/health` returns `{"status":"ok","database":"ok","demo":true}` and that the API documentation opens at `https://jalaops-api.onrender.com/docs`.
 
