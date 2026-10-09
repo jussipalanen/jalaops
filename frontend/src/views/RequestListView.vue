@@ -1,19 +1,48 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
 import { formatDate, priorityLabels, statusLabels } from '@/labels'
+
+const route = useRoute()
+const router = useRouter()
 
 const requests = ref([])
 const loading = ref(true)
 const error = ref('')
 
+// The filters live in the URL (?status=open&priority=high), so a filtered
+// list survives a reload and can be shared. Unknown values are ignored.
+const filters = computed(() => ({
+  status: route.query.status in statusLabels ? route.query.status : '',
+  priority: route.query.priority in priorityLabels ? route.query.priority : '',
+}))
+
+const hasFilters = computed(() => Boolean(filters.value.status || filters.value.priority))
+
+function setFilter(name, value) {
+  const query = { ...filters.value, [name]: value }
+
+  // Leave empty filters out of the URL.
+  router.replace({
+    query: Object.fromEntries(Object.entries(query).filter(([, filterValue]) => filterValue)),
+  })
+}
+
+function clearFilters() {
+  router.replace({ query: {} })
+}
+
 async function loadRequests() {
   loading.value = true
   error.value = ''
 
+  const params = new URLSearchParams(
+    Object.entries(filters.value).filter(([, filterValue]) => filterValue),
+  ).toString()
+
   try {
-    const response = await apiGet('/requests')
+    const response = await apiGet(params ? `/requests?${params}` : '/requests')
     requests.value = response.data
   } catch {
     error.value = 'Pyyntöjen lataaminen epäonnistui.'
@@ -35,7 +64,7 @@ async function deleteRequest(request) {
   }
 }
 
-onMounted(loadRequests)
+watch(filters, loadRequests, { immediate: true, deep: true })
 </script>
 
 <template>
@@ -50,11 +79,47 @@ onMounted(loadRequests)
       <RouterLink to="/requests/new" class="btn btn-primary new-button">+ Uusi pyyntö</RouterLink>
     </header>
 
+    <div class="filters card" role="search" aria-label="Suodata pyyntöjä">
+      <div class="filter">
+        <label for="filter-status">Tila</label>
+        <select
+          id="filter-status"
+          :value="filters.status"
+          @change="setFilter('status', $event.target.value)"
+        >
+          <option value="">Kaikki</option>
+          <option v-for="(label, value) in statusLabels" :key="value" :value="value">
+            {{ label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter">
+        <label for="filter-priority">Prioriteetti</label>
+        <select
+          id="filter-priority"
+          :value="filters.priority"
+          @change="setFilter('priority', $event.target.value)"
+        >
+          <option value="">Kaikki</option>
+          <option v-for="(label, value) in priorityLabels" :key="value" :value="value">
+            {{ label }}
+          </option>
+        </select>
+      </div>
+
+      <button v-if="hasFilters" type="button" class="btn btn-secondary" @click="clearFilters">
+        Tyhjennä suodattimet
+      </button>
+    </div>
+
     <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
 
     <div v-if="loading" class="card card-body muted">Ladataan pyyntöjä…</div>
 
-    <div v-else-if="requests.length === 0 && !error" class="card card-body muted">Ei pyyntöjä.</div>
+    <div v-else-if="requests.length === 0 && !error" class="card card-body muted">
+      {{ hasFilters ? 'Ei suodattimia vastaavia pyyntöjä.' : 'Ei pyyntöjä.' }}
+    </div>
 
     <div v-else-if="requests.length > 0" class="card table-card">
       <table class="request-table">
@@ -99,6 +164,50 @@ onMounted(loadRequests)
 </template>
 
 <style scoped>
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.filter {
+  display: grid;
+  gap: 0.25rem;
+  flex: 1 1 10rem;
+  max-width: 16rem;
+}
+
+.filter label {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.filter select {
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.filter select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(2 132 199 / 0.2);
+  outline: none;
+}
+
+@media (min-width: 1024px) {
+  .filter select {
+    min-height: 36px;
+  }
+}
+
 .table-card {
   overflow: hidden;
 }
@@ -185,6 +294,14 @@ onMounted(loadRequests)
 /* Phone: each request becomes its own card with labelled fields. */
 @media (max-width: 639px) {
   .new-button {
+    width: 100%;
+  }
+
+  .filter {
+    max-width: none;
+  }
+
+  .filters .btn {
     width: 100%;
   }
 
