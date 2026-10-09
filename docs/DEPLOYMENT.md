@@ -59,7 +59,7 @@ In demo mode the app shows the visitor a notice that changes are not kept perman
    | `AI_INSIGHTS_ENABLED` | `true` |
    | `AI_INSIGHTS_PROVIDER` | `gemini` or `puter` |
    | `GEMINI_API_KEY` | Your Gemini API key (provider `gemini`) |
-   | `PUTER_AUTH_TOKEN` | Your Puter auth token (provider `puter`) |
+   | `PUTER_AUTH_TOKEN` | Your Puter auth token (provider `puter`; needs a Puter subscription) |
 
    The key is only needed on Render; Vercel never sees it.
 

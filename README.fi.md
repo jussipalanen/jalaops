@@ -130,10 +130,10 @@ Ominaisuus on oletuksena pois päältä. Ota se käyttöön tiedostossa `backend
 | Muuttuja | Arvo |
 |---|---|
 | `AI_INSIGHTS_ENABLED` | `true` näyttää katsauksen |
-| `AI_INSIGHTS_PROVIDER` | `gemini` (Google Gemini, oletus) tai `puter` (Puter AI) |
+| `AI_INSIGHTS_PROVIDER` | `gemini` (Google Gemini, oletus; ilmainen käyttötaso) tai `puter` (Puter AI) |
 | `GEMINI_API_KEY` | Gemini-API-avain [Google AI Studiosta](https://aistudio.google.com/apikey), kun palveluntarjoaja on `gemini` |
-| `PUTER_AUTH_TOKEN` | Puterin tunnus [Puterin hallintapaneelista](https://puter.com/dashboard), kun palveluntarjoaja on `puter` |
-| `GEMINI_MODEL` / `PUTER_MODEL` | Valinnainen malli (oletukset: `gemini-3.1-flash-lite` ja Puterissa ilmainen `google/gemma-4-31b-it`) |
+| `PUTER_AUTH_TOKEN` | Puterin tunnus [Puterin hallintapaneelista](https://puter.com/dashboard), kun palveluntarjoaja on `puter`. Puterin kutsuminen taustapalvelusta vaatii Puter-tilauksen. |
+| `GEMINI_MODEL` / `PUTER_MODEL` | Valinnainen malli (oletukset: `gemini-3.1-flash-lite` ja Puterissa hintaan $0 listattu `google/gemma-4-31b-it`) |
 | `AI_INSIGHTS_CACHE_MINUTES` | Kuinka kauan katsausta käytetään uudelleen, kun pyynnöt eivät muutu (oletus 60) |
 | `AI_INSIGHTS_MAX_PER_HOUR` | Tekoälykutsujen enimmäismäärä tunnissa koko sovellukselle (oletus 20) |
 

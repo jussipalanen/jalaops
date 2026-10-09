@@ -41,7 +41,7 @@ class GeminiClient extends AiClient
         }
 
         if ($response->failed()) {
-            throw new AiException("Gemini API returned status {$response->status()}.");
+            throw new AiException(trim("Gemini API returned status {$response->status()}: ".$response->json('error.message', '')));
         }
 
         // Thinking models can return their reasoning as separate "thought" parts; skip those.

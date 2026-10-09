@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Http;
  * Puter AI through its OpenAI-compatible chat completions endpoint. The auth
  * token comes from the Puter dashboard (puter.com/dashboard → Create token),
  * and the model can be any model Puter offers (developer.puter.com/ai/models).
- * The default, google/gemma-4-31b-it, is free on Puter.
+ * Calling the API with a developer token needs a Puter subscription, even for
+ * models listed at $0 such as the default google/gemma-4-31b-it.
  */
 class PuterClient extends AiClient
 {
@@ -47,7 +48,7 @@ class PuterClient extends AiClient
         }
 
         if ($response->failed()) {
-            throw new AiException("Puter API returned status {$response->status()}.");
+            throw new AiException(trim("Puter API returned status {$response->status()}: ".$response->json('error.message', '')));
         }
 
         return (string) $response->json('choices.0.message.content', '');
