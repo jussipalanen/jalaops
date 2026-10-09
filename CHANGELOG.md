@@ -10,7 +10,7 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ### Added
 - Dark mode. The app follows the system setting, and a button in the header switches between light and dark; the choice is remembered in the browser. The dark theme uses an emerald-green primary color, the light theme keeps sky blue.
-- JalaOps logo: a gear with a check mark, used in the header, as the SVG favicon and as a wordmark in `docs/logo.svg`.
+- JalaOps logo: a gear with a check mark, used in the header, as the SVG favicon and as a wordmark in `docs/logo.svg` below the README title.
 - Footer that tells this is a demo application, with a link to the API documentation and the app version. The docs link is set with `VITE_API_DOCS_URL`.
 - Redesigned home page: a clearer introduction, shortcuts to the request list and a new request, and a short guide to priorities and statuses.
 - A friendlier empty state on the request list.

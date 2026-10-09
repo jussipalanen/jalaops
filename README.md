@@ -1,4 +1,6 @@
-# <img src="docs/logo.svg" alt="JalaOps" height="48">
+# JalaOps
+
+<img src="docs/logo.svg" alt="JalaOps logo" height="56">
 
 **English** | [Suomi](README.fi.md)
 
