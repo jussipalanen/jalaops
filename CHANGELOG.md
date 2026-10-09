@@ -14,6 +14,7 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Dependabot configuration for monthly grouped updates of Composer, npm, GitHub Actions and Docker images.
 - `npm run lint:check` runs ESLint without fixing files, for CI.
 - CI and Security badges and a "Continuous integration" section in the READMEs.
+- `AGENTS.md` with the instructions for AI coding agents (project overview, check commands, language, branch, versioning and secret-handling rules). `CLAUDE.md` now imports it, so all tools share one set of rules.
 
 ### Fixed
 - `php artisan test` failed because `phpunit.xml` listed a `tests/Unit` suite whose folder doesn't exist. The empty suite is removed.
