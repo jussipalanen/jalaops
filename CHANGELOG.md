@@ -6,6 +6,18 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-12
+
+### Added
+- Download a request as a PDF or an HTML file (#49): "Lataa PDF" and "Lataa HTML" on the details and edit pages, and a "Lataa" menu on each row of the request list. The document has the title, priority, status, description, due date, created and updated times, address, coordinates with OpenStreetMap and Street View links, and the sign-off with the signature image, name and time. Unsigned requests get empty lines for signing a printed copy by hand.
+- The HTML file is self-contained (styles and signature built in) and opens offline; the PDF is A4, made with dompdf, a pure-PHP library.
+- `GET /api/requests/{id}/export/pdf` and `/export/html` (downloads).
+- `DISPLAY_TIMEZONE` setting (default `Europe/Helsinki`): times in downloaded files are shown in this time zone.
+
+### Changed
+- The backend Docker images (development and production) include PHP's GD extension, which dompdf needs to draw the signature. Rebuild the local backend image with `./dev rebuild`; Render rebuilds the production image on deploy.
+- On phones, the actions of each request in the list form a 2×2 grid, so four buttons fit.
+
 ## [0.20.0] - 2026-10-12
 
 ### Added
@@ -234,7 +246,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/jussipalanen/jalaops/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...v0.18.0

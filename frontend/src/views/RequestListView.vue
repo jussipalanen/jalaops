@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
+import RequestDownloads from '@/components/RequestDownloads.vue'
 import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
 import { duePeriodLabels, formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels } from '@/labels'
@@ -284,7 +285,8 @@ watch(listPath, loadRequests, { immediate: true })
             </td>
             <td data-label="Määräpäivä" class="tabular-nums">{{ formatDate(request.due_date) }}</td>
             <td class="cell-actions">
-              <div class="flex justify-end gap-2 max-sm:*:flex-1">
+              <!-- Phones: the actions form a 2×2 grid, so four buttons fit on narrow screens. -->
+              <div class="flex justify-end gap-2 max-sm:grid max-sm:grid-cols-2">
                 <RouterLink
                   v-if="hasLocation(request)"
                   :to="`/map?request=${request.id}`"
@@ -293,6 +295,7 @@ watch(listPath, loadRequests, { immediate: true })
                 >
                   Kartalla
                 </RouterLink>
+                <RequestDownloads variant="menu" :request-id="request.id" :title="request.title" />
                 <RouterLink :to="`/requests/${request.id}/edit`" class="btn btn-secondary">
                   Muokkaa
                 </RouterLink>
