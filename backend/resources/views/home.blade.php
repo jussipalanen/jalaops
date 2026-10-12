@@ -13,6 +13,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="JalaOps-demosovelluksen REST API: huoltopyynnöt, kartta-osoitehaku ja tekoälyn tilannekatsaus. Laravel ja MariaDB.">
+    <meta name="theme-color" content="#0284c7">
     <title>JalaOps API</title>
     <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="15" fill="#0284c7"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="19" stroke-width="6" stroke-linecap="butt" stroke-dasharray="6.5 8.42"/><circle cx="32" cy="32" r="14" stroke-width="5"/><path d="M25 32.5l5 5 9-10" stroke-width="4.5"/></g></svg>') }}">
     <style>

@@ -20,6 +20,7 @@ class NoIndexTest extends TestCase
     {
         $this->get('/', ['Accept' => 'text/html'])
             ->assertOk()
-            ->assertSee('<meta name="robots" content="noindex, nofollow">', escape: false);
+            ->assertSee('<meta name="robots" content="noindex, nofollow">', escape: false)
+            ->assertSee('<meta name="description"', escape: false);
     }
 }
