@@ -2,12 +2,61 @@
 <html lang="fi">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JalaOps – huoltopyyntöjen hallinta</title>
+    <meta name="description" content="JalaOps on demosovellus huoltopyyntöjen hallintaan: kirjaa, priorisoi ja seuraa pyyntöjä, näe ne kartalla ja lue tekoälyn tilannekatsaus. Toteutettu Laravelilla, Vuella ja MariaDB:llä.">
+    <meta name="application-name" content="JalaOps">
+    <meta name="author" content="Jussi Alanen">
+    <meta name="keywords" content="huoltopyynnöt, kiinteistöhuolto, huoltopyyntöjen hallinta, kartta, tekoäly, Laravel, Vue, demosovellus">
+    <!-- A demo application: keep it out of search engines. The tags below are for link previews when the address is shared. -->
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="%VITE_SITE_URL%/">
+
+    <!-- Icons and the installable web app -->
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- A demo application: keep it out of search engines. -->
-    <meta name="robots" content="noindex, nofollow">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#f8fafc">
+    <meta name="color-scheme" content="light dark">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Open Graph (Facebook, LinkedIn, Slack, Teams, WhatsApp) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="JalaOps">
+    <meta property="og:locale" content="fi_FI">
+    <meta property="og:url" content="%VITE_SITE_URL%/">
+    <meta property="og:title" content="JalaOps – huoltopyyntöjen hallinta">
+    <meta property="og:description" content="Demosovellus huoltopyyntöjen hallintaan: pyynnöt, suodattimet, kartta ja tekoälyn tilannekatsaus. Laravel, Vue ja MariaDB.">
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="627">
+    <meta property="og:image:alt" content="JalaOps: huoltopyyntöjen hallinta ja tekoälyn tilannekatsaus">
+
+    <!-- X (Twitter) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="JalaOps – huoltopyyntöjen hallinta">
+    <meta name="twitter:description" content="Demosovellus huoltopyyntöjen hallintaan: pyynnöt, suodattimet, kartta ja tekoälyn tilannekatsaus.">
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.jpg">
+    <meta name="twitter:image:alt" content="JalaOps: huoltopyyntöjen hallinta ja tekoälyn tilannekatsaus">
+
+    <!-- Structured data: what the app is, for services that read it -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "JalaOps",
+        "url": "%VITE_SITE_URL%/",
+        "description": "Demosovellus huoltopyyntöjen hallintaan.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "fi",
+        "image": "%VITE_SITE_URL%/og-image.jpg",
+        "author": { "@type": "Person", "name": "Jussi Alanen" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+      }
+    </script>
     <script>
       // Apply the saved or system theme before the app loads to avoid a flash
       // of the wrong theme. src/theme.js takes over once the app starts.
@@ -20,7 +69,6 @@
         document.documentElement.classList.toggle('dark', dark)
       })()
     </script>
-    <title>JalaOps</title>
   </head>
   <body>
     <div id="app"></div>

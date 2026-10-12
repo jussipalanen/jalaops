@@ -182,7 +182,7 @@ cd frontend && npm run lint:check && npm test && npm run build && npm audit --au
 
 The app can be hosted for free with the frontend on Vercel and the backend on Render. By default the hosted backend runs on demo data that resets on every restart (`DEMO_MODE=true`), so no database service is needed. Set `DEMO_MODE=false` and the `DB_*` variables to use a real database.
 
-Both services ask search engines not to index them (`X-Robots-Tag: noindex` and a `noindex` meta tag), because the app is a demo.
+Both services ask search engines not to index them (`X-Robots-Tag: noindex` and a `noindex` meta tag), because the app is a demo. `index.html` still has a description, Open Graph and X card tags, so shared links show a preview card; set the frontend's public address in `VITE_SITE_URL` (`frontend/.env.production`).
 
 Step-by-step guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

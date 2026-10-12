@@ -182,7 +182,7 @@ cd frontend && npm run lint:check && npm test && npm run build && npm audit --au
 
 Sovelluksen voi julkaista ilmaiseksi: frontend Verceliin ja backend Renderiin. Oletuksena julkaistu backend käyttää demodataa, joka palautuu jokaisella uudelleenkäynnistyksellä (`DEMO_MODE=true`), joten erillistä tietokantapalvelua ei tarvita. Asettamalla `DEMO_MODE=false` ja `DB_*`-muuttujat käyttöön tulee oikea tietokanta.
 
-Molemmat palvelut pyytävät hakukoneita olemaan indeksoimatta niitä (`X-Robots-Tag: noindex` ja `noindex`-metatagi), koska sovellus on demo.
+Molemmat palvelut pyytävät hakukoneita olemaan indeksoimatta niitä (`X-Robots-Tag: noindex` ja `noindex`-metatagi), koska sovellus on demo. `index.html` sisältää silti kuvauksen sekä Open Graph- ja X-korttitagit, joten jaetuista linkeistä näkyy esikatselukortti; aseta frontendin julkinen osoite muuttujaan `VITE_SITE_URL` (`frontend/.env.production`).
 
 Vaiheittainen ohje (englanniksi): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

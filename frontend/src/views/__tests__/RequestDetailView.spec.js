@@ -44,6 +44,7 @@ describe('RequestDetailView', () => {
     const wrapper = await mountView(request)
 
     expect(wrapper.find('h1').text()).toBe('Vaihda ilmansuodatin')
+    expect(document.title).toBe('Vaihda ilmansuodatin – JalaOps')
     expect(wrapper.text()).toContain('Korkea')
     expect(wrapper.text()).toContain('Avoin')
     expect(wrapper.text()).toContain('Vaihda varaston ilmanvaihtokoneen ilmansuodatin.')

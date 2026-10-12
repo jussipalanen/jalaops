@@ -5,6 +5,7 @@ import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
 import { formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
+import { pageTitle } from '@/pageTitle'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,6 +37,7 @@ onMounted(async () => {
   try {
     const response = await apiGet(`/requests/${route.params.id}`)
     request.value = response.data
+    document.title = pageTitle(request.value.title)
   } catch (e) {
     if (e.status === 404) {
       notFound.value = true

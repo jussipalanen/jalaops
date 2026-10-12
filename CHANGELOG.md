@@ -6,6 +6,17 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-12
+
+### Added
+- Link preview and page metadata in the HTML source (`index.html`, #41): a Finnish title and description, application name, author and keywords, canonical address, Open Graph tags (title, description, locale, address and a 1200×627 preview image) and X (Twitter) card tags, so shared links show a card in Slack, Teams, LinkedIn, WhatsApp and similar services. Also structured data (schema.org `WebApplication`), a web app manifest with app icons, an Apple touch icon, `color-scheme` and `format-detection`.
+- Each page has its own browser tab title, e.g. "Kartta – JalaOps"; the details page uses the request's title.
+- A meta description on the backend home page.
+- `VITE_SITE_URL` setting for the frontend's public address, used in the absolute preview URLs (set in `.env.production`).
+
+### Changed
+- The app stays out of search results: `noindex` is unchanged; the new tags only make shared links look better.
+
 ## [0.16.0] - 2026-10-12
 
 ### Added
@@ -200,7 +211,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/jussipalanen/jalaops/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/jussipalanen/jalaops/compare/v0.14.0...v0.14.1
