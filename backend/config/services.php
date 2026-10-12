@@ -49,4 +49,17 @@ return [
         'timeout' => (int) env('PUTER_TIMEOUT', 30),
     ],
 
+    // Nominatim, OpenStreetMap's free geocoder; its usage policy requires an identifying User-Agent.
+    'nominatim' => [
+        'base_url' => env('NOMINATIM_BASE_URL', 'https://nominatim.openstreetmap.org'),
+        'user_agent' => env('NOMINATIM_USER_AGENT', 'JalaOps demo (https://github.com/jussipalanen/jalaops)'),
+        'timeout' => (int) env('NOMINATIM_TIMEOUT', 10),
+    ],
+
+    // Photon, a free OpenStreetMap geocoder made for search-as-you-type (Nominatim forbids autocomplete).
+    'photon' => [
+        'base_url' => env('PHOTON_BASE_URL', 'https://photon.komoot.io'),
+        'timeout' => (int) env('PHOTON_TIMEOUT', 5),
+    ],
+
 ];

@@ -48,6 +48,11 @@ class ServiceRequestApiTest extends TestCase
                 'priority' => 'high',
                 'status' => 'open',
                 'due_date' => '2026-10-15',
+                'street_address' => null,
+                'postal_code' => null,
+                'city' => null,
+                'latitude' => null,
+                'longitude' => null,
                 'created_at' => $request->created_at->toJSON(),
                 'updated_at' => $request->updated_at->toJSON(),
             ]]);
@@ -106,6 +111,53 @@ class ServiceRequestApiTest extends TestCase
             ->assertJsonValidationErrors(['title', 'priority', 'status', 'due_date'])
             ->assertJsonPath('errors.priority.0', 'Kentän prioriteetti arvo on virheellinen.')
             ->assertJsonPath('errors.due_date.0', 'Kentän määräpäivä on oltava muodossa Y-m-d.');
+    }
+
+    public function test_creates_a_request_with_a_location(): void
+    {
+        $this->postJson('/api/requests', $this->validPayload([
+            'street_address' => 'Hämeenkatu 10',
+            'postal_code' => '33100',
+            'city' => 'Tampere',
+            'latitude' => 61.4980,
+            'longitude' => 23.7660,
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.street_address', 'Hämeenkatu 10')
+            ->assertJsonPath('data.postal_code', '33100')
+            ->assertJsonPath('data.city', 'Tampere')
+            ->assertJsonPath('data.latitude', 61.498)
+            ->assertJsonPath('data.longitude', 23.766);
+
+        $this->assertDatabaseHas('service_requests', ['city' => 'Tampere', 'postal_code' => '33100']);
+    }
+
+    public function test_an_address_without_coordinates_is_allowed(): void
+    {
+        $this->postJson('/api/requests', $this->validPayload(['street_address' => 'Isokatu 32', 'city' => 'Oulu']))
+            ->assertCreated()
+            ->assertJsonPath('data.city', 'Oulu')
+            ->assertJsonPath('data.latitude', null);
+    }
+
+    public function test_rejects_invalid_locations(): void
+    {
+        $this->postJson('/api/requests', $this->validPayload([
+            'postal_code' => '<b>331</b>',
+            'latitude' => 91,
+            'longitude' => 'itä',
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.postal_code.0', 'Kentän postinumero muoto on virheellinen.')
+            ->assertJsonPath('errors.latitude.0', 'Kentän leveysaste on oltava välillä -90–90.')
+            ->assertJsonPath('errors.longitude.0', 'Kentän pituusaste on oltava numero.');
+    }
+
+    public function test_coordinates_must_be_given_together(): void
+    {
+        $this->postJson('/api/requests', $this->validPayload(['latitude' => 61.5]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.longitude.0', 'Kenttä pituusaste on pakollinen, kun leveysaste on annettu.');
     }
 
     public function test_updates_a_request(): void
@@ -205,6 +257,44 @@ class ServiceRequestApiTest extends TestCase
         $this->createFilterFixtures();
 
         $this->assertCount(4, $this->listedTitles('?status=&priority='));
+    }
+
+    public function test_searches_by_street_address_postal_code_or_city(): void
+    {
+        ServiceRequest::factory()->create(['title' => 'Tampere', 'street_address' => 'Hämeenkatu 10', 'postal_code' => '33100', 'city' => 'Tampere']);
+        ServiceRequest::factory()->create(['title' => 'Oulu', 'street_address' => 'Isokatu 32', 'postal_code' => '90100', 'city' => 'Oulu']);
+        ServiceRequest::factory()->create(['title' => 'Ei osoitetta']);
+
+        $titles = fn (string $search) => collect($this->getJson('/api/requests?search='.urlencode($search))->assertOk()->json('data'))
+            ->pluck('title')->sort()->values()->all();
+
+        $this->assertSame(['Tampere'], $titles('tampere'));
+        $this->assertSame(['Oulu'], $titles('Isokatu'));
+        $this->assertSame(['Oulu'], $titles('901'));
+        $this->assertSame(['Oulu', 'Tampere'], $titles('katu'));
+        $this->assertSame([], $titles('Rovaniemi'));
+        $this->assertSame(['Ei osoitetta', 'Oulu', 'Tampere'], $titles('  '));
+    }
+
+    public function test_search_treats_wildcards_literally(): void
+    {
+        ServiceRequest::factory()->create(['city' => 'Tampere']);
+        ServiceRequest::factory()->create(['street_address' => 'Varasto_2!']);
+
+        $this->getJson('/api/requests?search=%25')->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson('/api/requests?search=_')->assertOk()->assertJsonCount(1, 'data');
+        $this->getJson('/api/requests?search=o_2!')->assertOk()->assertJsonCount(1, 'data');
+    }
+
+    public function test_search_combines_with_filters(): void
+    {
+        ServiceRequest::factory()->create(['title' => 'Avoin', 'status' => 'open', 'city' => 'Tampere']);
+        ServiceRequest::factory()->create(['title' => 'Valmis', 'status' => 'completed', 'city' => 'Tampere']);
+
+        $this->getJson('/api/requests?search=Tampere&status=open')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Avoin');
     }
 
     public function test_rejects_invalid_filter_values(): void

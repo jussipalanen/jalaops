@@ -80,7 +80,7 @@
   }
 
   .nav-link {
-    @apply inline-flex min-h-10 items-center rounded-full px-3 text-[0.9375rem] font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:px-3.5 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
+    @apply inline-flex min-h-10 items-center rounded-full px-2.5 text-[0.9375rem] max-[22rem]:px-2 max-[22rem]:text-sm font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:px-3.5 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
   }
 
   .nav-link.active {
@@ -216,4 +216,113 @@
   .alert-error {
     @apply mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300;
   }
+}
+
+/* Maps (Leaflet, see src/map.js). Leaflet's own CSS isn't in a cascade layer
+   and loads after this file, so these overrides aren't layered either and are
+   scoped under .leaflet-container to win over its selectors. */
+
+/* The map page fills the window below the header instead of scrolling. */
+#app:has(.full-screen-page) {
+  @apply h-dvh min-h-0;
+}
+
+.leaflet-container.leaflet-container {
+  @apply bg-slate-200 font-sans dark:bg-slate-800;
+}
+
+/* Pins: a teardrop with a white dot, coloured by priority. */
+.map-pin-shape {
+  @apply absolute inset-0 rounded-[50%_50%_50%_0] border-2 border-white shadow-md shadow-slate-900/40 after:absolute after:inset-[30%] after:rounded-full after:bg-white after:content-[''];
+  transform: rotate(-45deg);
+}
+
+.map-pin-high .map-pin-shape {
+  @apply bg-red-600;
+}
+
+.map-pin-normal .map-pin-shape {
+  @apply bg-sky-600;
+}
+
+.map-pin-low .map-pin-shape {
+  @apply bg-slate-500;
+}
+
+/* Matching dots in the map's request list. */
+.map-dot-high {
+  @apply bg-red-600;
+}
+
+.map-dot-normal {
+  @apply bg-sky-600;
+}
+
+.map-dot-low {
+  @apply bg-slate-500;
+}
+
+.map-pin-picker .map-pin-shape {
+  @apply bg-primary-600 dark:bg-primary-500;
+}
+
+.map-pin-completed {
+  @apply opacity-60;
+}
+
+.map-pin:focus-visible {
+  @apply rounded-full outline-3 outline-offset-2 outline-primary-500;
+}
+
+/* Popups follow the app's cards and the dark theme. */
+.leaflet-container .leaflet-popup-content-wrapper {
+  @apply rounded-xl bg-white text-slate-900 shadow-lg dark:bg-slate-900 dark:text-slate-100;
+}
+
+.leaflet-container .leaflet-popup-tip {
+  @apply bg-white dark:bg-slate-900;
+}
+
+.leaflet-container .leaflet-popup-content {
+  @apply m-4 w-64! text-sm leading-normal;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  @apply size-8! text-xl! leading-8! text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white;
+}
+
+.map-popup {
+  @apply grid gap-2;
+}
+
+.map-popup .map-popup-title {
+  @apply m-0 pr-4 text-base font-bold;
+}
+
+.map-popup .map-popup-badges {
+  @apply m-0 flex flex-wrap gap-1.5;
+}
+
+.map-popup .map-popup-description {
+  @apply m-0 text-slate-700 dark:text-slate-300;
+}
+
+.map-popup .map-popup-meta {
+  @apply m-0 text-slate-500 dark:text-slate-400;
+}
+
+.leaflet-container a.map-popup-link {
+  @apply mt-1 font-semibold text-primary-700 hover:underline dark:text-primary-400;
+}
+
+.leaflet-container .leaflet-control-zoom a {
+  @apply dark:border-slate-700! dark:bg-slate-900! dark:text-slate-100!;
+}
+
+.leaflet-container .leaflet-control-attribution {
+  @apply dark:bg-slate-900/80! dark:text-slate-400!;
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  @apply dark:text-slate-300!;
 }

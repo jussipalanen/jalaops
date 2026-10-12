@@ -21,16 +21,19 @@ class ServiceRequestController extends Controller
      * List requests.
      *
      * Sorted by due date, soonest first. Requests without a due date come last.
-     * Filter by status and/or priority with the query parameters.
+     * Filter by status and/or priority, and search by street address, postal
+     * code or city (`?search=tampere`), with the query parameters.
      */
     public function index(ListServiceRequestsRequest $request): AnonymousResourceCollection
     {
         $status = $request->enum('status', RequestStatus::class);
         $priority = $request->enum('priority', RequestPriority::class);
+        $search = trim((string) $request->validated('search'));
 
         $requests = ServiceRequest::query()
             ->when($status, fn ($query) => $query->withStatus($status))
             ->when($priority, fn ($query) => $query->withPriority($priority))
+            ->when($search !== '', fn ($query) => $query->locatedAt($search))
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date')
             ->orderBy('id')

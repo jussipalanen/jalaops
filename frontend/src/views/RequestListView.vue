@@ -1,48 +1,23 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
-import { formatDate, priorityLabels, statusLabels } from '@/labels'
+import AddressSearch from '@/components/AddressSearch.vue'
+import { useRequestFilters } from '@/composables/useRequestFilters'
+import { formatAddress, formatDate, hasLocation, priorityLabels, statusLabels } from '@/labels'
 
-const route = useRoute()
-const router = useRouter()
+const { filters, hasFilters, apiPath, setFilter, setSearch, clearFilters } = useRequestFilters()
 
 const requests = ref([])
 const loading = ref(true)
 const error = ref('')
 
-// The filters live in the URL (?status=open&priority=high), so a filtered
-// list survives a reload and can be shared. Unknown values are ignored.
-const filters = computed(() => ({
-  status: route.query.status in statusLabels ? route.query.status : '',
-  priority: route.query.priority in priorityLabels ? route.query.priority : '',
-}))
-
-const hasFilters = computed(() => Boolean(filters.value.status || filters.value.priority))
-
-function setFilter(name, value) {
-  const query = { ...filters.value, [name]: value }
-
-  // Leave empty filters out of the URL.
-  router.replace({
-    query: Object.fromEntries(Object.entries(query).filter(([, filterValue]) => filterValue)),
-  })
-}
-
-function clearFilters() {
-  router.replace({ query: {} })
-}
-
 async function loadRequests() {
   loading.value = true
   error.value = ''
 
-  const params = new URLSearchParams(
-    Object.entries(filters.value).filter(([, filterValue]) => filterValue),
-  ).toString()
-
   try {
-    const response = await apiGet(params ? `/requests?${params}` : '/requests')
+    const response = await apiGet(apiPath.value)
     requests.value = response.data
   } catch {
     error.value = 'Pyyntöjen lataaminen epäonnistui.'
@@ -84,6 +59,13 @@ watch(filters, loadRequests, { immediate: true, deep: true })
       role="search"
       aria-label="Suodata pyyntöjä"
     >
+      <AddressSearch
+        id="filter-search"
+        class="flex-[2_1_16rem] sm:max-w-96"
+        :model-value="filters.search"
+        @search="setSearch"
+      />
+
       <div class="grid flex-[1_1_10rem] gap-1 sm:max-w-64">
         <label for="filter-status" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Tila</label>
         <select
@@ -150,7 +132,14 @@ watch(filters, loadRequests, { immediate: true, deep: true })
         </thead>
         <tbody>
           <tr v-for="request in requests" :key="request.id">
-            <td class="cell-title">{{ request.title }}</td>
+            <td class="cell-title">
+              <RouterLink :to="`/requests/${request.id}`" class="hover:text-primary-700 hover:underline dark:hover:text-primary-400">
+                {{ request.title }}
+              </RouterLink>
+              <span v-if="formatAddress(request)" class="block text-sm font-normal text-slate-500 dark:text-slate-400">
+                {{ formatAddress(request) }}
+              </span>
+            </td>
             <td data-label="Prioriteetti">
               <span class="badge" :class="`priority-${request.priority}`">
                 {{ priorityLabels[request.priority] }}
@@ -164,6 +153,14 @@ watch(filters, loadRequests, { immediate: true, deep: true })
             <td data-label="Määräpäivä" class="tabular-nums">{{ formatDate(request.due_date) }}</td>
             <td class="cell-actions">
               <div class="flex justify-end gap-2 max-sm:*:flex-1">
+                <RouterLink
+                  v-if="hasLocation(request)"
+                  :to="`/map?request=${request.id}`"
+                  class="btn btn-secondary"
+                  :aria-label="`Näytä kartalla: ${request.title}`"
+                >
+                  Kartalla
+                </RouterLink>
                 <RouterLink :to="`/requests/${request.id}/edit`" class="btn btn-secondary">
                   Muokkaa
                 </RouterLink>

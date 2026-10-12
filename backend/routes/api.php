@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AiOverviewController;
+use App\Http\Controllers\Api\GeocodeController;
 use App\Http\Controllers\Api\ServiceRequestController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,10 @@ Route::get('/health', function () {
 // The model is ServiceRequest, but the public API uses /api/requests.
 Route::apiResource('requests', ServiceRequestController::class)
     ->parameters(['requests' => 'serviceRequest']);
+
+// Address to coordinates for request locations (Nominatim), and address suggestions while typing (Photon).
+Route::get('/geocode', [GeocodeController::class, 'show'])->middleware('throttle:geocode');
+Route::get('/geocode/suggest', [GeocodeController::class, 'suggest'])->middleware('throttle:geocode-suggest');
 
 // AI-tilannekatsaus for the dashboard (Gemini or Puter). Off unless AI_INSIGHTS_ENABLED and the provider's key are set.
 Route::get('/dashboard/ai-overview', [AiOverviewController::class, 'show']);

@@ -22,6 +22,8 @@ class ListServiceRequestsRequest extends FormRequest
             'status' => ['nullable', Rule::enum(RequestStatus::class)],
             /** Only requests with this priority. */
             'priority' => ['nullable', Rule::enum(RequestPriority::class)],
+            /** Only requests whose street address, postal code or city contains this text. */
+            'search' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

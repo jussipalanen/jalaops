@@ -6,6 +6,26 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-12
+
+### Added
+- Request locations (#31): street address, postal code, city and map coordinates on each request, all optional. Coordinates are given together or not at all.
+- Kartta, a full-screen map view at `/map` with its own link in the main navigation. Requests with a location are shown as pins coloured by priority (completed requests are faded). Clicking a pin opens a popup with the title, priority, status, description, address, due date and a "Näytä tiedot" link. A side panel lists the requests on the map; on phones it opens from the bottom of the screen. `/map?request=12` focuses one request.
+- The map uses OpenFreeMap's free vector basemap (built on OpenStreetMap data) with Google Maps-like colours, and a dark basemap in the dark theme. It needs no API key; MapLibre GL draws it inside Leaflet, and browsers without WebGL get OpenStreetMap's own tiles.
+- Request details page at `/requests/:id` with all fields, a small map and Muokkaa/Poista buttons. Request titles in the list link to it.
+- "Sijainti" section in the request form: address fields, a small map where clicking or dragging the pin sets the coordinates, and "Hae koordinaatit osoitteesta", which looks the address up with Nominatim (OpenStreetMap).
+- Address suggestions while typing the street address. Choosing one fills in the address, postal code, city and coordinates. The suggestions come from Photon (OpenStreetMap), because Nominatim doesn't allow autocomplete.
+- Osoitehaku on the request list and the map: search by street address, postal code or city. The search is kept in the address like the other filters (`?search=tampere`).
+- `GET /api/requests?search=…`, `GET /api/geocode?q=…` and `GET /api/geocode/suggest?q=…`. Lookups and suggestions are cached and rate-limited per visitor, and Nominatim gets at most one call per second from the whole app.
+- Finnish addresses with coordinates for the demo requests, around Finland from Helsinki to Rovaniemi. Seeding an existing database adds the locations to the demo requests that don't have one.
+- "Kartalla" links in the request list for requests with a location.
+- "API-etusivu" link in the footer to the backend home page.
+- `NOMINATIM_USER_AGENT` setting in `backend/.env.example`.
+
+### Changed
+- The request list's filters are shared with the map (`useRequestFilters`).
+- On phones the header shows only the logo, so the three navigation links and the theme button fit.
+
 ## [0.12.0] - 2026-10-09
 
 ### Added
@@ -152,7 +172,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/jussipalanen/jalaops/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/jussipalanen/jalaops/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/jussipalanen/jalaops/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/jussipalanen/jalaops/compare/v0.10.0...v0.11.0
