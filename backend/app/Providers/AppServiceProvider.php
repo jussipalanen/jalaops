@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Address searches go to Nominatim, whose usage policy asks for light use.
         RateLimiter::for('geocode', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        RateLimiter::for('imports', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('geocode-suggest', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
     }
 }

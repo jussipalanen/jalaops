@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\RequestPriority;
-use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ListServiceRequestsRequest;
 use App\Http\Requests\SaveServiceRequestRequest;
@@ -32,20 +30,7 @@ class ServiceRequestController extends Controller
      */
     public function index(ListServiceRequestsRequest $request): AnonymousResourceCollection
     {
-        $status = $request->enum('status', RequestStatus::class);
-        $priority = $request->enum('priority', RequestPriority::class);
-        $search = trim((string) $request->validated('search'));
-        $due = $request->validated('due');
-        $dueFrom = $request->validated('due_from');
-        $dueTo = $request->validated('due_to');
-
-        $requests = ServiceRequest::query()
-            ->when($status, fn ($query) => $query->withStatus($status))
-            ->when($priority, fn ($query) => $query->withPriority($priority))
-            ->when($search !== '', fn ($query) => $query->matching($search))
-            ->when($due, fn ($query) => $query->dueIn($due))
-            ->when($dueFrom || $dueTo, fn ($query) => $query->dueBetween($dueFrom, $dueTo))
-            ->sortedBy($request->validated('sort') ?? 'due_date');
+        $requests = $request->filteredRequests();
 
         $perPage = $request->validated('per_page');
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AiOverviewController;
 use App\Http\Controllers\Api\GeocodeController;
+use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
 use App\Http\Controllers\Api\SystemController;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,11 @@ Route::get('/health', function () {
 
 // Application details and health for the "Tietoja" page.
 Route::get('/system', [SystemController::class, 'show']);
+
+// Bulk export and import. Registered before the resource routes, so "export"
+// and "import" aren't read as request ids.
+Route::get('/requests/export', [RequestTransferController::class, 'export']);
+Route::post('/requests/import', [RequestTransferController::class, 'import'])->middleware('throttle:imports');
 
 // The model is ServiceRequest, but the public API uses /api/requests.
 Route::get('/requests/{serviceRequest}/signature', [ServiceRequestController::class, 'signature']);

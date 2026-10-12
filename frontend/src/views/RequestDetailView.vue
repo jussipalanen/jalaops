@@ -129,7 +129,7 @@ async function deleteRequest() {
           <div
             ref="mapContainer"
             class="h-64 overflow-hidden rounded-lg border border-slate-200 sm:h-72 dark:border-slate-700"
-            role="img"
+            role="region"
             :aria-label="`Kartta: ${address || request.title}`"
           ></div>
           <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1">

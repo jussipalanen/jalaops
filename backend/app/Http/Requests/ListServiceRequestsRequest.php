@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Enums\RequestPriority;
 use App\Enums\RequestStatus;
+use App\Models\ServiceRequest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -48,5 +50,29 @@ class ListServiceRequestsRequest extends FormRequest
             /** Page number, with `per_page`. */
             'page' => ['nullable', 'integer', 'min:1'],
         ];
+    }
+
+    /**
+     * The requests matching the filters and the search, in the chosen order.
+     * Shared by the list and the export.
+     *
+     * @return Builder<ServiceRequest>
+     */
+    public function filteredRequests(): Builder
+    {
+        $status = $this->enum('status', RequestStatus::class);
+        $priority = $this->enum('priority', RequestPriority::class);
+        $search = trim((string) $this->validated('search'));
+        $due = $this->validated('due');
+        $dueFrom = $this->validated('due_from');
+        $dueTo = $this->validated('due_to');
+
+        return ServiceRequest::query()
+            ->when($status, fn ($query) => $query->withStatus($status))
+            ->when($priority, fn ($query) => $query->withPriority($priority))
+            ->when($search !== '', fn ($query) => $query->matching($search))
+            ->when($due, fn ($query) => $query->dueIn($due))
+            ->when($dueFrom || $dueTo, fn ($query) => $query->dueBetween($dueFrom, $dueTo))
+            ->sortedBy($this->validated('sort') ?? 'due_date');
     }
 }

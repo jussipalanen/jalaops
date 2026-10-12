@@ -7,6 +7,8 @@ export class ApiError extends Error {
     super(`API request failed with status ${status}`)
     this.status = status
     this.errors = data.errors ?? {}
+    // The whole response body, e.g. the import report.
+    this.data = data
   }
 }
 
@@ -14,7 +16,10 @@ async function apiRequest(method, path, body) {
   const headers = { Accept: 'application/json' }
   const options = { method, headers }
 
-  if (body !== undefined) {
+  if (body instanceof FormData) {
+    // The browser sets the multipart Content-Type with its boundary.
+    options.body = body
+  } else if (body !== undefined) {
     headers['Content-Type'] = 'application/json'
     options.body = JSON.stringify(body)
   }
@@ -44,4 +49,9 @@ export function apiPut(path, body) {
 
 export function apiDelete(path) {
   return apiRequest('DELETE', path)
+}
+
+// Uploads a file (multipart form data), e.g. an import file.
+export function apiUpload(path, formData) {
+  return apiRequest('POST', path, formData)
 }

@@ -1,5 +1,6 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, useTemplateRef } from 'vue'
+import { useDropdown } from '@/composables/useDropdown'
 
 // Download a request as a PDF or a self-contained HTML file. "buttons" shows
 // both formats side by side; "menu" is a compact "Lataa" button for list rows.
@@ -14,28 +15,8 @@ const formats = computed(() => [
   { format: 'html', label: 'HTML', href: `/api/requests/${props.requestId}/export/html` },
 ])
 
-const open = ref(false)
 const menu = useTemplateRef('menu')
-
-// The menu closes on a click elsewhere or Escape, like other menus.
-function onDocumentClick(event) {
-  if (!menu.value?.contains(event.target)) open.value = false
-}
-
-function onKeydown(event) {
-  if (event.key === 'Escape') open.value = false
-}
-
-watch(open, (isOpen) => {
-  const method = isOpen ? 'addEventListener' : 'removeEventListener'
-  document[method]('click', onDocumentClick)
-  document[method]('keydown', onKeydown)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
-  document.removeEventListener('keydown', onKeydown)
-})
+const { open, toggle, close } = useDropdown(menu)
 </script>
 
 <template>
@@ -46,7 +27,7 @@ onBeforeUnmount(() => {
       :aria-expanded="open"
       aria-haspopup="true"
       :aria-label="title ? `Lataa: ${title}` : 'Lataa'"
-      @click="open = !open"
+      @click="toggle"
     >
       Lataa <span class="text-xs" aria-hidden="true">▾</span>
     </button>
@@ -60,7 +41,7 @@ onBeforeUnmount(() => {
         :href="item.href"
         download
         class="flex min-h-11 items-center px-4 font-semibold hover:bg-slate-100 lg:min-h-9 dark:hover:bg-slate-800"
-        @click="open = false"
+        @click="close"
       >
         Lataa {{ item.label }}
       </a>
