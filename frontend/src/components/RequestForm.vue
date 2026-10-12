@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, reactive, ref } from 'vue'
 import { apiGet } from '@/api/client'
 import AddressAutocomplete from '@/components/AddressAutocomplete.vue'
+import SignaturePad from '@/components/SignaturePad.vue'
 import { formatAddress, priorityLabels, statusLabels } from '@/labels'
 
 // The map loads Leaflet, so it's fetched only when the form is shown.
@@ -29,7 +30,21 @@ const form = reactive({
   city: props.request.city ?? '',
   latitude: props.request.latitude ?? '',
   longitude: props.request.longitude ?? '',
+  signed_by: props.request.signed_by ?? '',
 })
+
+// Sign-off for completed requests. `signature` stays undefined while the saved
+// signature is kept; a new drawing is a PNG data URL and a removed one null.
+const signature = ref(undefined)
+const keepsSavedSignature = computed(() => Boolean(props.request.has_signature) && signature.value === undefined)
+const redrawing = ref(false)
+const savedSignatureUrl = computed(() =>
+  props.request.id ? `/api/requests/${props.request.id}/signature?v=${encodeURIComponent(props.request.signed_at ?? '')}` : null,
+)
+
+function removeSavedSignature() {
+  signature.value = null
+}
 
 // The API expects null for empty optional fields.
 function textOrNull(value) {
@@ -41,8 +56,10 @@ function numberOrNull(value) {
 }
 
 function submit() {
+  const { signed_by: signedBy, ...fields } = form
+
   emit('submit', {
-    ...form,
+    ...fields,
     description: form.description.trim() === '' ? null : form.description,
     due_date: form.due_date === '' ? null : form.due_date,
     street_address: textOrNull(form.street_address),
@@ -50,6 +67,11 @@ function submit() {
     city: textOrNull(form.city),
     latitude: numberOrNull(form.latitude),
     longitude: numberOrNull(form.longitude),
+    // Only completed requests are signed off; the signature is left out to keep the saved one.
+    ...(form.status === 'completed' && {
+      signed_by: textOrNull(signedBy),
+      ...(signature.value !== undefined && { completion_signature: signature.value }),
+    }),
   })
 }
 
@@ -318,6 +340,59 @@ function fieldError(field) {
       >
         Poista sijainti kartalta
       </button>
+    </fieldset>
+
+    <fieldset v-if="form.status === 'completed'" class="grid min-w-0 gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+      <legend class="float-left mb-1 text-lg font-bold">Kuittaus</legend>
+      <p class="-mt-2 text-sm text-slate-500 dark:text-slate-400">Valinnainen: kuittaa työ tehdyksi nimellä ja allekirjoituksella.</p>
+
+      <div class="grid min-w-0 content-start gap-1.5 sm:max-w-sm">
+        <label for="signed_by" class="text-[0.9375rem] font-semibold">Kuittaajan nimi</label>
+        <input
+          id="signed_by"
+          class="form-control"
+          v-model="form.signed_by"
+          type="text"
+          maxlength="100"
+          autocomplete="name"
+          :aria-invalid="Boolean(fieldError('signed_by'))"
+          :aria-describedby="fieldError('signed_by') ? 'signed_by-error' : undefined"
+        />
+        <p v-if="fieldError('signed_by')" id="signed_by-error" class="text-sm text-red-600 dark:text-red-400">
+          {{ fieldError('signed_by') }}
+        </p>
+      </div>
+
+      <div class="grid min-w-0 content-start gap-1.5">
+        <span class="text-[0.9375rem] font-semibold">Allekirjoitus</span>
+
+        <div v-if="keepsSavedSignature && !redrawing">
+          <img
+            :src="savedSignatureUrl"
+            alt="Tallennettu allekirjoitus"
+            class="block aspect-[3/1] w-full rounded-lg border border-slate-300 bg-white object-contain dark:border-slate-600"
+          />
+          <div class="mt-1.5 flex flex-wrap gap-x-5">
+            <button type="button" class="inline-flex min-h-11 items-center text-sm font-semibold text-primary-700 hover:underline lg:min-h-9 dark:text-primary-400" @click="redrawing = true">
+              Piirrä uusi allekirjoitus
+            </button>
+            <button type="button" class="inline-flex min-h-11 items-center text-sm font-semibold text-red-600 hover:underline lg:min-h-9 dark:text-red-400" @click="removeSavedSignature">
+              Poista allekirjoitus
+            </button>
+          </div>
+        </div>
+
+        <SignaturePad
+          v-else
+          id="completion_signature"
+          :invalid="Boolean(fieldError('completion_signature'))"
+          :describedby="fieldError('completion_signature') ? 'completion_signature-error' : undefined"
+          @change="signature = $event"
+        />
+        <p v-if="fieldError('completion_signature')" id="completion_signature-error" class="text-sm text-red-600 dark:text-red-400">
+          {{ fieldError('completion_signature') }}
+        </p>
+      </div>
     </fieldset>
 
     <div class="flex flex-col gap-3 pt-2 sm:flex-row">

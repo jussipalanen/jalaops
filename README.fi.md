@@ -26,7 +26,7 @@ JalaOps on pieni toiminnanohjauksen demosovellus huoltopyyntöjen hallintaan.
 Käyttäjä voi:
 
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
-- vaihtaa pyynnön tilaa
+- vaihtaa pyynnön tilaa ja kuitata valmiin pyynnön nimellä ja piirretyllä allekirjoituksella
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella yksinkertaista koontinäkymää
@@ -113,8 +113,10 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET    | `/api/health`        | API:n ja tietokannan tila     |
+| GET    | `/api/system`        | Sovelluksen tiedot ja tila Tietoja-sivulle (palvelimen versiot vain asetuksella `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | Listaa pyynnöt                |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
+| GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
 | POST   | `/api/requests`      | Luo pyyntö                    |
 | PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
 | DELETE | `/api/requests/{id}` | Poista pyyntö                 |

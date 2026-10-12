@@ -6,6 +6,19 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-12
+
+### Added
+- Sign-off when a request is completed (#47): with the status "Valmis", the form shows a "Kuittaus" section with the signer's name and a pad for drawing a signature with a finger, pen or mouse ("Tyhjennä" clears it). Both are optional, but a signature needs a name. The details page shows the signature, the signer and the time.
+- The signature is stored as a PNG with the signer's name and time (`signed_by`, `signed_at`, `has_signature` in the API). The image is at `GET /api/requests/{id}/signature`, so request lists stay small. Saving without a new drawing keeps the signature, `completion_signature: null` removes it, and changing the status away from completed removes the sign-off. Only real PNG images are accepted.
+
+## [0.19.0] - 2026-10-12
+
+### Added
+- "Tietoja sovelluksesta" page at `/about`, linked from the footer (#45): the frontend and API versions, environment, demo mode, time zone and server time, and a health check of the API, the database (with its response time) and the cache. With `SHOW_SYSTEM_DETAILS=true` it also shows the PHP, Laravel, database and Vue versions and the cache and queue drivers; the setting defaults to true only when `APP_ENV=local`, so the public demo doesn't show exact versions.
+- `GET /api/system` with the same details.
+- `SHOW_SYSTEM_DETAILS` in `backend/.env.example` and `docs/DEPLOYMENT.md`.
+
 ## [0.18.0] - 2026-10-12
 
 ### Added
@@ -221,7 +234,9 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/jussipalanen/jalaops/compare/v0.19.0...v0.20.0
+[0.19.0]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...v0.16.0

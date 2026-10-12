@@ -67,6 +67,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | System details
+    |--------------------------------------------------------------------------
+    |
+    | Whether GET /api/system (the "Tietoja" page) shows the PHP, Laravel and
+    | database versions and the cache and queue drivers. On by default only in
+    | local development, so a public server doesn't advertise exact versions.
+    |
+    */
+
+    'show_system_details' => (bool) env('SHOW_SYSTEM_DETAILS', env('APP_ENV', 'production') === 'local'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |
