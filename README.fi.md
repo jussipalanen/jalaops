@@ -31,7 +31,7 @@ Käyttäjä voi:
 - viedä pyyntöjä CSV- (Excel) tai JSON-tiedostoon ja tuoda niitä takaisin Työkalut-sivulla
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
-- tarkastella yksinkertaista koontinäkymää
+- tarkastella koontinäkymää, jonka lukumäärät vievät vastaavaan listaan
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -126,7 +126,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | POST   | `/api/requests`      | Luo pyyntö                    |
 | PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
 | DELETE | `/api/requests/{id}` | Poista pyyntö                 |
-| GET    | `/api/dashboard`     | Pyyntöjen määrät tiloittain   |
+| GET    | `/api/dashboard`     | Pyyntöjen määrät: avoimet, työn alla, valmiit, myöhässä ja yhteensä |
 | GET    | `/api/dashboard/ai-overview` | AI-tilannekatsaus (kun käytössä) |
 | POST   | `/api/dashboard/ai-overview/refresh` | Luo uusi AI-tilannekatsaus |
 | GET    | `/api/geocode?q=…`   | Osoitteen koordinaatit (Nominatim) |

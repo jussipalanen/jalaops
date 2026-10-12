@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { apiGet } from '@/api/client'
 import AiStatusOverview from '@/components/AiStatusOverview.vue'
+import DashboardCounts from '@/components/DashboardCounts.vue'
 import { priorityLabels, statusLabels } from '@/labels'
 
 // 'loading' | 'ok' | 'error'
@@ -34,7 +35,7 @@ onMounted(async () => {
       ></div>
 
       <div class="relative p-6 sm:p-10">
-        <p class="mb-2 text-sm font-semibold tracking-wide text-primary-600 uppercase dark:text-primary-400">
+        <p class="mb-2 text-sm font-semibold tracking-wide text-primary-700 uppercase dark:text-primary-400">
           Huoltopyyntöjen hallinta
         </p>
         <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Tervetuloa JalaOpsiin</h1>
@@ -64,6 +65,8 @@ onMounted(async () => {
         </p>
       </div>
     </div>
+
+    <DashboardCounts />
 
     <AiStatusOverview />
 
