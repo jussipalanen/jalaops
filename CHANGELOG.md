@@ -6,6 +6,12 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-12
+
+### Added
+- A loading screen while the app starts (#55): the JalaOps logo, a spinner and "Ladataan JalaOpsia…". It's inline in `index.html`, so it appears before any JavaScript has loaded; it follows the light or dark theme, fades in only after a moment so fast loads don't flash it, keeps still when the user prefers reduced motion, and is replaced as soon as the app starts. Screen readers hear it as a status message.
+- A Finnish message for browsers with JavaScript turned off.
+
 ## [0.22.0] - 2026-10-12
 
 ### Added
@@ -258,7 +264,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/jussipalanen/jalaops/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/jussipalanen/jalaops/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/jussipalanen/jalaops/compare/v0.19.0...v0.20.0
