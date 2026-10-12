@@ -552,3 +552,56 @@ At that point, stop adding features and release:
 ```text
 v1.0.0
 ```
+
+---
+
+# Upcoming Features
+
+Planned after the features above. Each is developed through its own GitHub issues, like the phases.
+
+## Android App (Google Play Testing)
+
+Goal: JalaOps as an Android app that testers install from Google Play, built with **one command**.
+
+### Approach
+
+Wrap the existing web app in a **Trusted Web Activity (TWA)** with Google's [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) tool. A TWA is a real Android app that shows the web app full screen through Chrome, without the browser's address bar. It suits JalaOps because:
+
+- the app is already responsive and works on phones
+- it already has a web app manifest (`site.webmanifest`), app icons and a theme colour
+- the app and the web version stay the same code; publishing the web app updates the Android app too
+
+**Alternative: [Capacitor](https://capacitorjs.com/)** bundles the built web app inside a native Android project and gives access to native features (camera, files, push notifications). Choose it only if such features are needed; it means building and publishing a new app version for every change.
+
+### The Command
+
+```bash
+./dev android
+```
+
+- Runs Bubblewrap in a Docker container with Java and the Android SDK, so nothing has to be installed on the developer's machine.
+- Reads its settings from `android/twa-manifest.json` (app name, package id `com.jussialanen.jalaops`, start address, colours, icons; generated from `site.webmanifest`).
+- Produces `android/app-release-bundle.aab` (for Google Play) and `android/app-release-signed.apk` (to install directly on a test phone).
+- Signs both with an upload key. The key file and its passwords stay outside the repository (environment variables locally, GitHub secrets in CI).
+
+### Steps
+
+1. **Installable web app:** add a service worker with an offline page ("Ei verkkoyhteyttä"), so the app meets Chrome's installability rules. Check with Lighthouse.
+2. **Digital Asset Links:** serve `/.well-known/assetlinks.json` from the frontend with the SHA-256 fingerprints of both the upload key (for the downloadable `.apk`) and Google Play's app signing key (for the Play version), so Android trusts the app to open the site without the address bar.
+3. **Bubblewrap project:** `android/twa-manifest.json` and the `./dev android` command; document it in the READMEs.
+4. **Signing:** create the upload key (Play App Signing keeps the final key at Google); document how to store and back it up.
+5. **APK download for testing:** a GitHub Actions workflow builds the app for each release tag and attaches `jalaops.apk` (and the `.aab`) to the GitHub release. It can also be started by hand from the Actions tab, with the files downloadable from the run. To test on a phone: open the release page on the phone, download `jalaops.apk` and install it (Android asks once to allow installing apps from the browser). The READMEs get a short "Install on Android" guide.
+6. **Google Play testing:**
+   - Create a Google Play Console developer account (one-time registration fee, USD 25).
+   - Create the app, fill in the store listing, privacy policy, content rating and data safety form.
+   - Upload the `.aab` to the **Internal testing** track (up to 100 testers by email; available within minutes).
+   - Move to **Closed testing**. New personal developer accounts must run a closed test with at least 12 testers for 14 days before the app can be published to everyone.
+
+### Acceptance Criteria
+
+- `./dev android` builds a signed `.aab` and `.apk` on a clean machine with only Docker installed.
+- Each release on GitHub has a `jalaops.apk` that can be downloaded and installed directly on a phone.
+- The `.apk` installs on an Android phone and opens JalaOps full screen, without an address bar.
+- The app is available to testers through Google Play's internal testing track.
+- Updating the web app updates the Android app without a new release.
+
