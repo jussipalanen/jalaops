@@ -5,7 +5,7 @@ import L from 'leaflet'
 import { apiGet } from '@/api/client'
 import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
-import { formatAddress, hasLocation, priorityLabels, statusLabels } from '@/labels'
+import { formatAddress, hasLocation, isNew, NEW_REQUEST_DAYS, priorityLabels, statusLabels } from '@/labels'
 import { createMap, FINLAND_BOUNDS, requestPin, requestPopup, STREET_ZOOM } from '@/map'
 
 const route = useRoute()
@@ -19,6 +19,7 @@ const error = ref('')
 const panelOpen = ref(false)
 
 const located = computed(() => requests.value.filter(hasLocation))
+const newCount = computed(() => located.value.filter((request) => isNew(request)).length)
 const withoutLocation = computed(() => requests.value.length - located.value.length)
 
 const container = useTemplateRef('container')
@@ -129,7 +130,9 @@ onBeforeUnmount(() => destroy?.())
           <p class="font-bold">Pyynnöt kartalla</p>
           <p class="text-sm text-slate-500 dark:text-slate-400" aria-live="polite">
             <template v-if="loading">Ladataan…</template>
-            <template v-else>{{ located.length }} {{ located.length === 1 ? 'pyyntö' : 'pyyntöä' }}</template>
+            <template v-else>
+              {{ located.length }} {{ located.length === 1 ? 'pyyntö' : 'pyyntöä' }}<template v-if="newCount > 0">, {{ newCount }} {{ newCount === 1 ? 'uusi' : 'uutta' }}</template>
+            </template>
           </p>
         </div>
         <button
@@ -200,12 +203,20 @@ onBeforeUnmount(() => destroy?.())
                 {{ request.title }}
               </span>
               <span class="pl-4.5 text-sm text-slate-500 dark:text-slate-400">{{ formatAddress(request) }}</span>
-              <span class="pl-4.5">
+              <span class="flex flex-wrap gap-1.5 pl-4.5">
+                <span v-if="isNew(request)" class="badge badge-new">Uusi</span>
                 <span class="badge" :class="`status-${request.status}`">{{ statusLabels[request.status] }}</span>
               </span>
             </button>
           </li>
         </ul>
+
+        <p class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-slate-200 px-4 py-2.5 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400" aria-label="Merkkien selitys">
+          <span class="inline-flex items-center gap-1.5"><span class="map-dot-high size-2.5 rounded-full" aria-hidden="true"></span>Korkea</span>
+          <span class="inline-flex items-center gap-1.5"><span class="map-dot-normal size-2.5 rounded-full" aria-hidden="true"></span>Normaali</span>
+          <span class="inline-flex items-center gap-1.5"><span class="map-dot-low size-2.5 rounded-full" aria-hidden="true"></span>Matala</span>
+          <span class="inline-flex items-center gap-1.5"><span class="map-legend-new" aria-hidden="true"></span>Uusi ({{ NEW_REQUEST_DAYS }} pv)</span>
+        </p>
 
         <p
           v-if="!loading && withoutLocation > 0"

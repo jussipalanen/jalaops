@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
-import { formatAddress, formatDate, hasLocation, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
+import { formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
 
 const route = useRoute()
@@ -79,6 +79,7 @@ async function deleteRequest() {
         <div class="min-w-0">
           <h1 class="page-title break-words">{{ request.title }}</h1>
           <p class="mt-2 flex flex-wrap gap-2">
+            <span v-if="isNew(request)" class="badge badge-new">Uusi</span>
             <span class="badge" :class="`priority-${request.priority}`">{{ priorityLabels[request.priority] }}</span>
             <span class="badge" :class="`status-${request.status}`">{{ statusLabels[request.status] }}</span>
           </p>

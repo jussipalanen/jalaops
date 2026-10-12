@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
 import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
-import { duePeriodLabels, formatAddress, formatDate, hasLocation, priorityLabels, statusLabels } from '@/labels'
+import { duePeriodLabels, formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels } from '@/labels'
 
 const { filters, hasFilters, apiPath, setFilter, setSearch, clearFilters } = useRequestFilters()
 
@@ -177,6 +177,7 @@ watch(filters, loadRequests, { immediate: true, deep: true })
               <RouterLink :to="`/requests/${request.id}`" class="hover:text-primary-700 hover:underline dark:hover:text-primary-400">
                 {{ request.title }}
               </RouterLink>
+              <span v-if="isNew(request)" class="badge badge-new ml-2 align-middle">Uusi</span>
               <span v-if="formatAddress(request)" class="block text-sm font-normal text-slate-500 dark:text-slate-400">
                 {{ formatAddress(request) }}
               </span>

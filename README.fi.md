@@ -128,7 +128,7 @@ Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määr�
 
 ## Kartta ja sijainnit
 
-Pyynnöllä voi olla katuosoite, postinumero, kaupunki ja karttakoordinaatit. **Kartta**-sivu (`/map`) näyttää sijainnilliset pyynnöt koko näytön kartalla: merkit on väritetty prioriteetin mukaan, ja merkkiä napsauttamalla näkyy pyyntö ja linkki sen tietoihin. Pyyntölomake ehdottaa osoitteita kirjoitettaessa ja täyttää koordinaatit, ja merkin voi myös asettaa napsauttamalla karttaa. Ponnahdusikkunasta ja tietosivulta pääsee Google Street View'hun pyynnön sijainnissa (pelkkä linkki, ei API-avainta).
+Pyynnöllä voi olla katuosoite, postinumero, kaupunki ja karttakoordinaatit. **Kartta**-sivu (`/map`) näyttää sijainnilliset pyynnöt koko näytön kartalla: merkit on väritetty prioriteetin mukaan, uusien pyyntöjen (luotu 7 päivän sisällä eikä valmis) merkin ympärillä sykkii ympyrä, ja merkkiä napsauttamalla näkyy pyyntö ja linkki sen tietoihin. Pyyntölomake ehdottaa osoitteita kirjoitettaessa ja täyttää koordinaatit, ja merkin voi myös asettaa napsauttamalla karttaa. Ponnahdusikkunasta ja tietosivulta pääsee Google Street View'hun pyynnön sijainnissa (pelkkä linkki, ei API-avainta).
 
 Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://www.openstreetmap.org/copyright) aineistoon eivätkä vaadi API-avaimia:
 

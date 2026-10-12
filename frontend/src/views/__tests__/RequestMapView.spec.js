@@ -93,6 +93,23 @@ describe('RequestMapView', () => {
     expect(wrapper.text()).toContain('1 pyyntö ilman sijaintia.')
   })
 
+  it('marks new requests with a circle, a badge and a count', async () => {
+    const created_at = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    const fresh = { ...requests[0], created_at }
+    const old = { ...requests[1], status: 'open', created_at: '2026-01-01T00:00:00Z' }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: [fresh, old] })))
+
+    const { wrapper } = await mountView()
+
+    expect(created.markers[0].options.icon.className).toContain('map-pin-new')
+    expect(created.markers[1].options.icon.className).not.toContain('map-pin-new')
+    expect(wrapper.text()).toContain('2 pyyntöä, 1 uusi')
+    expect(wrapper.findAll('li')[0].find('.badge-new').text()).toBe('Uusi')
+    expect(wrapper.findAll('li')[1].find('.badge-new').exists()).toBe(false)
+    expect(created.markers[0].openPopup().popupElement.querySelector('.badge-new').textContent).toBe('Uusi')
+    expect(wrapper.find('[aria-label="Merkkien selitys"]').text()).toContain('Uusi (7 pv)')
+  })
+
   it('opens a popup with the description and a link to the details', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: requests })))
 

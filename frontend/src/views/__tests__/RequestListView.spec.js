@@ -264,4 +264,18 @@ describe('RequestListView', () => {
 
     expect(wrapper.find('[role="alert"]').text()).toBe('Kentän asti on oltava sama tai myöhempi päivä kuin alkaen.')
   })
+
+  it('shows a badge on new requests', async () => {
+    const created_at = new Date().toISOString()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(jsonResponse({ data: [{ ...requests[0], created_at }, { ...requests[1], created_at: '2026-01-01T00:00:00Z' }] })),
+    )
+
+    const { wrapper } = await mountView()
+
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows[0].find('.badge-new').text()).toBe('Uusi')
+    expect(rows[1].find('.badge-new').exists()).toBe(false)
+  })
 })

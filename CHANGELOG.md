@@ -6,6 +6,14 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-12
+
+### Added
+- New requests on the map (#39): requests created in the last 7 days that aren't completed get a pulsing violet circle around their pin (a still circle when the user prefers reduced motion) and an "Uusi" badge in the map popup, the map's request list, the request list and the details page. The map panel shows how many of its requests are new and has a legend for the pin colours and the circle.
+
+### Changed
+- The demo requests get creation dates spread over the past weeks, so five of them are new instead of all.
+
 ## [0.15.0] - 2026-10-12
 
 ### Added
@@ -192,7 +200,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/jussipalanen/jalaops/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/jussipalanen/jalaops/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/jussipalanen/jalaops/compare/v0.13.0...v0.14.0

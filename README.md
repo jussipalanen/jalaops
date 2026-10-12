@@ -128,7 +128,7 @@ Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/
 
 ## Map and locations
 
-A request can have a street address, postal code, city and map coordinates. The **Kartta** page (`/map`) shows the requests with a location on a full-screen map: pins are coloured by priority, and clicking one shows the request with a link to its details. The request form suggests addresses while typing and fills in the coordinates, and the pin can also be placed by clicking the map. The popup and the details page link to Google Street View at the request's location (a plain link, no API key).
+A request can have a street address, postal code, city and map coordinates. The **Kartta** page (`/map`) shows the requests with a location on a full-screen map: pins are coloured by priority, new requests (created in the last 7 days and not completed) have a pulsing circle, and clicking a pin shows the request with a link to its details. The request form suggests addresses while typing and fills in the coordinates, and the pin can also be placed by clicking the map. The popup and the details page link to Google Street View at the request's location (a plain link, no API key).
 
 Everything uses free services built on [OpenStreetMap](https://www.openstreetmap.org/copyright) data, with no API keys:
 
