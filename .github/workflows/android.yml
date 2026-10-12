@@ -39,6 +39,17 @@ jobs:
             exit 1
           fi
 
+      # Bubblewrap expects sdkmanager in <sdk>/bin (as its own installer lays it
+      # out) and its build-tools version; the runner has sdkmanager in
+      # cmdline-tools/latest/bin. Keep the versions in step with docker/android/Dockerfile.
+      - name: Prepare the Android SDK
+        run: |
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$sdkmanager" --licenses > /dev/null
+          "$sdkmanager" --install "platforms;android-36" "build-tools;36.1.0" > /dev/null
+          [ -e "$ANDROID_HOME/bin" ] || ln -s cmdline-tools/latest/bin "$ANDROID_HOME/bin"
+          [ -e "$ANDROID_HOME/lib" ] || ln -s cmdline-tools/latest/lib "$ANDROID_HOME/lib"
+
       # The runner image includes Java 17 and the Android SDK.
       - name: Build
         env:

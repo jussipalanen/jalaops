@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.24.1] - 2026-10-12
+
+### Fixed
+- The Android workflow failed on GitHub's runners with Bubblewrap's "The provided androidSdk isn't correct" (#59), so releases didn't get `jalaops.apk` automatically. The workflow now prepares the runner's Android SDK the way Bubblewrap expects, like the `./dev android` image does.
+
 ## [0.24.0] - 2026-10-12
 
 ### Added
@@ -274,7 +279,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.24.1...HEAD
+[0.24.1]: https://github.com/jussipalanen/jalaops/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/jussipalanen/jalaops/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/jussipalanen/jalaops/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/jussipalanen/jalaops/compare/v0.21.0...v0.22.0
