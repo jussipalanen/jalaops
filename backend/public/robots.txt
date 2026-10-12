@@ -1,2 +1,6 @@
+# JalaOps is a demo application. Crawling is allowed on purpose: every
+# response sends "X-Robots-Tag: noindex", which keeps the pages out of search
+# results. Blocking crawlers here would hide that header from them, and they
+# could still list the bare addresses.
 User-agent: *
 Disallow:

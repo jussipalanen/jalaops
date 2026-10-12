@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\NoIndex;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // A demo application: keep every page and API response out of search engines.
+        $middleware->append(NoIndex::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
