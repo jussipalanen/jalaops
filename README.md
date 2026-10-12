@@ -124,7 +124,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/geocode?q=…`   | Coordinates of an address (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Address suggestions while typing (Photon) |
 
-Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `/api/requests?due_from=2026-10-01&due_to=2026-10-31`, and the search `/api/requests?search=tampere` (title, street address, postal code or city).
+Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `/api/requests?due_from=2026-10-01&due_to=2026-10-31`, and the search `/api/requests?search=tampere` (title, street address, postal code or city). Sort with `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` for descending) and paginate with `per_page=10|25|50|100&page=2`; without `per_page` all matching requests are returned.
 
 ## Map and locations
 

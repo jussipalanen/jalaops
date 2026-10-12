@@ -13,10 +13,12 @@ return [
     'date_format' => 'Kentän :attribute on oltava muodossa :format.',
     'enum' => 'Kentän :attribute arvo on virheellinen.',
     'in' => 'Kentän :attribute arvo on virheellinen.',
+    'integer' => 'Kentän :attribute on oltava kokonaisluku.',
     'max' => [
         'string' => 'Kenttä :attribute saa olla enintään :max merkkiä pitkä.',
     ],
     'min' => [
+        'numeric' => 'Kentän :attribute on oltava vähintään :min.',
         'string' => 'Kentän :attribute on oltava vähintään :min merkkiä pitkä.',
     ],
     'numeric' => 'Kentän :attribute on oltava numero.',
@@ -41,5 +43,8 @@ return [
         'due' => 'määräpäivä',
         'due_from' => 'alkaen',
         'due_to' => 'asti',
+        'sort' => 'järjestys',
+        'per_page' => 'sivun koko',
+        'page' => 'sivu',
     ],
 ];

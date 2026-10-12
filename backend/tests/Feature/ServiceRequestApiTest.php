@@ -345,6 +345,55 @@ class ServiceRequestApiTest extends TestCase
             ->assertJsonPath('errors.due_to.0', 'Kentän asti on oltava sama tai myöhempi päivä kuin alkaen.');
     }
 
+    public function test_sorts_by_the_given_field(): void
+    {
+        ServiceRequest::factory()->create(['title' => 'B', 'priority' => 'low', 'status' => 'completed', 'due_date' => '2026-10-20', 'created_at' => '2026-10-01']);
+        ServiceRequest::factory()->create(['title' => 'C', 'priority' => 'high', 'status' => 'open', 'due_date' => null, 'created_at' => '2026-10-03']);
+        ServiceRequest::factory()->create(['title' => 'A', 'priority' => 'normal', 'status' => 'in_progress', 'due_date' => '2026-10-10', 'created_at' => '2026-10-02']);
+
+        $titles = fn (string $sort) => collect($this->getJson("/api/requests?sort={$sort}")->assertOk()->json('data'))->pluck('title')->implode('');
+
+        $this->assertSame('ABC', $titles('due_date'));
+        // Requests without a due date stay last when sorting by due date either way.
+        $this->assertSame('BAC', $titles('-due_date'));
+        $this->assertSame('ABC', $titles('title'));
+        $this->assertSame('CBA', $titles('-title'));
+        $this->assertSame('BAC', $titles('priority'));
+        $this->assertSame('CAB', $titles('-priority'));
+        $this->assertSame('CAB', $titles('status'));
+        $this->assertSame('CAB', $titles('-created_at'));
+    }
+
+    public function test_paginates_with_per_page(): void
+    {
+        foreach (range(1, 12) as $day) {
+            ServiceRequest::factory()->create(['title' => "Pyyntö {$day}", 'due_date' => sprintf('2026-10-%02d', $day)]);
+        }
+
+        $this->getJson('/api/requests?per_page=10&page=2&status=')
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.title', 'Pyyntö 11')
+            ->assertJsonPath('meta.current_page', 2)
+            ->assertJsonPath('meta.last_page', 2)
+            ->assertJsonPath('meta.per_page', 10)
+            ->assertJsonPath('meta.total', 12)
+            ->assertJsonPath('meta.from', 11)
+            ->assertJsonPath('meta.to', 12);
+
+        // Without per_page everything comes back, as the map needs.
+        $this->getJson('/api/requests')->assertOk()->assertJsonCount(12, 'data')->assertJsonMissingPath('meta');
+    }
+
+    public function test_rejects_invalid_sort_and_page_values(): void
+    {
+        $this->getJson('/api/requests?sort=description&per_page=7&page=0')
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.sort.0', 'Kentän järjestys arvo on virheellinen.')
+            ->assertJsonPath('errors.per_page.0', 'Kentän sivun koko arvo on virheellinen.')
+            ->assertJsonPath('errors.page.0', 'Kentän sivu on oltava vähintään 1.');
+    }
+
     public function test_rejects_invalid_filter_values(): void
     {
         $this->getJson('/api/requests?status=done&priority=urgent')

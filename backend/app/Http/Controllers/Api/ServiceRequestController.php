@@ -20,9 +20,12 @@ class ServiceRequestController extends Controller
     /**
      * List requests.
      *
-     * Sorted by due date, soonest first. Requests without a due date come last.
      * Filter by status, priority and due date, and search by title, street
      * address, postal code or city (`?search=tampere`), with the query parameters.
+     * Sort with `sort` (default: due date, soonest first; requests without a due
+     * date come last). With `per_page` the
+     * result is paginated and has `links` and `meta`; without it, all matching
+     * requests are returned.
      */
     public function index(ListServiceRequestsRequest $request): AnonymousResourceCollection
     {
@@ -39,12 +42,13 @@ class ServiceRequestController extends Controller
             ->when($search !== '', fn ($query) => $query->matching($search))
             ->when($due, fn ($query) => $query->dueIn($due))
             ->when($dueFrom || $dueTo, fn ($query) => $query->dueBetween($dueFrom, $dueTo))
-            ->orderByRaw('due_date IS NULL')
-            ->orderBy('due_date')
-            ->orderBy('id')
-            ->get();
+            ->sortedBy($request->validated('sort') ?? 'due_date');
 
-        return ServiceRequestResource::collection($requests);
+        $perPage = $request->validated('per_page');
+
+        return ServiceRequestResource::collection(
+            $perPage ? $requests->paginate((int) $perPage)->withQueryString() : $requests->get()
+        );
     }
 
     /**
