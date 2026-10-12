@@ -13,7 +13,7 @@
 
 [English](README.md) | **Suomi**
 
-[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Kartta](#kartta-ja-sijainnit) · [Julkaisu](#julkaisu) · [Tiekartta](#tiekartta)
+[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Kartta](#kartta-ja-sijainnit) · [Android](#android-sovellus) · [Julkaisu](#julkaisu) · [Tiekartta](#tiekartta)
 
 > **Tila:** kehitys on alkuvaiheessa. Katso [tiekartta](ROADMAP.md) ja [issuet](https://github.com/jussipalanen/jalaops/issues).
 
@@ -185,6 +185,32 @@ Samat tarkistukset paikallisesti:
 cd backend && vendor/bin/pint --test && php artisan test && composer audit
 cd frontend && npm run lint:check && npm test && npm run build && npm audit --audit-level=high
 ```
+
+## Android-sovellus
+
+JalaOps on myös Android-sovellus: [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity), joka avaa verkkosovelluksen koko näytölle ilman selaimen osoiteriviä. Verkkosovelluksen päivitys päivittää myös Android-sovelluksen.
+
+### Asennus Android-puhelimeen
+
+1. Avaa puhelimella [uusin julkaisu](https://github.com/jussipalanen/jalaops/releases/latest) ja lataa **jalaops.apk**.
+2. Avaa ladattu tiedosto. Ensimmäisellä kerralla Android pyytää sallimaan sovellusten asentamisen selaimesta; salli se ja palaa takaisin.
+3. Valitse **Asenna** ja avaa JalaOps aloitusnäytöltä. Kuvaketta pitkään painamalla saat pikalinkit uuteen pyyntöön, listaan ja karttaan.
+
+Puhelimessa tarvitaan Chrome (tai muu Trusted Web Activityä tukeva selain). Päivitys: asenna uudempi `jalaops.apk` vanhan päälle.
+
+### Sovelluksen rakentaminen
+
+```bash
+./dev android
+```
+
+Komento rakentaa Dockerissa tiedostot `android/dist/jalaops.apk` (asennus puhelimeen) ja `android/dist/jalaops.aab` (Google Playhin), joten vain Docker tarvitaan. Se käyttää [Bubblewrapia](https://github.com/GoogleChromeLabs/bubblewrap) ja tiedoston [`android/twa-manifest.json`](android/twa-manifest.json) asetuksia; sovelluksen versio seuraa frontendin versiota (0.24.0 → versiokoodi 2400). Ensimmäinen rakennus lataa Javan, Android SDK:n ja Gradlen (noin 2 Gt) ja kestää useita minuutteja; myöhemmin noin minuutin.
+
+**Allekirjoitusavain:** ensimmäinen rakennus luo latausavaimen kansioon `~/.jalaops/android` (repositorion ulkopuolelle). Varmuuskopioi kansio: Google Play hyväksyy päivitykset vain samalla avaimella allekirjoitettuina. Avaimen SHA-256-sormenjälki on tiedostossa [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); ilman sitä sovellus avautuu osoiterivin kanssa. Eri avaimen (esimerkiksi toisella koneella) sormenjälki pitää lisätä sinne.
+
+**Julkaisut:** [Android-työnkulku](.github/workflows/android.yml) liittää `jalaops.apk`- ja `jalaops.aab`-tiedostot jokaiseen GitHub-julkaisuun, ja sen voi käynnistää myös käsin Actions-välilehdeltä. Avain tallennetaan kerran GitHubin salaisuuksiin komennolla `./dev android-secrets` (käyttää `gh`-työkalua).
+
+**Google Play:** lataa `jalaops.aab` sisäiseen testaukseen [Play Consolessa](https://play.google.com/console). Suunnitelma on tiedostossa [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
 
 ## Julkaisu
 

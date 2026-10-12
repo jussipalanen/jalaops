@@ -33,6 +33,10 @@ Backend (Laravel):
 Frontend (Vue):
   npm <args>         Run npm in the frontend container
 
+Android app:
+  android            Build android/dist/jalaops.apk and jalaops.aab (needs only Docker)
+  android-secrets    Store the upload key in GitHub secrets for the release workflow
+
 Tests:
   test               Run the backend and frontend tests
   test:backend       Run the backend tests
@@ -62,6 +66,27 @@ case "$command" in
     shell)         $COMPOSE exec backend bash ;;
     db)            $COMPOSE exec db mariadb -u jalaops -psecret jalaops ;;
     npm)           $COMPOSE exec frontend npm "$@" ;;
+    android)
+        # Builds in the jalaops-android image (Node, Java 17, Android SDK, Bubblewrap).
+        # The upload key stays outside the repository, in ~/.jalaops/android.
+        keys="${JALAOPS_ANDROID_KEYS:-$HOME/.jalaops/android}"
+        cache="${XDG_CACHE_HOME:-$HOME/.cache}/jalaops-android"
+        mkdir -p "$keys" "$cache"
+        docker build -q -t jalaops-android docker/android > /dev/null
+        docker run --rm -u "$(id -u):$(id -g)" -e HOME=/home/builder -e GRADLE_USER_HOME=/home/builder/.gradle \
+            -v "$PWD:/work" -v "$keys:/keys" -v "$cache:/home/builder" -w /work \
+            jalaops-android scripts/android/docker-build.sh
+        ;;
+    android-secrets)
+        # Uploads the key and its passwords to the repository's GitHub secrets
+        # (with the gh CLI), so the Android workflow can sign release builds.
+        keys="${JALAOPS_ANDROID_KEYS:-$HOME/.jalaops/android}"
+        [ -f "$keys/upload.jks" ] || { echo "No key in $keys; run ./dev android first."; exit 1; }
+        base64 -w0 "$keys/upload.jks" | gh secret set ANDROID_KEYSTORE_BASE64
+        sed -n 's/^ANDROID_KEYSTORE_PASSWORD=//p' "$keys/signing.env" | gh secret set ANDROID_KEYSTORE_PASSWORD
+        sed -n 's/^ANDROID_KEY_PASSWORD=//p' "$keys/signing.env" | gh secret set ANDROID_KEY_PASSWORD
+        echo "Stored ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_PASSWORD in GitHub secrets."
+        ;;
     test)
         $COMPOSE exec backend php artisan test
         $COMPOSE exec frontend npm run test

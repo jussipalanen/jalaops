@@ -1,0 +1,61 @@
+{
+  "packageId": "com.jussialanen.jalaops",
+  "host": "jalaops-demo.jussialanen.com",
+  "name": "JalaOps – huoltopyyntöjen hallinta",
+  "launcherName": "JalaOps",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#0284c7",
+  "themeColorDark": "#020617",
+  "navigationColor": "#f8fafc",
+  "navigationColorDark": "#020617",
+  "navigationDividerColor": "#e2e8f0",
+  "navigationDividerColorDark": "#1e293b",
+  "backgroundColor": "#f8fafc",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://jalaops-demo.jussialanen.com/icon-512.png",
+  "maskableIconUrl": "https://jalaops-demo.jussialanen.com/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./upload.jks",
+    "alias": "jalaops"
+  },
+  "appVersion": "0.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Uusi pyyntö",
+      "shortName": "Uusi pyyntö",
+      "url": "/requests/new",
+      "chosenIconUrl": "https://jalaops-demo.jussialanen.com/icon-192.png"
+    },
+    {
+      "name": "Pyynnöt",
+      "shortName": "Pyynnöt",
+      "url": "/requests",
+      "chosenIconUrl": "https://jalaops-demo.jussialanen.com/icon-192.png"
+    },
+    {
+      "name": "Kartta",
+      "shortName": "Kartta",
+      "url": "/map",
+      "chosenIconUrl": "https://jalaops-demo.jussialanen.com/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://jalaops-demo.jussialanen.com/site.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://jalaops-demo.jussialanen.com/",
+  "minSdkVersion": 24,
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}

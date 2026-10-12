@@ -563,6 +563,8 @@ Planned after the features above. Each is developed through its own GitHub issue
 
 Goal: JalaOps as an Android app that testers install from Google Play, built with **one command**.
 
+**Status:** steps 1–5 are done (version 0.24.0): `./dev android` builds the app, and each GitHub release gets a `jalaops.apk`. Step 6, Google Play, is next.
+
 ### Approach
 
 Wrap the existing web app in a **Trusted Web Activity (TWA)** with Google's [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) tool. A TWA is a real Android app that shows the web app full screen through Chrome, without the browser's address bar. It suits JalaOps because:

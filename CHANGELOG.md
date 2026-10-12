@@ -6,6 +6,16 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-10-12
+
+### Added
+- Android app (#57): a Trusted Web Activity that opens JalaOps full screen without the browser's address bar, with shortcuts to a new request, the list and the map. `./dev android` builds `android/dist/jalaops.apk` (install on a phone) and `jalaops.aab` (Google Play) in Docker with Bubblewrap, so only Docker is needed; the app's version follows the frontend's. The first build creates an upload key in `~/.jalaops/android`, outside the repository.
+- The [Android workflow](.github/workflows/android.yml) attaches `jalaops.apk` and `jalaops.aab` to every GitHub release and can be started by hand. `./dev android-secrets` stores the upload key in GitHub secrets for it.
+- `/.well-known/assetlinks.json`, which lets the Android app open the site without an address bar.
+- A service worker and an offline page ("Ei verkkoyhteyttä") when a page can't load without a connection. API calls, scripts and map tiles still always use the network.
+- A maskable app icon and shortcuts in the web app manifest.
+- "Install on Android" and "Build the app" sections in the READMEs.
+
 ## [0.23.0] - 2026-10-12
 
 ### Added
@@ -264,7 +274,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.23.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/jussipalanen/jalaops/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/jussipalanen/jalaops/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/jussipalanen/jalaops/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...v0.21.0

@@ -13,7 +13,7 @@
 
 **English** | [Suomi](README.fi.md)
 
-[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Map](#map-and-locations) · [Deployment](#deployment) · [Roadmap](#roadmap)
+[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Map](#map-and-locations) · [Android](#android-app) · [Deployment](#deployment) · [Roadmap](#roadmap)
 
 > **Status:** in early development. See the [roadmap](ROADMAP.md) and [issues](https://github.com/jussipalanen/jalaops/issues).
 
@@ -185,6 +185,32 @@ Run the same checks locally:
 cd backend && vendor/bin/pint --test && php artisan test && composer audit
 cd frontend && npm run lint:check && npm test && npm run build && npm audit --audit-level=high
 ```
+
+## Android app
+
+JalaOps is also an Android app: a [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity) that opens the live web app full screen, without the browser's address bar. Updating the web app updates the Android app too.
+
+### Install on Android
+
+1. Open the [latest release](https://github.com/jussipalanen/jalaops/releases/latest) on your phone and download **jalaops.apk**.
+2. Open the downloaded file. The first time, Android asks you to allow your browser to install apps; allow it and return.
+3. Choose **Install** and open JalaOps from the home screen. Long-press the icon for shortcuts to a new request, the list and the map.
+
+The app needs Chrome (or another browser that supports Trusted Web Activities) on the phone. Updates: install the newer `jalaops.apk` over the old one.
+
+### Build the app
+
+```bash
+./dev android
+```
+
+This builds `android/dist/jalaops.apk` (install on a phone) and `android/dist/jalaops.aab` (upload to Google Play) in Docker, so only Docker is needed. It uses [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) with the settings in [`android/twa-manifest.json`](android/twa-manifest.json); the app's version follows the frontend's (0.24.0 → version code 2400). The first build downloads Java, the Android SDK and Gradle (about 2 GB) and takes several minutes; later builds take about a minute.
+
+**Signing key:** the first build creates an upload key in `~/.jalaops/android` (outside the repository). Back that folder up: Google Play only accepts updates signed with the same key. The key's SHA-256 fingerprint is listed in [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); without it the app opens with an address bar. A different key (for example on another machine) needs its fingerprint added there.
+
+**Release builds:** the [Android workflow](.github/workflows/android.yml) attaches `jalaops.apk` and `jalaops.aab` to every GitHub release, and can be started by hand from the Actions tab. It needs the key in GitHub secrets once: run `./dev android-secrets` (uses the `gh` CLI).
+
+**Google Play:** upload `jalaops.aab` to the internal testing track in the [Play Console](https://play.google.com/console). See the plan in [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
 
 ## Deployment
 
