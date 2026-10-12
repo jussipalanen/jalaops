@@ -58,6 +58,9 @@ const fullScreen = computed(() => Boolean(route.meta.fullScreen))
         huoltopyyntöjen hallintaan. Sovelluksen tiedot ovat esimerkkidataa.
       </p>
       <nav class="flex flex-wrap items-center gap-x-4 gap-y-1" aria-label="Alatunniste">
+        <RouterLink to="/about" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
+          Tietoja
+        </RouterLink>
         <a
           :href="apiDocsUrl"
           class="font-semibold text-primary-700 hover:underline dark:text-primary-400"

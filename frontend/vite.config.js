@@ -9,6 +9,10 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
+  // index.html uses %VITE_SITE_URL% for absolute link preview URLs; without a
+  // setting (local development, tests) it points to the dev server.
+  process.env.VITE_SITE_URL = (env.VITE_SITE_URL || 'http://localhost:5173').replace(/\/$/, '')
+
   return {
     plugins: [vue(), tailwindcss()],
     resolve: {

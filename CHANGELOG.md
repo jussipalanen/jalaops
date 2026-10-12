@@ -6,6 +6,48 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-12
+
+### Added
+- Sign-off when a request is completed (#47): with the status "Valmis", the form shows a "Kuittaus" section with the signer's name and a pad for drawing a signature with a finger, pen or mouse ("Tyhjennä" clears it). Both are optional, but a signature needs a name. The details page shows the signature, the signer and the time.
+- The signature is stored as a PNG with the signer's name and time (`signed_by`, `signed_at`, `has_signature` in the API). The image is at `GET /api/requests/{id}/signature`, so request lists stay small. Saving without a new drawing keeps the signature, `completion_signature: null` removes it, and changing the status away from completed removes the sign-off. Only real PNG images are accepted.
+
+## [0.19.0] - 2026-10-12
+
+### Added
+- "Tietoja sovelluksesta" page at `/about`, linked from the footer (#45): the frontend and API versions, environment, demo mode, time zone and server time, and a health check of the API, the database (with its response time) and the cache. With `SHOW_SYSTEM_DETAILS=true` it also shows the PHP, Laravel, database and Vue versions and the cache and queue drivers; the setting defaults to true only when `APP_ENV=local`, so the public demo doesn't show exact versions.
+- `GET /api/system` with the same details.
+- `SHOW_SYSTEM_DETAILS` in `backend/.env.example` and `docs/DEPLOYMENT.md`.
+
+## [0.18.0] - 2026-10-12
+
+### Added
+- Sorting on the request list (#43): click a column header (title, priority, status, due date) to sort, and again to reverse it. Priority sorts high first on the first click. On phones a "Järjestys" select offers the same orders and "Uusimmat ensin"/"Vanhimmat ensin".
+- Pagination on the request list: 10, 25, 50 or 100 requests per page (default 10), previous and next buttons and "Näytetään 1–10 / 15". Sort, page and page size are kept in the address; changing a filter goes back to the first page and keeps the sort.
+- `GET /api/requests?sort=…&per_page=…&page=…`. `sort` takes `due_date`, `title`, `priority`, `status` or `created_at`, with `-` in front for descending; priority and status sort in their logical order. With `per_page` the response is paginated and has `links` and `meta`; without it, all matching requests are returned, as before.
+
+### Changed
+- Deleting a request on the list reloads the page, so it fills up from the next page.
+
+## [0.17.0] - 2026-10-12
+
+### Added
+- Link preview and page metadata in the HTML source (`index.html`, #41): a Finnish title and description, application name, author and keywords, canonical address, Open Graph tags (title, description, locale, address and a 1200×627 preview image) and X (Twitter) card tags, so shared links show a card in Slack, Teams, LinkedIn, WhatsApp and similar services. Also structured data (schema.org `WebApplication`), a web app manifest with app icons, an Apple touch icon, `color-scheme` and `format-detection`.
+- Each page has its own browser tab title, e.g. "Kartta – JalaOps"; the details page uses the request's title.
+- A meta description on the backend home page.
+- `VITE_SITE_URL` setting for the frontend's public address, used in the absolute preview URLs (set in `.env.production`).
+
+### Changed
+- The app stays out of search results: `noindex` is unchanged; the new tags only make shared links look better.
+
+## [0.16.0] - 2026-10-12
+
+### Added
+- New requests on the map (#39): requests created in the last 7 days that aren't completed get a pulsing violet circle around their pin (a still circle when the user prefers reduced motion) and an "Uusi" badge in the map popup, the map's request list, the request list and the details page. The map panel shows how many of its requests are new and has a legend for the pin colours and the circle.
+
+### Changed
+- The demo requests get creation dates spread over the past weeks, so five of them are new instead of all.
+
 ## [0.15.0] - 2026-10-12
 
 ### Added
@@ -192,7 +234,12 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/jussipalanen/jalaops/compare/v0.19.0...v0.20.0
+[0.19.0]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...v0.19.0
+[0.18.0]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...v0.18.0
+[0.17.0]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...v0.17.0
+[0.16.0]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/jussipalanen/jalaops/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/jussipalanen/jalaops/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/jussipalanen/jalaops/compare/v0.13.0...v0.14.0

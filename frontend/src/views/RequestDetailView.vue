@@ -3,8 +3,9 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
-import { formatAddress, formatDate, hasLocation, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
+import { formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
+import { pageTitle } from '@/pageTitle'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,6 +37,7 @@ onMounted(async () => {
   try {
     const response = await apiGet(`/requests/${route.params.id}`)
     request.value = response.data
+    document.title = pageTitle(request.value.title)
   } catch (e) {
     if (e.status === 404) {
       notFound.value = true
@@ -79,6 +81,7 @@ async function deleteRequest() {
         <div class="min-w-0">
           <h1 class="page-title break-words">{{ request.title }}</h1>
           <p class="mt-2 flex flex-wrap gap-2">
+            <span v-if="isNew(request)" class="badge badge-new">Uusi</span>
             <span class="badge" :class="`priority-${request.priority}`">{{ priorityLabels[request.priority] }}</span>
             <span class="badge" :class="`status-${request.status}`">{{ statusLabels[request.status] }}</span>
           </p>
@@ -105,6 +108,19 @@ async function deleteRequest() {
             <dd class="mt-1">{{ address || '–' }}</dd>
           </div>
         </dl>
+
+        <div v-if="request.signed_by || request.has_signature">
+          <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Kuittaus</h2>
+          <img
+            v-if="request.has_signature"
+            :src="`/api/requests/${request.id}/signature?v=${encodeURIComponent(request.signed_at ?? '')}`"
+            :alt="`Allekirjoitus: ${request.signed_by ?? 'kuittaaja'}`"
+            class="mt-2 block aspect-[3/1] w-full max-w-md rounded-lg border border-slate-200 bg-white object-contain dark:border-slate-700"
+          />
+          <p class="mt-2">
+            Kuitannut <strong>{{ request.signed_by ?? '–' }}</strong><template v-if="request.signed_at">, {{ new Date(request.signed_at).toLocaleString('fi-FI') }}</template>
+          </p>
+        </div>
 
         <div v-if="hasLocation(request)">
           <div

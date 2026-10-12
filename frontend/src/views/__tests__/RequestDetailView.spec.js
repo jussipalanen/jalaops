@@ -44,6 +44,7 @@ describe('RequestDetailView', () => {
     const wrapper = await mountView(request)
 
     expect(wrapper.find('h1').text()).toBe('Vaihda ilmansuodatin')
+    expect(document.title).toBe('Vaihda ilmansuodatin – JalaOps')
     expect(wrapper.text()).toContain('Korkea')
     expect(wrapper.text()).toContain('Avoin')
     expect(wrapper.text()).toContain('Vaihda varaston ilmanvaihtokoneen ilmansuodatin.')
@@ -62,6 +63,21 @@ describe('RequestDetailView', () => {
       'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=60.2891,25.0371',
     )
     expect(streetView.attributes('rel')).toBe('noopener')
+  })
+
+  it('shows the sign-off of a completed request', async () => {
+    const wrapper = await mountView({
+      ...request,
+      status: 'completed',
+      has_signature: true,
+      signed_by: 'Maija Huoltaja',
+      signed_at: '2026-10-12T12:30:00.000000Z',
+    })
+
+    const signature = wrapper.find('img')
+    expect(signature.attributes('src')).toBe(`/api/requests/1/signature?v=${encodeURIComponent('2026-10-12T12:30:00.000000Z')}`)
+    expect(signature.attributes('alt')).toBe('Allekirjoitus: Maija Huoltaja')
+    expect(wrapper.text()).toMatch(/Kuitannut Maija Huoltaja, \d+\.\d+\.2026/)
   })
 
   it('has no map for a request without a location', async () => {

@@ -12,6 +12,11 @@ use Illuminate\Validation\Rule;
  */
 class ListServiceRequestsRequest extends FormRequest
 {
+    public const SORTS = [
+        'due_date', '-due_date', 'title', '-title', 'priority', '-priority',
+        'status', '-status', 'created_at', '-created_at',
+    ];
+
     /**
      * @return array<string, mixed>
      */
@@ -33,6 +38,15 @@ class ListServiceRequestsRequest extends FormRequest
             'due_from' => ['nullable', 'date_format:Y-m-d'],
             /** Only requests due on or before this date (YYYY-MM-DD). */
             'due_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:due_from'],
+            /**
+             * Sort order: `due_date` (the default), `title`, `priority`, `status` or `created_at`,
+             * with `-` in front for descending, e.g. `-priority` (high first).
+             */
+            'sort' => ['nullable', Rule::in(self::SORTS)],
+            /** Paginate with this many requests per page. Without it, all matching requests are returned. */
+            'per_page' => ['nullable', 'integer', Rule::in([10, 25, 50, 100])],
+            /** Page number, with `per_page`. */
+            'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

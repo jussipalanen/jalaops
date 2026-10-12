@@ -133,6 +133,11 @@
     @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300;
   }
 
+  /* A request created in the last 7 days that isn't completed. */
+  .badge-new {
+    @apply bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300;
+  }
+
   /* Form controls */
   .form-control {
     @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 transition-[border-color,box-shadow] focus:border-primary-500 focus:ring-3 focus:ring-primary-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100;
@@ -166,6 +171,23 @@
 
   .cell-title {
     @apply font-semibold;
+  }
+
+  /* Sortable column headers. */
+  .sort-button {
+    @apply inline-flex cursor-pointer items-center gap-1 uppercase hover:text-slate-900 dark:hover:text-white;
+  }
+
+  .sort-icon {
+    @apply text-[0.625rem] opacity-0;
+  }
+
+  .sort-button:hover .sort-icon {
+    @apply opacity-40;
+  }
+
+  .request-table th[aria-sort] {
+    @apply text-primary-700 dark:text-primary-300;
   }
 
   @media (width < 40rem) {
@@ -268,6 +290,49 @@
 
 .map-pin-completed {
   @apply opacity-60;
+}
+
+/* New requests: a violet circle that pulses outwards behind the pin
+   (a still circle when the user prefers reduced motion). */
+.map-pin-new::before,
+.map-legend-new::before {
+  @apply absolute rounded-full border-3 border-violet-500 content-[''];
+}
+
+.map-pin-new::before {
+  /* A 44px circle centred on the pin's round head (the pin is 30px, its head centre ~12px from the top). */
+  top: -10px;
+  left: -7px;
+  width: 44px;
+  height: 44px;
+  animation: map-pin-pulse 1.8s ease-out infinite;
+}
+
+@keyframes map-pin-pulse {
+  from {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-pin-new::before {
+    animation: none;
+    opacity: 0.8;
+  }
+}
+
+.map-legend-new {
+  @apply relative inline-block size-3;
+}
+
+.map-legend-new::before {
+  @apply -inset-0.5 border-2;
 }
 
 .map-pin:focus-visible {

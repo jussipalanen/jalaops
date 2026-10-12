@@ -26,7 +26,7 @@ JalaOps is a small operations management demo application for handling service r
 A user can:
 
 - view, create, edit and delete requests
-- change a request's status
+- change a request's status, and sign off a completed request with a name and a drawn signature
 - filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
 - view a simple dashboard
@@ -113,8 +113,10 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
 | GET    | `/api/health`        | API and database health     |
+| GET    | `/api/system`        | App details and health for the "Tietoja" page (server versions only with `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | List requests               |
 | GET    | `/api/requests/{id}` | Get a single request        |
+| GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
 | POST   | `/api/requests`      | Create a request            |
 | PUT    | `/api/requests/{id}` | Update a request            |
 | DELETE | `/api/requests/{id}` | Delete a request            |
@@ -124,11 +126,11 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/geocode?q=…`   | Coordinates of an address (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Address suggestions while typing (Photon) |
 
-Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `/api/requests?due_from=2026-10-01&due_to=2026-10-31`, and the search `/api/requests?search=tampere` (title, street address, postal code or city).
+Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `/api/requests?due_from=2026-10-01&due_to=2026-10-31`, and the search `/api/requests?search=tampere` (title, street address, postal code or city). Sort with `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` for descending) and paginate with `per_page=10|25|50|100&page=2`; without `per_page` all matching requests are returned.
 
 ## Map and locations
 
-A request can have a street address, postal code, city and map coordinates. The **Kartta** page (`/map`) shows the requests with a location on a full-screen map: pins are coloured by priority, and clicking one shows the request with a link to its details. The request form suggests addresses while typing and fills in the coordinates, and the pin can also be placed by clicking the map. The popup and the details page link to Google Street View at the request's location (a plain link, no API key).
+A request can have a street address, postal code, city and map coordinates. The **Kartta** page (`/map`) shows the requests with a location on a full-screen map: pins are coloured by priority, new requests (created in the last 7 days and not completed) have a pulsing circle, and clicking a pin shows the request with a link to its details. The request form suggests addresses while typing and fills in the coordinates, and the pin can also be placed by clicking the map. The popup and the details page link to Google Street View at the request's location (a plain link, no API key).
 
 Everything uses free services built on [OpenStreetMap](https://www.openstreetmap.org/copyright) data, with no API keys:
 
@@ -182,7 +184,7 @@ cd frontend && npm run lint:check && npm test && npm run build && npm audit --au
 
 The app can be hosted for free with the frontend on Vercel and the backend on Render. By default the hosted backend runs on demo data that resets on every restart (`DEMO_MODE=true`), so no database service is needed. Set `DEMO_MODE=false` and the `DB_*` variables to use a real database.
 
-Both services ask search engines not to index them (`X-Robots-Tag: noindex` and a `noindex` meta tag), because the app is a demo.
+Both services ask search engines not to index them (`X-Robots-Tag: noindex` and a `noindex` meta tag), because the app is a demo. `index.html` still has a description, Open Graph and X card tags, so shared links show a preview card; set the frontend's public address in `VITE_SITE_URL` (`frontend/.env.production`).
 
 Step-by-step guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

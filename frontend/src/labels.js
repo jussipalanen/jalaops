@@ -48,3 +48,14 @@ export function hasLocation(request) {
 export function streetViewUrl(request) {
   return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${request.latitude},${request.longitude}`
 }
+
+// A request is new for 7 days after it was created, until it's completed.
+export const NEW_REQUEST_DAYS = 7
+
+export function isNew(request, now = Date.now()) {
+  if (!request.created_at || request.status === 'completed') {
+    return false
+  }
+
+  return now - new Date(request.created_at).getTime() < NEW_REQUEST_DAYS * 24 * 60 * 60 * 1000
+}

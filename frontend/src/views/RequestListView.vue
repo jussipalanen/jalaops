@@ -1,24 +1,101 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
 import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
-import { duePeriodLabels, formatAddress, formatDate, hasLocation, priorityLabels, statusLabels } from '@/labels'
+import { duePeriodLabels, formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels } from '@/labels'
 
+const route = useRoute()
+const router = useRouter()
 const { filters, hasFilters, apiPath, setFilter, setSearch, clearFilters } = useRequestFilters()
 
 const requests = ref([])
+// Pagination details from the API: current_page, last_page, from, to, total.
+const meta = ref(null)
 const loading = ref(true)
 const error = ref('')
+
+// Sort order, page and page size live in the URL like the filters
+// (?sort=-priority&page=2&per_page=25); defaults are left out of it.
+const PAGE_SIZES = [10, 25, 50, 100]
+const DEFAULT_PAGE_SIZE = 10
+const DEFAULT_SORT = 'due_date'
+
+const sortOptions = {
+  due_date: 'Määräpäivä, aikaisin ensin',
+  '-due_date': 'Määräpäivä, myöhäisin ensin',
+  '-priority': 'Prioriteetti, korkein ensin',
+  priority: 'Prioriteetti, matalin ensin',
+  status: 'Tila, avoimet ensin',
+  '-status': 'Tila, valmiit ensin',
+  title: 'Otsikko, A–Ö',
+  '-title': 'Otsikko, Ö–A',
+  '-created_at': 'Uusimmat ensin',
+  created_at: 'Vanhimmat ensin',
+}
+
+// The first click on a column sorts the useful way round: high priority and
+// the newest first, the rest ascending. Another click reverses it.
+const FIRST_DIRECTION = { priority: '-priority', created_at: '-created_at' }
+
+const sort = computed(() => (route.query.sort in sortOptions ? route.query.sort : DEFAULT_SORT))
+const perPage = computed(() =>
+  PAGE_SIZES.includes(Number(route.query.per_page)) ? Number(route.query.per_page) : DEFAULT_PAGE_SIZE,
+)
+const page = computed(() => Math.max(1, Number.parseInt(route.query.page, 10) || 1))
+const total = computed(() => meta.value?.total ?? requests.value.length)
+
+const listPath = computed(() => {
+  const options = new URLSearchParams({
+    ...(sort.value !== DEFAULT_SORT && { sort: sort.value }),
+    per_page: perPage.value,
+    ...(page.value > 1 && { page: page.value }),
+  })
+
+  return `${apiPath.value}${apiPath.value.includes('?') ? '&' : '?'}${options}`
+})
+
+function updateQuery(changes) {
+  const query = { ...route.query, ...changes }
+
+  if (query.sort === DEFAULT_SORT) delete query.sort
+  if (Number(query.per_page) === DEFAULT_PAGE_SIZE) delete query.per_page
+  if (Number(query.page) <= 1) delete query.page
+
+  router.replace({ query })
+}
+
+function setSort(value) {
+  updateQuery({ sort: value, page: 1 })
+}
+
+function toggleSort(field) {
+  const next = sort.value === field ? `-${field}` : sort.value === `-${field}` ? field : (FIRST_DIRECTION[field] ?? field)
+  setSort(next)
+}
+
+function ariaSort(field) {
+  return sort.value === field ? 'ascending' : sort.value === `-${field}` ? 'descending' : undefined
+}
+
+function goToPage(number) {
+  updateQuery({ page: number })
+}
 
 async function loadRequests() {
   loading.value = true
   error.value = ''
 
   try {
-    const response = await apiGet(apiPath.value)
+    const response = await apiGet(listPath.value)
     requests.value = response.data
+    meta.value = response.meta ?? null
+
+    // A page past the end (e.g. after deleting its last request) shows the last page instead.
+    if (meta.value && requests.value.length === 0 && meta.value.total > 0 && page.value > meta.value.last_page) {
+      goToPage(meta.value.last_page)
+    }
   } catch (e) {
     // An invalid filter typed into the address gets the API's Finnish message.
     error.value = e.status === 422 ? Object.values(e.errors).flat()[0] : 'Pyyntöjen lataaminen epäonnistui.'
@@ -34,13 +111,14 @@ async function deleteRequest(request) {
 
   try {
     await apiDelete(`/requests/${request.id}`)
-    requests.value = requests.value.filter((item) => item.id !== request.id)
+    // Reload, so the page fills up from the next one and the counts stay right.
+    await loadRequests()
   } catch {
     error.value = 'Pyynnön poistaminen epäonnistui.'
   }
 }
 
-watch(filters, loadRequests, { immediate: true, deep: true })
+watch(listPath, loadRequests, { immediate: true })
 </script>
 
 <template>
@@ -48,8 +126,8 @@ watch(filters, loadRequests, { immediate: true, deep: true })
     <header class="page-header">
       <div>
         <h1 class="page-title">Pyynnöt</h1>
-        <p v-if="!loading && requests.length > 0" class="page-subtitle mt-1">
-          {{ requests.length }} {{ requests.length === 1 ? 'pyyntö' : 'pyyntöä' }}
+        <p v-if="!loading && total > 0" class="page-subtitle mt-1">
+          {{ total }} {{ total === 1 ? 'pyyntö' : 'pyyntöä' }}
         </p>
       </div>
       <RouterLink to="/requests/new" class="btn btn-primary w-full sm:w-auto">+ Uusi pyyntö</RouterLink>
@@ -137,6 +215,14 @@ watch(filters, loadRequests, { immediate: true, deep: true })
         </div>
       </template>
 
+      <!-- On phones the table becomes cards without headers, so the order is chosen here. -->
+      <div class="grid flex-[1_1_10rem] gap-1 sm:hidden">
+        <label for="list-sort" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Järjestys</label>
+        <select id="list-sort" class="form-control" :value="sort" @change="setSort($event.target.value)">
+          <option v-for="(label, value) in sortOptions" :key="value" :value="value">{{ label }}</option>
+        </select>
+      </div>
+
       <button v-if="hasFilters" type="button" class="btn btn-secondary w-full sm:w-auto" @click="clearFilters">
         Tyhjennä suodattimet
       </button>
@@ -164,10 +250,14 @@ watch(filters, loadRequests, { immediate: true, deep: true })
       <table class="request-table">
         <thead>
           <tr>
-            <th>Otsikko</th>
-            <th>Prioriteetti</th>
-            <th>Tila</th>
-            <th>Määräpäivä</th>
+            <th v-for="column in [['title', 'Otsikko'], ['priority', 'Prioriteetti'], ['status', 'Tila'], ['due_date', 'Määräpäivä']]" :key="column[0]" :aria-sort="ariaSort(column[0])">
+              <button type="button" class="sort-button" @click="toggleSort(column[0])">
+                {{ column[1] }}
+                <span class="sort-icon" :class="{ 'opacity-100': ariaSort(column[0]) }" aria-hidden="true">
+                  {{ ariaSort(column[0]) === 'descending' ? '▼' : '▲' }}
+                </span>
+              </button>
+            </th>
             <th><span class="sr-only">Toiminnot</span></th>
           </tr>
         </thead>
@@ -177,6 +267,7 @@ watch(filters, loadRequests, { immediate: true, deep: true })
               <RouterLink :to="`/requests/${request.id}`" class="hover:text-primary-700 hover:underline dark:hover:text-primary-400">
                 {{ request.title }}
               </RouterLink>
+              <span v-if="isNew(request)" class="badge badge-new ml-2 align-middle">Uusi</span>
               <span v-if="formatAddress(request)" class="block text-sm font-normal text-slate-500 dark:text-slate-400">
                 {{ formatAddress(request) }}
               </span>
@@ -214,5 +305,44 @@ watch(filters, loadRequests, { immediate: true, deep: true })
         </tbody>
       </table>
     </div>
+    <nav
+      v-if="meta && meta.total > 0 && !error"
+      class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      aria-label="Sivutus"
+    >
+      <p class="text-sm text-slate-500 tabular-nums dark:text-slate-400">
+        Näytetään {{ meta.from }}–{{ meta.to }} / {{ meta.total }}
+      </p>
+      <div class="flex flex-wrap items-center gap-2">
+        <label for="per-page" class="text-sm text-slate-500 dark:text-slate-400">Näytä</label>
+        <select
+          id="per-page"
+          class="form-control w-auto lg:min-h-9 lg:py-1.5"
+          :value="perPage"
+          @change="updateQuery({ per_page: $event.target.value, page: 1 })"
+        >
+          <option v-for="size in PAGE_SIZES" :key="size" :value="size">{{ size }}</option>
+        </select>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          :disabled="meta.current_page <= 1"
+          aria-label="Edellinen sivu"
+          @click="goToPage(meta.current_page - 1)"
+        >
+          ←
+        </button>
+        <span class="text-sm tabular-nums" aria-live="polite">Sivu {{ meta.current_page }} / {{ meta.last_page }}</span>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          :disabled="meta.current_page >= meta.last_page"
+          aria-label="Seuraava sivu"
+          @click="goToPage(meta.current_page + 1)"
+        >
+          →
+        </button>
+      </div>
+    </nav>
   </section>
 </template>

@@ -62,6 +62,26 @@ class ServiceRequestTest extends TestCase
         $this->assertNull($own->fresh()->city);
     }
 
+    public function test_only_some_seeded_requests_are_new(): void
+    {
+        $this->seed();
+
+        $new = ServiceRequest::where('created_at', '>=', now()->subDays(7))
+            ->where('status', '!=', 'completed')
+            ->pluck('title')
+            ->sort()
+            ->values()
+            ->all();
+
+        $this->assertSame([
+            'Huolla trukki',
+            'Säädä toimiston lämmitys',
+            'Tarkasta varaston nosto-ovi',
+            'Vaihda WC:n poistoilmapuhallin',
+            'Vaihda ilmansuodatin',
+        ], $new);
+    }
+
     public function test_seeded_requests_cover_every_status_and_priority(): void
     {
         $this->seed();

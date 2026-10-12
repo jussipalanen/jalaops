@@ -26,7 +26,7 @@ JalaOps on pieni toiminnanohjauksen demosovellus huoltopyyntöjen hallintaan.
 Käyttäjä voi:
 
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
-- vaihtaa pyynnön tilaa
+- vaihtaa pyynnön tilaa ja kuitata valmiin pyynnön nimellä ja piirretyllä allekirjoituksella
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella yksinkertaista koontinäkymää
@@ -113,8 +113,10 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET    | `/api/health`        | API:n ja tietokannan tila     |
+| GET    | `/api/system`        | Sovelluksen tiedot ja tila Tietoja-sivulle (palvelimen versiot vain asetuksella `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | Listaa pyynnöt                |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
+| GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
 | POST   | `/api/requests`      | Luo pyyntö                    |
 | PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
 | DELETE | `/api/requests/{id}` | Poista pyyntö                 |
@@ -124,11 +126,11 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/geocode?q=…`   | Osoitteen koordinaatit (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Osoite-ehdotukset kirjoitettaessa (Photon) |
 
-Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määräpäivä `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `/api/requests?due_from=2026-10-01&due_to=2026-10-31` sekä haku `/api/requests?search=tampere` (otsikko, katuosoite, postinumero tai kaupunki).
+Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määräpäivä `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `/api/requests?due_from=2026-10-01&due_to=2026-10-31` sekä haku `/api/requests?search=tampere` (otsikko, katuosoite, postinumero tai kaupunki). Järjestys `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` laskevaan järjestykseen) ja sivutus `per_page=10|25|50|100&page=2`; ilman `per_page`-parametria palautetaan kaikki osumat.
 
 ## Kartta ja sijainnit
 
-Pyynnöllä voi olla katuosoite, postinumero, kaupunki ja karttakoordinaatit. **Kartta**-sivu (`/map`) näyttää sijainnilliset pyynnöt koko näytön kartalla: merkit on väritetty prioriteetin mukaan, ja merkkiä napsauttamalla näkyy pyyntö ja linkki sen tietoihin. Pyyntölomake ehdottaa osoitteita kirjoitettaessa ja täyttää koordinaatit, ja merkin voi myös asettaa napsauttamalla karttaa. Ponnahdusikkunasta ja tietosivulta pääsee Google Street View'hun pyynnön sijainnissa (pelkkä linkki, ei API-avainta).
+Pyynnöllä voi olla katuosoite, postinumero, kaupunki ja karttakoordinaatit. **Kartta**-sivu (`/map`) näyttää sijainnilliset pyynnöt koko näytön kartalla: merkit on väritetty prioriteetin mukaan, uusien pyyntöjen (luotu 7 päivän sisällä eikä valmis) merkin ympärillä sykkii ympyrä, ja merkkiä napsauttamalla näkyy pyyntö ja linkki sen tietoihin. Pyyntölomake ehdottaa osoitteita kirjoitettaessa ja täyttää koordinaatit, ja merkin voi myös asettaa napsauttamalla karttaa. Ponnahdusikkunasta ja tietosivulta pääsee Google Street View'hun pyynnön sijainnissa (pelkkä linkki, ei API-avainta).
 
 Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://www.openstreetmap.org/copyright) aineistoon eivätkä vaadi API-avaimia:
 
@@ -182,7 +184,7 @@ cd frontend && npm run lint:check && npm test && npm run build && npm audit --au
 
 Sovelluksen voi julkaista ilmaiseksi: frontend Verceliin ja backend Renderiin. Oletuksena julkaistu backend käyttää demodataa, joka palautuu jokaisella uudelleenkäynnistyksellä (`DEMO_MODE=true`), joten erillistä tietokantapalvelua ei tarvita. Asettamalla `DEMO_MODE=false` ja `DB_*`-muuttujat käyttöön tulee oikea tietokanta.
 
-Molemmat palvelut pyytävät hakukoneita olemaan indeksoimatta niitä (`X-Robots-Tag: noindex` ja `noindex`-metatagi), koska sovellus on demo.
+Molemmat palvelut pyytävät hakukoneita olemaan indeksoimatta niitä (`X-Robots-Tag: noindex` ja `noindex`-metatagi), koska sovellus on demo. `index.html` sisältää silti kuvauksen sekä Open Graph- ja X-korttitagit, joten jaetuista linkeistä näkyy esikatselukortti; aseta frontendin julkinen osoite muuttujaan `VITE_SITE_URL` (`frontend/.env.production`).
 
 Vaiheittainen ohje (englanniksi): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

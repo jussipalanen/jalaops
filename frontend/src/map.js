@@ -10,7 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 // breaks, so Vite builds the worker and MapLibre is told where it is.
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { watch } from 'vue'
-import { formatAddress, formatDate, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
+import { formatAddress, formatDate, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import { isDark } from '@/theme'
 
 // Most requests are in Finland, so a map without pins starts there.
@@ -101,9 +101,14 @@ function pin(classes) {
   })
 }
 
-// A request's pin, coloured by priority; completed requests are faded.
+// A request's pin, coloured by priority; completed requests are faded and new
+// ones get a pulsing circle around them.
 export function requestPin(request) {
-  return pin([`map-pin-${request.priority}`, ...(request.status === 'completed' ? ['map-pin-completed'] : [])])
+  return pin([
+    `map-pin-${request.priority}`,
+    ...(request.status === 'completed' ? ['map-pin-completed'] : []),
+    ...(isNew(request) ? ['map-pin-new'] : []),
+  ])
 }
 
 // The pin of the location being chosen in the request form.
@@ -136,6 +141,10 @@ export function requestPopup(request, openDetails) {
   popup.append(element('p', 'map-popup-title', request.title))
 
   const badges = element('p', 'map-popup-badges')
+  if (isNew(request)) {
+    badges.append(element('span', 'badge badge-new', 'Uusi'))
+  }
+
   badges.append(
     element('span', `badge priority-${request.priority}`, priorityLabels[request.priority]),
     element('span', `badge status-${request.status}`, statusLabels[request.status]),

@@ -71,6 +71,7 @@ If the name `jalaops-api` was taken, Render gives the service a different addres
 ## 2. Frontend on Vercel
 
 1. If your Render address is not `https://jalaops-api.onrender.com`, change the `destination` in [`frontend/vercel.json`](../frontend/vercel.json) and `VITE_API_DOCS_URL` in [`frontend/.env.production`](../frontend/.env.production) to your address and push the change.
+   Also set `VITE_SITE_URL` in the same file to the frontend's public address (your Vercel or own domain, no trailing slash): link previews use it for the page address and the preview image.
 2. Sign in at [vercel.com](https://vercel.com) with GitHub.
 3. Choose **Add New → Project** and import the `jalaops` repository.
 4. Fill in:
@@ -126,6 +127,7 @@ To return to demo mode, set `DEMO_MODE` back to `true`.
 | `APP_ENV` / `APP_DEBUG` | `production` / `false` | Don't enable debug on a public server. |
 | `DB_*`, `MYSQL_ATTR_SSL_CA` | (unset) | Database connection when `DEMO_MODE=false`. |
 | `PORT` | set by Render | The port the server listens on (`10000` if unset). |
+| `SHOW_SYSTEM_DETAILS` | `false` | `true` shows the PHP, Laravel and database versions on the "Tietoja" page (`/api/system`). Off on public servers so exact versions aren't advertised. |
 | `NOMINATIM_USER_AGENT` | `JalaOps demo (https://github.com/jussipalanen/jalaops)` | Identifies the app to Nominatim and Photon (address lookup and suggestions), as their usage policies require. Set it to your own app name and contact URL or email. |
 
 All keys are also listed in [`backend/.env.example`](../backend/.env.example).

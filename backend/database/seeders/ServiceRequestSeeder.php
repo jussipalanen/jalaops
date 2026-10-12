@@ -35,6 +35,16 @@ class ServiceRequestSeeder extends Seeder
             ['Säädä toimiston lämmitys', 'Avotoimiston lämpötila on aamuisin alle 19 astetta.', 'normal', 'open', 4, null],
         ];
 
+        // Days since each request was created. Requests from the last 7 days
+        // that aren't completed show as new ("Uusi") in the app.
+        $createdDaysAgo = [
+            'Vaihda ilmansuodatin' => 1,
+            'Tarkasta varaston nosto-ovi' => 3,
+            'Huolla trukki' => 2,
+            'Vaihda WC:n poistoilmapuhallin' => 5,
+            'Säädä toimiston lämmitys' => 0,
+        ];
+
         // Seeding again never duplicates the demo data: a table that already has
         // requests only gets the locations added to demo requests that lack one.
         if (ServiceRequest::query()->exists()) {
@@ -50,8 +60,8 @@ class ServiceRequestSeeder extends Seeder
             return;
         }
 
-        foreach ($requests as [$title, $description, $priority, $status, $dueInDays, $location]) {
-            ServiceRequest::create([
+        foreach ($requests as $index => [$title, $description, $priority, $status, $dueInDays, $location]) {
+            $request = new ServiceRequest([
                 'title' => $title,
                 'description' => $description,
                 'priority' => $priority,
@@ -59,6 +69,11 @@ class ServiceRequestSeeder extends Seeder
                 'due_date' => today()->addDays($dueInDays),
                 ...($location !== null ? $this->locationFields($location) : []),
             ]);
+
+            // Older requests are spread over the past weeks.
+            $request->created_at = now()->subDays($createdDaysAgo[$title] ?? 10 + $index * 2)->subHours($index);
+            $request->updated_at = $request->created_at;
+            $request->save();
         }
     }
 
