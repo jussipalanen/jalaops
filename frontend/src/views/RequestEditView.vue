@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiGet, apiPut } from '@/api/client'
+import RequestDownloads from '@/components/RequestDownloads.vue'
 import RequestForm from '@/components/RequestForm.vue'
 
 const route = useRoute()
@@ -54,6 +55,8 @@ async function update(data) {
   <section class="max-w-3xl">
     <header class="page-header">
       <h1 class="page-title">Muokkaa pyyntöä</h1>
+      <!-- Downloads the saved version; unsaved changes aren't included. -->
+      <RequestDownloads v-if="request" :request-id="request.id" class="max-sm:w-full" />
     </header>
 
     <p v-if="error" class="alert-error" role="alert">{{ error }}</p>

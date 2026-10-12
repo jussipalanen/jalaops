@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
 import { formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
+import RequestDownloads from '@/components/RequestDownloads.vue'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
 import { pageTitle } from '@/pageTitle'
 
@@ -91,6 +92,8 @@ async function deleteRequest() {
           <button type="button" class="btn btn-danger" @click="deleteRequest">Poista</button>
         </div>
       </header>
+
+      <RequestDownloads :request-id="request.id" class="mb-4" />
 
       <div class="card card-body grid gap-5">
         <div>

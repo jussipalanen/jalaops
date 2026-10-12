@@ -27,6 +27,7 @@ A user can:
 
 - view, create, edit and delete requests
 - change a request's status, and sign off a completed request with a name and a drawn signature
+- download a request as a PDF or HTML file
 - filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
 - view a simple dashboard
@@ -117,6 +118,8 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/requests`      | List requests               |
 | GET    | `/api/requests/{id}` | Get a single request        |
 | GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
+| GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF |
+| GET    | `/api/requests/{id}/export/html` | Download the request as a self-contained HTML file |
 | POST   | `/api/requests`      | Create a request            |
 | PUT    | `/api/requests/{id}` | Update a request            |
 | DELETE | `/api/requests/{id}` | Delete a request            |

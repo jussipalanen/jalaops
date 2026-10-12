@@ -80,6 +80,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Display time zone
+    |--------------------------------------------------------------------------
+    |
+    | The app stores times in UTC; downloaded PDF and HTML files show them in
+    | this time zone, so they match what Finnish users see in the browser.
+    |
+    */
+
+    'display_timezone' => env('DISPLAY_TIMEZONE', 'Europe/Helsinki'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |

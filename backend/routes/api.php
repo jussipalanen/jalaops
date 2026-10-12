@@ -36,6 +36,8 @@ Route::get('/system', [SystemController::class, 'show']);
 
 // The model is ServiceRequest, but the public API uses /api/requests.
 Route::get('/requests/{serviceRequest}/signature', [ServiceRequestController::class, 'signature']);
+Route::get('/requests/{serviceRequest}/export/{format}', [ServiceRequestController::class, 'export'])
+    ->whereIn('format', ['pdf', 'html']);
 Route::apiResource('requests', ServiceRequestController::class)
     ->parameters(['requests' => 'serviceRequest']);
 

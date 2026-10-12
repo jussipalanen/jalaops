@@ -127,6 +127,7 @@ To return to demo mode, set `DEMO_MODE` back to `true`.
 | `APP_ENV` / `APP_DEBUG` | `production` / `false` | Don't enable debug on a public server. |
 | `DB_*`, `MYSQL_ATTR_SSL_CA` | (unset) | Database connection when `DEMO_MODE=false`. |
 | `PORT` | set by Render | The port the server listens on (`10000` if unset). |
+| `DISPLAY_TIMEZONE` | `Europe/Helsinki` | Time zone of the times in downloaded PDF and HTML files (the app stores UTC). |
 | `SHOW_SYSTEM_DETAILS` | `false` | `true` shows the PHP, Laravel and database versions on the "Tietoja" page (`/api/system`). Off on public servers so exact versions aren't advertised. |
 | `NOMINATIM_USER_AGENT` | `JalaOps demo (https://github.com/jussipalanen/jalaops)` | Identifies the app to Nominatim and Photon (address lookup and suggestions), as their usage policies require. Set it to your own app name and contact URL or email. |
 

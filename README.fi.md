@@ -27,6 +27,7 @@ Käyttäjä voi:
 
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
 - vaihtaa pyynnön tilaa ja kuitata valmiin pyynnön nimellä ja piirretyllä allekirjoituksella
+- ladata pyynnön PDF- tai HTML-tiedostona
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella yksinkertaista koontinäkymää
@@ -117,6 +118,8 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/requests`      | Listaa pyynnöt                |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
 | GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
+| GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona |
+| GET    | `/api/requests/{id}/export/html` | Lataa pyyntö itsenäisenä HTML-tiedostona |
 | POST   | `/api/requests`      | Luo pyyntö                    |
 | PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
 | DELETE | `/api/requests/{id}` | Poista pyyntö                 |
