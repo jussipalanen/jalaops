@@ -6,6 +6,13 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-12
+
+### Added
+- "Tietoja sovelluksesta" page at `/about`, linked from the footer (#45): the frontend and API versions, environment, demo mode, time zone and server time, and a health check of the API, the database (with its response time) and the cache. With `SHOW_SYSTEM_DETAILS=true` it also shows the PHP, Laravel, database and Vue versions and the cache and queue drivers; the setting defaults to true only when `APP_ENV=local`, so the public demo doesn't show exact versions.
+- `GET /api/system` with the same details.
+- `SHOW_SYSTEM_DETAILS` in `backend/.env.example` and `docs/DEPLOYMENT.md`.
+
 ## [0.18.0] - 2026-10-12
 
 ### Added
@@ -221,7 +228,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...v0.16.0

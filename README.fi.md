@@ -113,6 +113,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET    | `/api/health`        | API:n ja tietokannan tila     |
+| GET    | `/api/system`        | Sovelluksen tiedot ja tila Tietoja-sivulle (palvelimen versiot vain asetuksella `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | Listaa pyynnöt                |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
 | POST   | `/api/requests`      | Luo pyyntö                    |

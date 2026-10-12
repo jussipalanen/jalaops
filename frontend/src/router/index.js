@@ -36,6 +36,12 @@ const router = createRouter({
       component: () => import('../views/RequestEditView.vue'),
     },
     {
+      path: '/about',
+      name: 'about',
+      meta: { title: 'Tietoja' },
+      component: () => import('../views/AboutView.vue'),
+    },
+    {
       path: '/map',
       name: 'map',
       component: () => import('../views/RequestMapView.vue'),

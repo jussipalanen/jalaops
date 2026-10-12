@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AiOverviewController;
 use App\Http\Controllers\Api\GeocodeController;
 use App\Http\Controllers\Api\ServiceRequestController;
+use App\Http\Controllers\Api\SystemController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,9 @@ Route::get('/health', function () {
         'demo' => config('app.demo_mode'),
     ]);
 });
+
+// Application details and health for the "Tietoja" page.
+Route::get('/system', [SystemController::class, 'show']);
 
 // The model is ServiceRequest, but the public API uses /api/requests.
 Route::apiResource('requests', ServiceRequestController::class)

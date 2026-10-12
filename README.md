@@ -113,6 +113,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
 | GET    | `/api/health`        | API and database health     |
+| GET    | `/api/system`        | App details and health for the "Tietoja" page (server versions only with `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | List requests               |
 | GET    | `/api/requests/{id}` | Get a single request        |
 | POST   | `/api/requests`      | Create a request            |
