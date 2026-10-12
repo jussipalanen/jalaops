@@ -43,3 +43,8 @@ export function formatAddress(request) {
 export function hasLocation(request) {
   return request.latitude != null && request.longitude != null
 }
+
+// Google Street View at a request's coordinates: a free Maps URL that needs no API key.
+export function streetViewUrl(request) {
+  return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${request.latitude},${request.longitude}`
+}

@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-12
+
+### Added
+- Street View links for requests with a location (#37): "Street View ↗" in the map popup and "Avaa Street View" on the details page open Google Street View at the coordinates in a new tab. It uses a free Google Maps URL, so no API key is needed.
+
 ## [0.14.1] - 2026-10-12
 
 ### Fixed
@@ -187,7 +192,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/jussipalanen/jalaops/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/jussipalanen/jalaops/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/jussipalanen/jalaops/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/jussipalanen/jalaops/compare/v0.12.0...v0.13.0

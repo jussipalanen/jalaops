@@ -56,6 +56,12 @@ describe('RequestDetailView', () => {
     const links = wrapper.findAllComponents(RouterLinkStub).map((link) => link.props('to'))
     expect(links).toContain('/requests/1/edit')
     expect(links).toContain('/map?request=1')
+
+    const streetView = wrapper.find('a[target="_blank"]')
+    expect(streetView.attributes('href')).toBe(
+      'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=60.2891,25.0371',
+    )
+    expect(streetView.attributes('rel')).toBe('noopener')
   })
 
   it('has no map for a request without a location', async () => {

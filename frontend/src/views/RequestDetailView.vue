@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
-import { formatAddress, formatDate, hasLocation, priorityLabels, statusLabels } from '@/labels'
+import { formatAddress, formatDate, hasLocation, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
 
 const route = useRoute()
@@ -113,12 +113,22 @@ async function deleteRequest() {
             role="img"
             :aria-label="`Kartta: ${address || request.title}`"
           ></div>
-          <RouterLink
-            :to="`/map?request=${request.id}`"
-            class="mt-2 inline-block font-semibold text-primary-700 hover:underline dark:text-primary-400"
-          >
-            Näytä suurella kartalla →
-          </RouterLink>
+          <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+            <RouterLink
+              :to="`/map?request=${request.id}`"
+              class="inline-flex min-h-11 items-center font-semibold text-primary-700 hover:underline lg:min-h-0 dark:text-primary-400"
+            >
+              Näytä suurella kartalla →
+            </RouterLink>
+            <a
+              :href="streetViewUrl(request)"
+              class="inline-flex min-h-11 items-center font-semibold text-primary-700 hover:underline lg:min-h-0 dark:text-primary-400"
+              target="_blank"
+              rel="noopener"
+            >
+              Avaa Street View ↗<span class="sr-only"> (avautuu uuteen välilehteen)</span>
+            </a>
+          </p>
         </div>
       </div>
 
