@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
+import ExportMenu from '@/components/ExportMenu.vue'
 import RequestDownloads from '@/components/RequestDownloads.vue'
 import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
@@ -83,6 +84,36 @@ function ariaSort(field) {
 function goToPage(number) {
   updateQuery({ page: number })
 }
+
+// Requests chosen for export, by id. A new filter or search starts a new selection.
+const selected = ref(new Set())
+const allOnPageSelected = computed(() => requests.value.length > 0 && requests.value.every((request) => selected.value.has(request.id)))
+
+function toggleSelected(id) {
+  const next = new Set(selected.value)
+  next.has(id) ? next.delete(id) : next.add(id)
+  selected.value = next
+}
+
+function toggleAllOnPage() {
+  const next = new Set(selected.value)
+  for (const request of requests.value) {
+    allOnPageSelected.value ? next.delete(request.id) : next.add(request.id)
+  }
+  selected.value = next
+}
+
+// The export gets the chosen ids, or else the list's filters and sort order.
+const exportQuery = computed(() => {
+  if (selected.value.size > 0) {
+    return `ids=${[...selected.value].join(',')}`
+  }
+
+  const filterQuery = apiPath.value.split('?')[1] ?? ''
+  return [filterQuery, sort.value !== DEFAULT_SORT ? `sort=${sort.value}` : ''].filter(Boolean).join('&')
+})
+
+watch(apiPath, () => (selected.value = new Set()))
 
 async function loadRequests() {
   loading.value = true
@@ -244,13 +275,38 @@ watch(listPath, loadRequests, { immediate: true })
       </template>
     </div>
 
+    <template v-else-if="requests.length > 0">
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <p class="text-sm text-slate-500 dark:text-slate-400" aria-live="polite">
+        <template v-if="selected.size > 0">
+          <strong class="text-slate-900 dark:text-white">{{ selected.size }}</strong> valittu ·
+          <button type="button" class="font-semibold text-primary-700 hover:underline dark:text-primary-400" @click="selected = new Set()">
+            Poista valinnat
+          </button>
+        </template>
+        <template v-else>Valitse pyyntöjä, jos haluat viedä vain ne.</template>
+      </p>
+      <div class="flex gap-2 max-sm:w-full max-sm:*:flex-1">
+        <ExportMenu :query="exportQuery" :label="selected.size > 0 ? `Vie valitut (${selected.size})` : `Vie kaikki (${total})`" />
+        <RouterLink to="/tools#tuo" class="btn btn-secondary">Tuo</RouterLink>
+      </div>
+    </div>
+
     <div
-      v-else-if="requests.length > 0"
-      class="card overflow-hidden max-sm:overflow-visible max-sm:border-0 max-sm:bg-transparent max-sm:shadow-none max-sm:dark:bg-transparent"
+      class="card max-sm:border-0 max-sm:bg-transparent max-sm:shadow-none max-sm:dark:bg-transparent"
     >
       <table class="request-table">
         <thead>
           <tr>
+            <th class="cell-select">
+              <input
+                type="checkbox"
+                class="size-4 cursor-pointer accent-primary-700"
+                :checked="allOnPageSelected"
+                aria-label="Valitse kaikki tämän sivun pyynnöt"
+                @change="toggleAllOnPage"
+              />
+            </th>
             <th v-for="column in [['title', 'Otsikko'], ['priority', 'Prioriteetti'], ['status', 'Tila'], ['due_date', 'Määräpäivä']]" :key="column[0]" :aria-sort="ariaSort(column[0])">
               <button type="button" class="sort-button" @click="toggleSort(column[0])">
                 {{ column[1] }}
@@ -264,6 +320,18 @@ watch(listPath, loadRequests, { immediate: true })
         </thead>
         <tbody>
           <tr v-for="request in requests" :key="request.id">
+            <td class="cell-select">
+              <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 sm:min-h-0">
+                <input
+                  type="checkbox"
+                  class="size-4 cursor-pointer accent-primary-700"
+                  :checked="selected.has(request.id)"
+                  :aria-label="`Valitse: ${request.title}`"
+                  @change="toggleSelected(request.id)"
+                />
+                <span class="text-sm text-slate-500 sm:sr-only dark:text-slate-400" aria-hidden="true">Valitse</span>
+              </label>
+            </td>
             <td class="cell-title">
               <RouterLink :to="`/requests/${request.id}`" class="hover:text-primary-700 hover:underline dark:hover:text-primary-400">
                 {{ request.title }}
@@ -308,6 +376,7 @@ watch(listPath, loadRequests, { immediate: true })
         </tbody>
       </table>
     </div>
+    </template>
     <nav
       v-if="meta && meta.total > 0 && !error"
       class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"

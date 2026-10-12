@@ -12,9 +12,12 @@ return [
     ],
     'date_format' => 'Kentän :attribute on oltava muodossa :format.',
     'enum' => 'Kentän :attribute arvo on virheellinen.',
+    'file' => 'Kentän :attribute on oltava tiedosto.',
+    'mimes' => 'Tiedoston on oltava tyyppiä :values.',
     'in' => 'Kentän :attribute arvo on virheellinen.',
     'integer' => 'Kentän :attribute on oltava kokonaisluku.',
     'max' => [
+        'file' => 'Tiedosto saa olla enintään :max kilotavua.',
         'string' => 'Kenttä :attribute saa olla enintään :max merkkiä pitkä.',
     ],
     'min' => [
@@ -46,6 +49,9 @@ return [
         'due_to' => 'asti',
         'signed_by' => 'kuittaajan nimi',
         'completion_signature' => 'allekirjoitus',
+        'file' => 'tiedosto',
+        'format' => 'muoto',
+        'ids' => 'valitut pyynnöt',
         'sort' => 'järjestys',
         'per_page' => 'sivun koko',
         'page' => 'sivu',

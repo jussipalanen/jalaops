@@ -92,8 +92,9 @@
     @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-transparent px-4 text-[0.9375rem] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 lg:min-h-9;
   }
 
+  /* primary-700 keeps white text at 4.5:1 contrast or more (WCAG AA). */
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:text-slate-950 dark:hover:bg-primary-400;
+    @apply bg-primary-700 text-white hover:bg-primary-800 dark:bg-primary-500 dark:text-slate-950 dark:hover:bg-primary-400;
   }
 
   .btn-secondary {
@@ -163,6 +164,28 @@
 
   .request-table tbody tr:last-child td {
     @apply border-b-0;
+  }
+
+  /* The card isn't overflow-hidden (row menus may extend past it), so the
+     corner cells carry its rounding. */
+  .request-table th:first-child {
+    @apply rounded-tl-2xl;
+  }
+
+  .request-table th:last-child {
+    @apply rounded-tr-2xl;
+  }
+
+  .request-table tbody tr:last-child td:first-child {
+    @apply rounded-bl-2xl;
+  }
+
+  .request-table tbody tr:last-child td:last-child {
+    @apply rounded-br-2xl;
+  }
+
+  .request-table .cell-select {
+    @apply w-10 pr-0;
   }
 
   .request-table tbody tr {
@@ -251,6 +274,9 @@
 
 .leaflet-container.leaflet-container {
   @apply bg-slate-200 font-sans dark:bg-slate-800;
+  /* Leaflet's layers use z-index 400–1000; isolating the map keeps them inside
+     it, so the header and its menu stay on top of every map. */
+  isolation: isolate;
 }
 
 /* Pins: a teardrop with a white dot, coloured by priority. */

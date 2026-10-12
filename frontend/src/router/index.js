@@ -36,6 +36,12 @@ const router = createRouter({
       component: () => import('../views/RequestEditView.vue'),
     },
     {
+      path: '/tools',
+      name: 'tools',
+      meta: { title: 'Työkalut' },
+      component: () => import('../views/ToolsView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       meta: { title: 'Tietoja' },

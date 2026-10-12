@@ -28,6 +28,7 @@ A user can:
 - view, create, edit and delete requests
 - change a request's status, and sign off a completed request with a name and a drawn signature
 - download a request as a PDF or HTML file
+- export requests to CSV (Excel) or JSON and import them back on the Työkalut page
 - filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
 - view a simple dashboard
@@ -116,6 +117,8 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/health`        | API and database health     |
 | GET    | `/api/system`        | App details and health for the "Tietoja" page (server versions only with `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | List requests               |
+| GET    | `/api/requests/export?format=csv\|json` | Export the requests matching the filters, or `ids=1,2` |
+| POST   | `/api/requests/import` | Import requests from a CSV or JSON file (`dry_run` to check it first) |
 | GET    | `/api/requests/{id}` | Get a single request        |
 | GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
 | GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF |

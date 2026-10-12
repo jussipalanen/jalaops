@@ -6,6 +6,18 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-12
+
+### Added
+- Export and import (#51). The request list gets checkboxes and a "Vie" menu: CSV (opens in Excel: semicolons, UTF-8) or JSON (a full copy, including signatures), for the selected requests or all requests matching the filters. A new **Työkalut** page (`/tools`) in the main navigation exports all or filtered requests and imports a CSV or JSON file: it first checks the file and lists each invalid row with Finnish messages, and imports only when every row is valid. Imported requests are always new; Finnish labels ("Korkea"), dates (15.10.2026) and decimal commas are understood. Up to 1000 rows and 2 MB per file.
+- `GET /api/requests/export?format=csv|json` (the list's filters, or `ids=1,2,3`) and `POST /api/requests/import` (`file`, `dry_run`; ten imports per minute per visitor). CSV cells starting with `=`, `+`, `-` or `@` get an apostrophe so Excel doesn't run them as formulas; import removes it again.
+- A menu button (☰) for phones and tablets (below 1024 px): the navigation opens as a full-width panel under the header. It closes when a page opens, on Escape (focus returns to the button), on a click outside it and when keyboard focus leaves it.
+
+### Fixed
+- The open menu showed behind the map on the map, details and edit pages; maps now keep their layers inside themselves.
+- Accessibility (WCAG AA, checked with axe-core): the primary buttons and the "Ops" of the logo had too little contrast in the light theme, the details page map was marked as an image although it has controls, and the file chooser's button followed the browser's language instead of Finnish.
+- The download menu of the last row on the request list was cut off by the table's card.
+
 ## [0.21.0] - 2026-10-12
 
 ### Added
@@ -246,7 +258,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/jussipalanen/jalaops/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/jussipalanen/jalaops/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/jussipalanen/jalaops/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...v0.19.0

@@ -28,6 +28,7 @@ Käyttäjä voi:
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
 - vaihtaa pyynnön tilaa ja kuitata valmiin pyynnön nimellä ja piirretyllä allekirjoituksella
 - ladata pyynnön PDF- tai HTML-tiedostona
+- viedä pyyntöjä CSV- (Excel) tai JSON-tiedostoon ja tuoda niitä takaisin Työkalut-sivulla
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella yksinkertaista koontinäkymää
@@ -116,6 +117,8 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/health`        | API:n ja tietokannan tila     |
 | GET    | `/api/system`        | Sovelluksen tiedot ja tila Tietoja-sivulle (palvelimen versiot vain asetuksella `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | Listaa pyynnöt                |
+| GET    | `/api/requests/export?format=csv\|json` | Vie suodattimia vastaavat pyynnöt, tai `ids=1,2` |
+| POST   | `/api/requests/import` | Tuo pyyntöjä CSV- tai JSON-tiedostosta (`dry_run` tarkistaa ensin) |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
 | GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
 | GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona |

@@ -349,4 +349,31 @@ describe('RequestListView', () => {
 
     expect(router.currentRoute.value.query).toEqual({ page: '2' })
   })
+
+  it('exports the selected requests, or else all matching the filters', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: requests, meta: { current_page: 1, last_page: 1, per_page: 10, from: 1, to: 2, total: 2 } })))
+
+    const { wrapper, router } = await mountView('/requests?status=open&sort=title')
+    const exportLinks = () => wrapper.findAll('a[href^="/api/requests/export"]').map((link) => link.attributes('href'))
+
+    expect(wrapper.text()).toContain('Vie kaikki (2)')
+    expect(exportLinks()).toEqual([
+      '/api/requests/export?format=csv&status=open&sort=title',
+      '/api/requests/export?format=json&status=open&sort=title',
+    ])
+
+    await wrapper.findAll('tbody input[type="checkbox"]')[1].setValue(true)
+    expect(wrapper.text()).toContain('Vie valitut (1)')
+    expect(exportLinks()[0]).toBe('/api/requests/export?format=csv&ids=2')
+
+    // The header box selects the whole page.
+    await wrapper.find('thead input[type="checkbox"]').setValue(true)
+    expect(exportLinks()[0]).toBe('/api/requests/export?format=csv&ids=2,1')
+
+    // A new filter starts a new selection.
+    await router.replace({ query: { status: 'completed' } })
+    await flushPromises()
+    expect(wrapper.text()).toContain('Vie kaikki')
+    expect(wrapper.find('a[href="/tools#tuo"]').text()).toBe('Tuo')
+  })
 })
