@@ -1,0 +1,7 @@
+# The Android project is generated from twa-manifest.json on every build.
+/build/
+# Build outputs: jalaops.apk and jalaops.aab
+/dist/
+# Never commit signing keys.
+*.jks
+*.keystore

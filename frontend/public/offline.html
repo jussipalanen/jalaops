@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ei verkkoyhteyttä – JalaOps</title>
+  <style>
+    body {
+      margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center;
+      background: #f8fafc; color: #0f172a; text-align: center;
+      font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    main { max-width: 22rem; padding: 24px; }
+    h1 { font-size: 1.5rem; margin: 16px 0 8px; }
+    p { margin: 0 0 24px; color: #475569; }
+    button {
+      min-height: 44px; padding: 0 20px; border: 0; border-radius: 8px; cursor: pointer;
+      background: #0369a1; color: #fff; font: inherit; font-weight: 600;
+    }
+    button:focus-visible { outline: 3px solid rgb(14 165 233 / 0.5); outline-offset: 2px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #020617; color: #f1f5f9; }
+      p { color: #94a3b8; }
+      button { background: #10b981; color: #020617; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- Inline, so the page needs nothing from the network. -->
+    <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+      <defs><linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs>
+      <rect width="64" height="64" rx="15" fill="url(#tile)"/>
+      <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="32" cy="32" r="19" stroke-width="6" stroke-linecap="butt" stroke-dasharray="6.5 8.42"/>
+        <circle cx="32" cy="32" r="14" stroke-width="5"/>
+        <path d="M25 32.5l5 5 9-10" stroke-width="4.5"/>
+      </g>
+    </svg>
+    <h1>Ei verkkoyhteyttä</h1>
+    <p>JalaOps tarvitsee verkkoyhteyden. Tarkista yhteys ja yritä uudelleen.</p>
+    <button type="button" onclick="location.reload()">Yritä uudelleen</button>
+  </main>
+</body>
+</html>

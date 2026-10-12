@@ -116,6 +116,10 @@ Render's free plan has no MySQL or MariaDB, so use a free MySQL service elsewher
 
 To return to demo mode, set `DEMO_MODE` back to `true`.
 
+## Android app
+
+The Android app opens the frontend's address (`host` in [`android/twa-manifest.json`](../android/twa-manifest.json), now `jalaops-demo.jussialanen.com`). If the frontend moves to another address, change `host` and the URLs in that file, rebuild the app (`./dev android`) and publish a new version. The frontend must keep serving `/.well-known/assetlinks.json` (from `frontend/public`), or the app shows an address bar. See "Android app" in the [README](../README.md#android-app).
+
 ## Environment variables
 
 | Key | Default in the image | Purpose |
