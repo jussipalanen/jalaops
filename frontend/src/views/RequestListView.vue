@@ -2,9 +2,9 @@
 import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
-import AddressSearch from '@/components/AddressSearch.vue'
+import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
-import { formatAddress, formatDate, hasLocation, priorityLabels, statusLabels } from '@/labels'
+import { duePeriodLabels, formatAddress, formatDate, hasLocation, priorityLabels, statusLabels } from '@/labels'
 
 const { filters, hasFilters, apiPath, setFilter, setSearch, clearFilters } = useRequestFilters()
 
@@ -19,8 +19,9 @@ async function loadRequests() {
   try {
     const response = await apiGet(apiPath.value)
     requests.value = response.data
-  } catch {
-    error.value = 'Pyyntöjen lataaminen epäonnistui.'
+  } catch (e) {
+    // An invalid filter typed into the address gets the API's Finnish message.
+    error.value = e.status === 422 ? Object.values(e.errors).flat()[0] : 'Pyyntöjen lataaminen epäonnistui.'
   } finally {
     loading.value = false
   }
@@ -59,7 +60,7 @@ watch(filters, loadRequests, { immediate: true, deep: true })
       role="search"
       aria-label="Suodata pyyntöjä"
     >
-      <AddressSearch
+      <RequestSearch
         id="filter-search"
         class="flex-[2_1_16rem] sm:max-w-96"
         :model-value="filters.search"
@@ -95,6 +96,46 @@ watch(filters, loadRequests, { immediate: true, deep: true })
           </option>
         </select>
       </div>
+
+      <div class="grid flex-[1_1_10rem] gap-1 sm:max-w-64">
+        <label for="filter-due" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Määräpäivä</label>
+        <select
+          id="filter-due"
+          class="form-control lg:min-h-9 lg:py-1.5"
+          :value="filters.due"
+          @change="setFilter('due', $event.target.value)"
+        >
+          <option value="">Kaikki</option>
+          <option v-for="(label, value) in duePeriodLabels" :key="value" :value="value">
+            {{ label }}
+          </option>
+        </select>
+      </div>
+
+      <template v-if="filters.due === 'range'">
+        <div class="grid flex-[1_1_9rem] gap-1 sm:max-w-48">
+          <label for="filter-due-from" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Alkaen</label>
+          <input
+            id="filter-due-from"
+            class="form-control lg:min-h-9 lg:py-1.5"
+            type="date"
+            :value="filters.due_from"
+            :max="filters.due_to || undefined"
+            @change="setFilter('due_from', $event.target.value)"
+          />
+        </div>
+        <div class="grid flex-[1_1_9rem] gap-1 sm:max-w-48">
+          <label for="filter-due-to" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Asti</label>
+          <input
+            id="filter-due-to"
+            class="form-control lg:min-h-9 lg:py-1.5"
+            type="date"
+            :value="filters.due_to"
+            :min="filters.due_from || undefined"
+            @change="setFilter('due_to', $event.target.value)"
+          />
+        </div>
+      </template>
 
       <button v-if="hasFilters" type="button" class="btn btn-secondary w-full sm:w-auto" @click="clearFilters">
         Tyhjennä suodattimet

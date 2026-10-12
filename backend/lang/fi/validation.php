@@ -3,6 +3,7 @@
 // Finnish messages for the validation rules used by the API. Rules not
 // listed here fall back to Laravel's English messages.
 return [
+    'after_or_equal' => 'Kentän :attribute on oltava sama tai myöhempi päivä kuin :date.',
     'between' => [
         'min' => [
             'string' => 'Kentän :attribute on oltava vähintään :min merkkiä pitkä.',
@@ -11,6 +12,7 @@ return [
     ],
     'date_format' => 'Kentän :attribute on oltava muodossa :format.',
     'enum' => 'Kentän :attribute arvo on virheellinen.',
+    'in' => 'Kentän :attribute arvo on virheellinen.',
     'max' => [
         'string' => 'Kenttä :attribute saa olla enintään :max merkkiä pitkä.',
     ],
@@ -35,5 +37,9 @@ return [
         'latitude' => 'leveysaste',
         'longitude' => 'pituusaste',
         'q' => 'haku',
+        'search' => 'haku',
+        'due' => 'määräpäivä',
+        'due_from' => 'alkaen',
+        'due_to' => 'asti',
     ],
 ];

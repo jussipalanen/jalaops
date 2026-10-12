@@ -27,7 +27,7 @@ Käyttäjä voi:
 
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
 - vaihtaa pyynnön tilaa
-- suodattaa pyyntöjä tilan ja prioriteetin mukaan ja hakea niitä osoitteella
+- suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella yksinkertaista koontinäkymää
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
@@ -124,7 +124,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/geocode?q=…`   | Osoitteen koordinaatit (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Osoite-ehdotukset kirjoitettaessa (Photon) |
 
-Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high` ja osoitehaku `/api/requests?search=tampere` (katuosoite, postinumero tai kaupunki).
+Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määräpäivä `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `/api/requests?due_from=2026-10-01&due_to=2026-10-31` sekä haku `/api/requests?search=tampere` (otsikko, katuosoite, postinumero tai kaupunki).
 
 ## Kartta ja sijainnit
 

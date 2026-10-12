@@ -83,20 +83,56 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Only requests whose street address, postal code or city contains the text.
+     * Only requests whose title, street address, postal code or city contains the text.
      *
      * @param  Builder<self>  $query
      */
     #[Scope]
-    protected function locatedAt(Builder $query, string $text): void
+    protected function matching(Builder $query, string $text): void
     {
         // "%" and "_" in the search match literally. The escape character is
         // given explicitly, because MariaDB and SQLite have different defaults.
         $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $text).'%';
 
         $query->where(fn (Builder $query) => $query
-            ->whereRaw("street_address like ? escape '!'", [$pattern])
+            ->whereRaw("title like ? escape '!'", [$pattern])
+            ->orWhereRaw("street_address like ? escape '!'", [$pattern])
             ->orWhereRaw("postal_code like ? escape '!'", [$pattern])
             ->orWhereRaw("city like ? escape '!'", [$pattern]));
+    }
+
+    /**
+     * Only requests due in the given period: overdue (not completed and due
+     * before today), today, week (today and the next 7 days), month (the next
+     * 30 days) or none (no due date).
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function dueIn(Builder $query, string $period): void
+    {
+        $today = today();
+
+        match ($period) {
+            'overdue' => $query->whereDate('due_date', '<', $today)->where('status', '!=', RequestStatus::Completed),
+            'today' => $query->whereDate('due_date', $today),
+            'week' => $query->dueBetween($today->toDateString(), $today->copy()->addDays(7)->toDateString()),
+            'month' => $query->dueBetween($today->toDateString(), $today->copy()->addDays(30)->toDateString()),
+            'none' => $query->whereNull('due_date'),
+        };
+    }
+
+    /**
+     * Only requests due between the dates (inclusive); either end can be left open.
+     * whereDate compares just the date, also in SQLite, which stores a time too.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function dueBetween(Builder $query, ?string $from, ?string $to): void
+    {
+        $query
+            ->when($from, fn (Builder $query) => $query->whereDate('due_date', '>=', $from))
+            ->when($to, fn (Builder $query) => $query->whereDate('due_date', '<=', $to));
     }
 }

@@ -204,4 +204,64 @@ describe('RequestListView', () => {
     expect(wrapper.find('#filter-search').element.value).toBe('33100')
     expect(wrapper.text()).toContain('Ei suodattimia vastaavia pyyntöjä.')
   })
+
+  it('filters by a due date period', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: [] })))
+
+    const { wrapper, router } = await mountView()
+
+    expect(wrapper.find('#filter-due').text()).toContain('Myöhässä')
+    await wrapper.find('#filter-due').setValue('overdue')
+    await flushPromises()
+
+    expect(router.currentRoute.value.query).toEqual({ due: 'overdue' })
+    expect(fetch).toHaveBeenLastCalledWith('/api/requests?due=overdue', expect.anything())
+    expect(wrapper.find('#filter-due-from').exists()).toBe(false)
+  })
+
+  it('filters by a custom due date range', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: [] })))
+
+    const { wrapper, router } = await mountView()
+
+    await wrapper.find('#filter-due').setValue('range')
+    await flushPromises()
+    // Choosing the range only shows the date fields; nothing is filtered yet.
+    expect(fetch).toHaveBeenLastCalledWith('/api/requests', expect.anything())
+
+    await wrapper.find('#filter-due-from').setValue('2026-10-01')
+    await flushPromises()
+    await wrapper.find('#filter-due-to').setValue('2026-10-31')
+    await flushPromises()
+
+    expect(router.currentRoute.value.query).toEqual({ due: 'range', due_from: '2026-10-01', due_to: '2026-10-31' })
+    expect(fetch).toHaveBeenLastCalledWith('/api/requests?due_from=2026-10-01&due_to=2026-10-31', expect.anything())
+    expect(wrapper.find('#filter-due-to').attributes('min')).toBe('2026-10-01')
+
+    // Switching to a period drops the dates.
+    await wrapper.find('#filter-due').setValue('week')
+    await flushPromises()
+    expect(router.currentRoute.value.query).toEqual({ due: 'week' })
+  })
+
+  it('ignores invalid due date values in the URL', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: [] })))
+
+    await mountView('/requests?due=yesterday&due_from=2026-10-01')
+
+    expect(fetch).toHaveBeenCalledWith('/api/requests', expect.anything())
+  })
+
+  it("shows the API's message for an invalid range", async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse({ errors: { due_to: ['Kentän asti on oltava sama tai myöhempi päivä kuin alkaen.'] } }, 422),
+      ),
+    )
+
+    const { wrapper } = await mountView('/requests?due=range&due_from=2026-10-10&due_to=2026-10-01')
+
+    expect(wrapper.find('[role="alert"]').text()).toBe('Kentän asti on oltava sama tai myöhempi päivä kuin alkaen.')
+  })
 })

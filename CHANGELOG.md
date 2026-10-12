@@ -6,6 +6,16 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-12
+
+### Added
+- Määräpäivä filter on the request list (#33): Myöhässä (not completed and due before today), Tänään, Seuraavat 7 päivää, Seuraavat 30 päivää, Ei määräpäivää, or Aikaväli… with Alkaen and Asti date fields. The choice is kept in the address like the other filters.
+- `GET /api/requests?due=overdue|today|week|month|none` and `due_from`/`due_to` (YYYY-MM-DD, either end can be left open), with Finnish validation messages.
+
+### Changed
+- The search ("Haku", formerly "Osoitehaku") also matches the request title, on the list and the map.
+- An invalid filter in the address shows the API's Finnish validation message on the request list.
+
 ## [0.13.0] - 2026-10-12
 
 ### Added
@@ -172,7 +182,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/jussipalanen/jalaops/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/jussipalanen/jalaops/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/jussipalanen/jalaops/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/jussipalanen/jalaops/compare/v0.11.0...v0.11.1
