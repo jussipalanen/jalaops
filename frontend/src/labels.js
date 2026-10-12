@@ -11,6 +11,16 @@ export const statusLabels = {
   completed: 'Valmis',
 }
 
+// Due date filter choices; "range" shows date fields for a custom period.
+export const duePeriodLabels = {
+  overdue: 'Myöhässä',
+  today: 'Tänään',
+  week: 'Seuraavat 7 päivää',
+  month: 'Seuraavat 30 päivää',
+  none: 'Ei määräpäivää',
+  range: 'Aikaväli…',
+}
+
 // Formats an ISO date (YYYY-MM-DD) as a Finnish date, e.g. 15.10.2026.
 export function formatDate(isoDate) {
   if (!isoDate) {

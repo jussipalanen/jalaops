@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiGet } from '@/api/client'
-import AddressSearch from '@/components/AddressSearch.vue'
+import RequestSearch from '@/components/RequestSearch.vue'
 import { useRequestFilters } from '@/composables/useRequestFilters'
 import { formatAddress, hasLocation, priorityLabels, statusLabels } from '@/labels'
 import { createMap, FINLAND_BOUNDS, requestPin, requestPopup, STREET_ZOOM } from '@/map'
@@ -149,7 +149,7 @@ onBeforeUnmount(() => destroy?.())
         :class="panelOpen ? 'flex' : 'hidden'"
       >
         <div class="grid grid-cols-2 gap-2 p-3" role="search" aria-label="Suodata kartan pyyntöjä">
-          <AddressSearch id="map-filter-search" class="col-span-2" :model-value="filters.search" @search="setSearch" />
+          <RequestSearch id="map-filter-search" class="col-span-2" :model-value="filters.search" @search="setSearch" />
           <div class="grid gap-1">
             <label for="map-filter-status" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Tila</label>
             <select

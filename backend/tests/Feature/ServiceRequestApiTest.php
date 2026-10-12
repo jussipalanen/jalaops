@@ -259,7 +259,7 @@ class ServiceRequestApiTest extends TestCase
         $this->assertCount(4, $this->listedTitles('?status=&priority='));
     }
 
-    public function test_searches_by_street_address_postal_code_or_city(): void
+    public function test_searches_by_title_street_address_postal_code_or_city(): void
     {
         ServiceRequest::factory()->create(['title' => 'Tampere', 'street_address' => 'Hämeenkatu 10', 'postal_code' => '33100', 'city' => 'Tampere']);
         ServiceRequest::factory()->create(['title' => 'Oulu', 'street_address' => 'Isokatu 32', 'postal_code' => '90100', 'city' => 'Oulu']);
@@ -272,6 +272,7 @@ class ServiceRequestApiTest extends TestCase
         $this->assertSame(['Oulu'], $titles('Isokatu'));
         $this->assertSame(['Oulu'], $titles('901'));
         $this->assertSame(['Oulu', 'Tampere'], $titles('katu'));
+        $this->assertSame(['Ei osoitetta'], $titles('osoitetta'));
         $this->assertSame([], $titles('Rovaniemi'));
         $this->assertSame(['Ei osoitetta', 'Oulu', 'Tampere'], $titles('  '));
     }
@@ -295,6 +296,53 @@ class ServiceRequestApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Avoin');
+    }
+
+    public function test_filters_by_due_date_period(): void
+    {
+        $this->travelTo('2026-10-12 12:00');
+
+        ServiceRequest::factory()->create(['title' => 'Myöhässä', 'status' => 'open', 'due_date' => '2026-10-05']);
+        ServiceRequest::factory()->create(['title' => 'Myöhässä mutta valmis', 'status' => 'completed', 'due_date' => '2026-10-05']);
+        ServiceRequest::factory()->create(['title' => 'Tänään', 'status' => 'open', 'due_date' => '2026-10-12']);
+        ServiceRequest::factory()->create(['title' => 'Viikon päästä', 'status' => 'open', 'due_date' => '2026-10-19']);
+        ServiceRequest::factory()->create(['title' => 'Kuukauden päästä', 'status' => 'in_progress', 'due_date' => '2026-11-11']);
+        ServiceRequest::factory()->create(['title' => 'Myöhemmin', 'status' => 'open', 'due_date' => '2026-12-31']);
+        ServiceRequest::factory()->create(['title' => 'Ei määräpäivää', 'status' => 'open', 'due_date' => null]);
+
+        $titles = fn (string $query) => collect($this->getJson("/api/requests?{$query}")->assertOk()->json('data'))->pluck('title')->all();
+
+        $this->assertSame(['Myöhässä'], $titles('due=overdue'));
+        $this->assertSame(['Tänään'], $titles('due=today'));
+        $this->assertSame(['Tänään', 'Viikon päästä'], $titles('due=week'));
+        $this->assertSame(['Tänään', 'Viikon päästä', 'Kuukauden päästä'], $titles('due=month'));
+        $this->assertSame(['Ei määräpäivää'], $titles('due=none'));
+    }
+
+    public function test_filters_by_due_date_range(): void
+    {
+        ServiceRequest::factory()->create(['title' => 'Syyskuu', 'due_date' => '2026-09-30']);
+        ServiceRequest::factory()->create(['title' => 'Lokakuun alku', 'due_date' => '2026-10-01']);
+        ServiceRequest::factory()->create(['title' => 'Lokakuun loppu', 'due_date' => '2026-10-31']);
+        ServiceRequest::factory()->create(['title' => 'Marraskuu', 'due_date' => '2026-11-01']);
+
+        $titles = fn (string $query) => collect($this->getJson("/api/requests?{$query}")->assertOk()->json('data'))->pluck('title')->all();
+
+        $this->assertSame(['Lokakuun alku', 'Lokakuun loppu'], $titles('due_from=2026-10-01&due_to=2026-10-31'));
+        $this->assertSame(['Lokakuun loppu', 'Marraskuu'], $titles('due_from=2026-10-15'));
+        $this->assertSame(['Syyskuu'], $titles('due_to=2026-09-30'));
+    }
+
+    public function test_rejects_invalid_due_date_filters(): void
+    {
+        $this->getJson('/api/requests?due=yesterday&due_from=1.10.2026&due_to=2026-09-01')
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.due.0', 'Kentän määräpäivä arvo on virheellinen.')
+            ->assertJsonPath('errors.due_from.0', 'Kentän alkaen on oltava muodossa Y-m-d.');
+
+        $this->getJson('/api/requests?due_from=2026-10-10&due_to=2026-10-01')
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.due_to.0', 'Kentän asti on oltava sama tai myöhempi päivä kuin alkaen.');
     }
 
     public function test_rejects_invalid_filter_values(): void

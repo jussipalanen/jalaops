@@ -27,7 +27,7 @@ A user can:
 
 - view, create, edit and delete requests
 - change a request's status
-- filter requests by status and priority, and search them by address
+- filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
 - view a simple dashboard
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
@@ -124,7 +124,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/geocode?q=…`   | Coordinates of an address (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Address suggestions while typing (Photon) |
 
-Filters: `/api/requests?status=open`, `/api/requests?priority=high`, and the address search `/api/requests?search=tampere` (street address, postal code or city).
+Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `/api/requests?due_from=2026-10-01&due_to=2026-10-31`, and the search `/api/requests?search=tampere` (title, street address, postal code or city).
 
 ## Map and locations
 
