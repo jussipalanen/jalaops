@@ -23,6 +23,11 @@ class ServiceRequestResource extends JsonResource
             'priority' => $this->priority,
             'status' => $this->status,
             'due_date' => $this->due_date?->toDateString(),
+            'street_address' => $this->street_address,
+            'postal_code' => $this->postal_code,
+            'city' => $this->city,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

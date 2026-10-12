@@ -13,7 +13,7 @@
 
 [English](README.md) | **Suomi**
 
-[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Julkaisu](#julkaisu) · [Tiekartta](#tiekartta)
+[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Kartta](#kartta-ja-sijainnit) · [Julkaisu](#julkaisu) · [Tiekartta](#tiekartta)
 
 > **Tila:** kehitys on alkuvaiheessa. Katso [tiekartta](ROADMAP.md) ja [issuet](https://github.com/jussipalanen/jalaops/issues).
 
@@ -27,7 +27,8 @@ Käyttäjä voi:
 
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
 - vaihtaa pyynnön tilaa
-- suodattaa pyyntöjä tilan ja prioriteetin mukaan
+- suodattaa pyyntöjä tilan ja prioriteetin mukaan ja hakea niitä osoitteella
+- antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella yksinkertaista koontinäkymää
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
@@ -120,8 +121,24 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/dashboard`     | Pyyntöjen määrät tiloittain   |
 | GET    | `/api/dashboard/ai-overview` | AI-tilannekatsaus (kun käytössä) |
 | POST   | `/api/dashboard/ai-overview/refresh` | Luo uusi AI-tilannekatsaus |
+| GET    | `/api/geocode?q=…`   | Osoitteen koordinaatit (Nominatim) |
+| GET    | `/api/geocode/suggest?q=…` | Osoite-ehdotukset kirjoitettaessa (Photon) |
 
-Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`
+Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high` ja osoitehaku `/api/requests?search=tampere` (katuosoite, postinumero tai kaupunki).
+
+## Kartta ja sijainnit
+
+Pyynnöllä voi olla katuosoite, postinumero, kaupunki ja karttakoordinaatit. **Kartta**-sivu (`/map`) näyttää sijainnilliset pyynnöt koko näytön kartalla: merkit on väritetty prioriteetin mukaan, ja merkkiä napsauttamalla näkyy pyyntö ja linkki sen tietoihin. Pyyntölomake ehdottaa osoitteita kirjoitettaessa ja täyttää koordinaatit, ja merkin voi myös asettaa napsauttamalla karttaa.
+
+Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://www.openstreetmap.org/copyright) aineistoon eivätkä vaadi API-avaimia:
+
+| Palvelu | Käyttö |
+|---|---|
+| [OpenFreeMap](https://openfreemap.org) | Taustakartta, piirretään Leafletillä ja MapLibre GL:llä (ilman WebGL:ää OpenStreetMapin omat karttatiilet) |
+| [Nominatim](https://nominatim.org) | "Hae koordinaatit osoitteesta": osoitteesta koordinaatit, enintään yksi kutsu sekunnissa |
+| [Photon](https://photon.komoot.io) | Osoite-ehdotukset kirjoitettaessa (Nominatim ei salli automaattista täydennystä) |
+
+Backend kutsuu Nominatimia ja Photonia, tallentaa tulokset välimuistiin ja rajoittaa kutsuja kävijää kohden. Nominatimin käyttöehdot vaativat sovelluksen tunnistavan User-Agentin: aseta oma arvo muuttujaan `NOMINATIM_USER_AGENT`. Esimerkkiosoitteet ovat oikeita suomalaisia katuosoitteita OpenStreetMapin koordinaatein; itse pyynnöt ovat keksittyjä.
 
 ## AI-tilannekatsaus
 

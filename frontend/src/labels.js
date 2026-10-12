@@ -21,3 +21,15 @@ export function formatDate(isoDate) {
 
   return `${day}.${month}.${year}`
 }
+
+// "Hämeenkatu 10, 33100 Tampere", leaving out the parts that are missing.
+export function formatAddress(request) {
+  const city = [request.postal_code, request.city].filter(Boolean).join(' ')
+
+  return [request.street_address, city].filter(Boolean).join(', ')
+}
+
+// Whether a request has map coordinates.
+export function hasLocation(request) {
+  return request.latitude != null && request.longitude != null
+}

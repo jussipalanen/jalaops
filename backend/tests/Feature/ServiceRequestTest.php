@@ -31,6 +31,37 @@ class ServiceRequestTest extends TestCase
         $this->assertDatabaseCount('service_requests', 15);
     }
 
+    public function test_seeded_requests_have_finnish_locations(): void
+    {
+        $this->seed();
+
+        // Two demo requests are left without a location on purpose.
+        $this->assertSame(13, ServiceRequest::whereNotNull('latitude')->count());
+
+        $request = ServiceRequest::where('title', 'Vaihda ilmansuodatin')->firstOrFail();
+        $this->assertSame('Tikkurilantie 44', $request->street_address);
+        $this->assertSame('01300', $request->postal_code);
+        $this->assertSame('Vantaa', $request->city);
+
+        // Every location is inside Finland.
+        foreach (ServiceRequest::whereNotNull('latitude')->get() as $located) {
+            $this->assertTrue($located->latitude > 59.5 && $located->latitude < 70.1, $located->title);
+            $this->assertTrue($located->longitude > 19.0 && $located->longitude < 31.6, $located->title);
+        }
+    }
+
+    public function test_seeding_adds_locations_to_existing_demo_requests(): void
+    {
+        $existing = ServiceRequest::factory()->create(['title' => 'Huolla trukki']);
+        $own = ServiceRequest::factory()->create(['title' => 'Oma pyyntö']);
+
+        $this->seed();
+
+        $this->assertDatabaseCount('service_requests', 2);
+        $this->assertSame('Oulu', $existing->fresh()->city);
+        $this->assertNull($own->fresh()->city);
+    }
+
     public function test_seeded_requests_cover_every_status_and_priority(): void
     {
         $this->seed();

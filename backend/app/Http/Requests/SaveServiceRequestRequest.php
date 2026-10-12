@@ -23,6 +23,13 @@ class SaveServiceRequestRequest extends FormRequest
             'priority' => ['required', Rule::enum(RequestPriority::class)],
             'status' => ['required', Rule::enum(RequestStatus::class)],
             'due_date' => ['nullable', 'date_format:Y-m-d'],
+            'street_address' => ['nullable', 'string', 'max:255'],
+            // Mostly Finnish five-digit codes, but other countries' formats are allowed.
+            'postal_code' => ['nullable', 'string', 'max:10', 'regex:/^[A-Za-z0-9 -]+$/'],
+            'city' => ['nullable', 'string', 'max:100'],
+            // A point needs both coordinates, so one is required when the other is given.
+            'latitude' => ['nullable', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_with:latitude', 'numeric', 'between:-180,180'],
         ];
     }
 }

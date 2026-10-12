@@ -13,7 +13,7 @@
 
 **English** | [Suomi](README.fi.md)
 
-[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Deployment](#deployment) · [Roadmap](#roadmap)
+[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Map](#map-and-locations) · [Deployment](#deployment) · [Roadmap](#roadmap)
 
 > **Status:** in early development. See the [roadmap](ROADMAP.md) and [issues](https://github.com/jussipalanen/jalaops/issues).
 
@@ -27,7 +27,8 @@ A user can:
 
 - view, create, edit and delete requests
 - change a request's status
-- filter requests by status and priority
+- filter requests by status and priority, and search them by address
+- give a request an address and see the requests on a full-screen map
 - view a simple dashboard
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
@@ -120,8 +121,24 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/dashboard`     | Request counts by status    |
 | GET    | `/api/dashboard/ai-overview` | AI status overview (when enabled) |
 | POST   | `/api/dashboard/ai-overview/refresh` | Generate a new AI status overview |
+| GET    | `/api/geocode?q=…`   | Coordinates of an address (Nominatim) |
+| GET    | `/api/geocode/suggest?q=…` | Address suggestions while typing (Photon) |
 
-Filters: `/api/requests?status=open`, `/api/requests?priority=high`
+Filters: `/api/requests?status=open`, `/api/requests?priority=high`, and the address search `/api/requests?search=tampere` (street address, postal code or city).
+
+## Map and locations
+
+A request can have a street address, postal code, city and map coordinates. The **Kartta** page (`/map`) shows the requests with a location on a full-screen map: pins are coloured by priority, and clicking one shows the request with a link to its details. The request form suggests addresses while typing and fills in the coordinates, and the pin can also be placed by clicking the map.
+
+Everything uses free services built on [OpenStreetMap](https://www.openstreetmap.org/copyright) data, with no API keys:
+
+| Service | Used for |
+|---|---|
+| [OpenFreeMap](https://openfreemap.org) | The basemap, drawn with Leaflet and MapLibre GL (OpenStreetMap's own tiles without WebGL) |
+| [Nominatim](https://nominatim.org) | "Hae koordinaatit osoitteesta": address to coordinates, at most one call per second |
+| [Photon](https://photon.komoot.io) | Address suggestions while typing (Nominatim doesn't allow autocomplete) |
+
+The backend calls Nominatim and Photon, caches the results and limits calls per visitor. Nominatim's usage policy requires a User-Agent that identifies the app: set your own in `NOMINATIM_USER_AGENT`. The demo addresses are real Finnish street addresses with OpenStreetMap's coordinates; the requests themselves are made up.
 
 ## AI status overview
 

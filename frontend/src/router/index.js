@@ -20,9 +20,20 @@ const router = createRouter({
       component: () => import('../views/RequestCreateView.vue'),
     },
     {
+      path: '/requests/:id(\\d+)',
+      name: 'request-details',
+      component: () => import('../views/RequestDetailView.vue'),
+    },
+    {
       path: '/requests/:id/edit',
       name: 'request-edit',
       component: () => import('../views/RequestEditView.vue'),
+    },
+    {
+      path: '/map',
+      name: 'map',
+      component: () => import('../views/RequestMapView.vue'),
+      meta: { fullScreen: true },
     },
   ],
 })

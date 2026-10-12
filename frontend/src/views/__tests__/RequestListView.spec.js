@@ -10,6 +10,11 @@ const requests = [
     priority: 'high',
     status: 'open',
     due_date: '2026-10-15',
+    street_address: 'Tikkurilantie 44',
+    postal_code: '01300',
+    city: 'Vantaa',
+    latitude: 60.2891,
+    longitude: 25.0371,
   },
   {
     id: 2,
@@ -29,7 +34,9 @@ async function mountView(url = '/requests') {
     history: createMemoryHistory(),
     routes: [
       { path: '/requests', component: RequestListView },
+      { path: '/requests/:id', component: { template: '<div />' } },
       { path: '/requests/:id/edit', component: { template: '<div />' } },
+      { path: '/map', component: { template: '<div />' } },
     ],
   })
   await router.push(url)
@@ -63,7 +70,12 @@ describe('RequestListView', () => {
     expect(rows[1].text()).toContain('Työn alla')
     expect(rows[1].text()).toContain('–')
 
-    expect(rows[0].find('a').attributes('href')).toBe('/requests/1/edit')
+    expect(rows[0].find('a').attributes('href')).toBe('/requests/1')
+    expect(rows[0].find('a[href="/requests/1/edit"]').text()).toBe('Muokkaa')
+    // Only requests with coordinates link to the map.
+    expect(rows[0].find('a[href="/map?request=1"]').exists()).toBe(true)
+    expect(rows[0].text()).toContain('Tikkurilantie 44, 01300 Vantaa')
+    expect(rows[1].find('a[href^="/map"]').exists()).toBe(false)
   })
 
   it('shows a message when there are no requests', async () => {
@@ -154,6 +166,42 @@ describe('RequestListView', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/requests?priority=high', expect.anything())
     expect(wrapper.find('#filter-priority').element.value).toBe('high')
     expect(wrapper.find('#filter-status').element.value).toBe('')
+    expect(wrapper.text()).toContain('Ei suodattimia vastaavia pyyntöjä.')
+  })
+
+  it('searches by address after a short pause and keeps the search in the URL', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: [requests[0]] }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { wrapper, router } = await mountView()
+
+    await wrapper.find('#filter-search').setValue('Vant')
+    await wrapper.find('#filter-search').setValue('Vantaa ')
+    expect(router.currentRoute.value.query).toEqual({})
+
+    await vi.advanceTimersByTimeAsync(300)
+    await flushPromises()
+
+    // Only the finished search is sent, trimmed.
+    expect(router.currentRoute.value.query).toEqual({ search: 'Vantaa' })
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/requests?search=Vantaa', expect.anything())
+    expect(fetchMock.mock.calls.filter(([url]) => url.includes('search'))).toHaveLength(1)
+
+    await wrapper.find('[role="search"] .btn').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('#filter-search').element.value).toBe('')
+
+    vi.useRealTimers()
+  })
+
+  it('applies the search from the URL when opened', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: [] })))
+
+    const { wrapper } = await mountView('/requests?search=33100&status=open')
+
+    expect(fetch).toHaveBeenCalledWith('/api/requests?status=open&search=33100', expect.anything())
+    expect(wrapper.find('#filter-search').element.value).toBe('33100')
     expect(wrapper.text()).toContain('Ei suodattimia vastaavia pyyntöjä.')
   })
 })

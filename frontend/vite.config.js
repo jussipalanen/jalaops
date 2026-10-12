@@ -27,8 +27,13 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      // MapLibre GL (the map renderer, ~1.2 MB) is in its own chunk that only map pages load.
+      chunkSizeWarningLimit: 1300,
+    },
     test: {
       environment: 'jsdom',
+      setupFiles: ['./src/test/setup.js'],
     },
   }
 })

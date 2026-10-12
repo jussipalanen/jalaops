@@ -84,6 +84,11 @@ describe('RequestEditView', () => {
     priority: 'high',
     status: 'open',
     due_date: '2026-10-15',
+    street_address: 'Tikkurilantie 44',
+    postal_code: '01300',
+    city: 'Vantaa',
+    latitude: 60.2891,
+    longitude: 25.0371,
   }
 
   it('loads the request and saves a changed status', async () => {
@@ -112,6 +117,11 @@ describe('RequestEditView', () => {
       priority: 'high',
       status: 'completed',
       due_date: '2026-10-15',
+      street_address: 'Tikkurilantie 44',
+      postal_code: '01300',
+      city: 'Vantaa',
+      latitude: 60.2891,
+      longitude: 25.0371,
     })
     expect(push).toHaveBeenCalledWith('/requests')
   })
