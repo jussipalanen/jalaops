@@ -42,7 +42,7 @@ These are the same checks GitHub Actions runs (see "Continuous integration" in R
 
 ## Versioning and changelog
 
-- Follow semantic versioning (`MAJOR.MINOR.PATCH`). Until `1.0.0`, every merged feature is a new minor version (`0.x.0`) and a fix-only release is a patch (`0.x.y`). `1.0.0` is the release defined in ROADMAP.md's Definition of Done.
+- Follow semantic versioning (`MAJOR.MINOR.PATCH`). Until `1.0.0`, every merged feature is a new minor version (`0.x.0`) and a fix-only release is a patch (`0.x.y`). `1.0.0` is the release defined in ROADMAP.md's Definition of Done. From `1.0.0` on, a new feature is a minor version (`1.x.0`), a fix-only release a patch (`1.x.y`), and a change that breaks the API for its clients a major version.
 - Every pull request that changes behaviour adds its entry to `CHANGELOG.md` under the next version (Added, Changed, Fixed, Removed), and updates the version in `frontend/package.json` and the API docs version in `backend/config/scramble.php`.
 - After a pull request is merged, tag the merge commit on `main` with an annotated tag such as `v0.4.0`.
 - Then publish a GitHub release for that tag, titled with the plain version number (`0.4.0`), with the version's `CHANGELOG.md` section as the notes and a "Full changelog" compare link to the previous tag.
@@ -52,6 +52,7 @@ These are the same checks GitHub Actions runs (see "Continuous integration" in R
 
 - Keep `README.md` (English) and `README.fi.md` (Finnish) in sync.
 - Document new environment variables in `backend/.env.example` (and `docs/DEPLOYMENT.md` if they matter for hosting).
+- Keep `ROADMAP.md` up to date: add each new feature to "Upcoming Features" when it's planned, and mark it done with its version when it's released.
 
 ## Secrets and staging
 

@@ -553,11 +553,21 @@ At that point, stop adding features and release:
 v1.0.0
 ```
 
+**Status:** done. Every point above works, and v1.0.0 was released on 13 October 2026. The phases were also extended with locations and a map, signatures, PDF and HTML downloads, export and import, and an Android app (versions 0.13–0.24, see CHANGELOG.md).
+
 ---
 
 # Upcoming Features
 
 Planned after the features above. Each is developed through its own GitHub issues, like the phases.
+
+| Feature | Status |
+|---|---|
+| Android app (Google Play testing) | Steps 1–5 done in 0.24.0; Google Play submission is next. |
+| Lähellä minua: nearest requests first on the map and the list ([#61](https://github.com/jussipalanen/jalaops/issues/61)) | Planned |
+| Statistics and charts on the dashboard | Planned |
+
+**Ideas, not scheduled yet:** a daily route through the open requests, pin clustering on the map, bulk editing of selected requests, Excel (.xlsx) import, calendar (.ics) export, photos on requests, activity history, recurring maintenance, email reminders.
 
 ## Android App (Google Play Testing)
 

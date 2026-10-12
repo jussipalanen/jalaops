@@ -31,7 +31,7 @@ A user can:
 - export requests to CSV (Excel) or JSON and import them back on the Työkalut page
 - filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
-- view a simple dashboard
+- view a dashboard with the request counts, each linking to the matching list
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -126,7 +126,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | POST   | `/api/requests`      | Create a request            |
 | PUT    | `/api/requests/{id}` | Update a request            |
 | DELETE | `/api/requests/{id}` | Delete a request            |
-| GET    | `/api/dashboard`     | Request counts by status    |
+| GET    | `/api/dashboard`     | Request counts: open, in progress, completed, overdue and total |
 | GET    | `/api/dashboard/ai-overview` | AI status overview (when enabled) |
 | POST   | `/api/dashboard/ai-overview/refresh` | Generate a new AI status overview |
 | GET    | `/api/geocode?q=…`   | Coordinates of an address (Nominatim) |

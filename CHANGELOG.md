@@ -6,6 +6,22 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-13
+
+The first complete release: every point of the Definition of Done in ROADMAP.md works.
+
+### Added
+- Dashboard counts on the home page (#8): how many requests are open, in progress, completed and overdue, under "Tilanne". Each count opens the request list filtered to the same requests, and the overdue count is highlighted when it isn't zero.
+- `GET /api/dashboard`: the counts by status, overdue (not completed and due before today) and the total.
+
+### Changed
+- ROADMAP.md marks v1.0 as done and lists the planned features and ideas; AGENTS.md asks to keep the roadmap up to date and describes versioning from 1.0.0 on.
+- The automated tests (#9) cover the API, the views and the components: about 100 backend and 100 frontend tests, run by CI on every pull request.
+
+### Fixed
+- The "Huoltopyyntöjen hallinta" heading on the home page had too little contrast in the light theme.
+- The README listed `GET /api/dashboard` before it existed.
+
 ## [0.24.1] - 2026-10-12
 
 ### Fixed
@@ -279,7 +295,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.24.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/jussipalanen/jalaops/compare/v0.24.1...v1.0.0
 [0.24.1]: https://github.com/jussipalanen/jalaops/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/jussipalanen/jalaops/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/jussipalanen/jalaops/compare/v0.22.0...v0.23.0

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AiOverviewController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
 use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
@@ -50,6 +51,9 @@ Route::apiResource('requests', ServiceRequestController::class)
 // Address to coordinates for request locations (Nominatim), and address suggestions while typing (Photon).
 Route::get('/geocode', [GeocodeController::class, 'show'])->middleware('throttle:geocode');
 Route::get('/geocode/suggest', [GeocodeController::class, 'suggest'])->middleware('throttle:geocode-suggest');
+
+// Request counts for the dashboard on the home page.
+Route::get('/dashboard', [DashboardController::class, 'show']);
 
 // AI-tilannekatsaus for the dashboard (Gemini or Puter). Off unless AI_INSIGHTS_ENABLED and the provider's key are set.
 Route::get('/dashboard/ai-overview', [AiOverviewController::class, 'show']);
