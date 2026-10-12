@@ -6,6 +6,16 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-12
+
+### Added
+- Sorting on the request list (#43): click a column header (title, priority, status, due date) to sort, and again to reverse it. Priority sorts high first on the first click. On phones a "Järjestys" select offers the same orders and "Uusimmat ensin"/"Vanhimmat ensin".
+- Pagination on the request list: 10, 25, 50 or 100 requests per page (default 10), previous and next buttons and "Näytetään 1–10 / 15". Sort, page and page size are kept in the address; changing a filter goes back to the first page and keeps the sort.
+- `GET /api/requests?sort=…&per_page=…&page=…`. `sort` takes `due_date`, `title`, `priority`, `status` or `created_at`, with `-` in front for descending; priority and status sort in their logical order. With `per_page` the response is paginated and has `links` and `meta`; without it, all matching requests are returned, as before.
+
+### Changed
+- Deleting a request on the list reloads the page, so it fills up from the next page.
+
 ## [0.17.0] - 2026-10-12
 
 ### Added
@@ -211,7 +221,8 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/jussipalanen/jalaops/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/jussipalanen/jalaops/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/jussipalanen/jalaops/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/jussipalanen/jalaops/compare/v0.14.1...v0.15.0

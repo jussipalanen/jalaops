@@ -135,4 +135,27 @@ class ServiceRequest extends Model
             ->when($from, fn (Builder $query) => $query->whereDate('due_date', '>=', $from))
             ->when($to, fn (Builder $query) => $query->whereDate('due_date', '<=', $to));
     }
+
+    /**
+     * Sorts by a field, with "-" in front for descending. Requests without a
+     * due date come last either way; priority and status sort in their logical
+     * order (low → high, open → completed). The id breaks ties, so pages are stable.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function sortedBy(Builder $query, string $sort): void
+    {
+        $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
+        $field = ltrim($sort, '-');
+
+        match ($field) {
+            'due_date' => $query->orderByRaw('due_date IS NULL')->orderBy('due_date', $direction),
+            'priority' => $query->orderByRaw("CASE priority WHEN 'low' THEN 1 WHEN 'normal' THEN 2 ELSE 3 END {$direction}"),
+            'status' => $query->orderByRaw("CASE status WHEN 'open' THEN 1 WHEN 'in_progress' THEN 2 ELSE 3 END {$direction}"),
+            default => $query->orderBy($field, $direction),
+        };
+
+        $query->orderBy('id', $direction);
+    }
 }

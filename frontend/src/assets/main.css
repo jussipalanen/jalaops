@@ -173,6 +173,23 @@
     @apply font-semibold;
   }
 
+  /* Sortable column headers. */
+  .sort-button {
+    @apply inline-flex cursor-pointer items-center gap-1 uppercase hover:text-slate-900 dark:hover:text-white;
+  }
+
+  .sort-icon {
+    @apply text-[0.625rem] opacity-0;
+  }
+
+  .sort-button:hover .sort-icon {
+    @apply opacity-40;
+  }
+
+  .request-table th[aria-sort] {
+    @apply text-primary-700 dark:text-primary-300;
+  }
+
   @media (width < 40rem) {
     .request-table thead {
       @apply sr-only;

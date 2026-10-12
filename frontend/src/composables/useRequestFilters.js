@@ -42,10 +42,20 @@ export function useRequestFilters() {
       query.due_to = ''
     }
 
-    // Leave empty filters out of the URL.
+    // Leave empty filters out of the URL. The list's sort order and page size
+    // stay; the page goes back to the first.
     router.replace({
-      query: Object.fromEntries(Object.entries(query).filter(([, filterValue]) => filterValue)),
+      query: {
+        ...listOptions(),
+        ...Object.fromEntries(Object.entries(query).filter(([, filterValue]) => filterValue)),
+      },
     })
+  }
+
+  // The request list's sort order and page size, which outlive filter changes.
+  function listOptions() {
+    const { sort, per_page } = route.query
+    return Object.fromEntries(Object.entries({ sort, per_page }).filter(([, value]) => value))
   }
 
   // Typing in the search box updates the URL (and so the results) after a short pause.
@@ -61,7 +71,7 @@ export function useRequestFilters() {
 
   function clearFilters() {
     clearTimeout(searchTimer)
-    router.replace({ query: {} })
+    router.replace({ query: listOptions() })
   }
 
   return { filters, hasFilters, apiPath, setFilter, setSearch, clearFilters }

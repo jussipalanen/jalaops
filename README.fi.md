@@ -124,7 +124,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/geocode?q=…`   | Osoitteen koordinaatit (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Osoite-ehdotukset kirjoitettaessa (Photon) |
 
-Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määräpäivä `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `/api/requests?due_from=2026-10-01&due_to=2026-10-31` sekä haku `/api/requests?search=tampere` (otsikko, katuosoite, postinumero tai kaupunki).
+Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määräpäivä `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `/api/requests?due_from=2026-10-01&due_to=2026-10-31` sekä haku `/api/requests?search=tampere` (otsikko, katuosoite, postinumero tai kaupunki). Järjestys `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` laskevaan järjestykseen) ja sivutus `per_page=10|25|50|100&page=2`; ilman `per_page`-parametria palautetaan kaikki osumat.
 
 ## Kartta ja sijainnit
 
