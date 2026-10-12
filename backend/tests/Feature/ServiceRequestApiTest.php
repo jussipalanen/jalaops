@@ -53,6 +53,9 @@ class ServiceRequestApiTest extends TestCase
                 'city' => null,
                 'latitude' => null,
                 'longitude' => null,
+                'has_signature' => false,
+                'signed_by' => null,
+                'signed_at' => null,
                 'created_at' => $request->created_at->toJSON(),
                 'updated_at' => $request->updated_at->toJSON(),
             ]]);

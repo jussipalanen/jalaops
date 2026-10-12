@@ -23,6 +23,9 @@ use Illuminate\Support\Carbon;
  * @property string|null $city
  * @property float|null $latitude
  * @property float|null $longitude
+ * @property string|null $completion_signature PNG data URL
+ * @property string|null $signed_by
+ * @property Carbon|null $signed_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
@@ -42,6 +45,8 @@ class ServiceRequest extends Model
         'city',
         'latitude',
         'longitude',
+        'completion_signature',
+        'signed_by',
     ];
 
     protected $attributes = [
@@ -57,7 +62,42 @@ class ServiceRequest extends Model
             'due_date' => 'date:Y-m-d',
             'latitude' => 'float',
             'longitude' => 'float',
+            'signed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Saves the request. A request that isn't completed has no sign-off, and a
+     * new or changed signature or signer's name is stamped with the time.
+     *
+     * @param  array<string, mixed>  $data  validated fields; a missing completion_signature keeps the current one
+     */
+    public function saveWithSignOff(array $data): void
+    {
+        $this->fill($data);
+
+        if ($this->status !== RequestStatus::Completed) {
+            $this->completion_signature = null;
+            $this->signed_by = null;
+        }
+
+        if ($this->isDirty(['completion_signature', 'signed_by']) || ! $this->exists) {
+            $this->signed_at = $this->completion_signature || $this->signed_by ? now() : null;
+        }
+
+        $this->save();
+    }
+
+    /**
+     * The signature as PNG bytes, or null when there is none.
+     */
+    public function signaturePng(): ?string
+    {
+        if (! $this->completion_signature) {
+            return null;
+        }
+
+        return base64_decode(substr($this->completion_signature, strlen('data:image/png;base64,')), true) ?: null;
     }
 
     /**
