@@ -105,8 +105,12 @@ describe('RequestMapView', () => {
     expect(popup.textContent).toContain('Vaihda varaston ilmanvaihtokoneen ilmansuodatin.')
     expect(popup.textContent).toContain('Määräpäivä 15.10.2026')
 
-    const link = popup.querySelector('a')
+    const [link, streetView] = popup.querySelectorAll('a')
     expect(link.getAttribute('href')).toBe('/requests/1')
+    expect(streetView.getAttribute('href')).toBe(
+      'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=60.2891,25.0371',
+    )
+    expect(streetView.getAttribute('target')).toBe('_blank')
 
     link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }))
     await flushPromises()

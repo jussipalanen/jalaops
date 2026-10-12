@@ -10,7 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 // breaks, so Vite builds the worker and MapLibre is told where it is.
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { watch } from 'vue'
-import { formatAddress, formatDate, priorityLabels, statusLabels } from '@/labels'
+import { formatAddress, formatDate, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import { isDark } from '@/theme'
 
 // Most requests are in Finland, so a map without pins starts there.
@@ -127,8 +127,8 @@ function truncate(text, length) {
   return text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text
 }
 
-// Popup content for a request: title, badges, description, address, due date
-// and a "Näytä tiedot" link. `openDetails` is called instead of following the
+// Popup content for a request: title, badges, description, address, due date,
+// a "Näytä tiedot" link and a Street View link. `openDetails` is called instead of following the
 // link, so the app navigates without a page reload (modifier clicks still open a new tab).
 export function requestPopup(request, openDetails) {
   const popup = element('div', 'map-popup')
@@ -156,6 +156,8 @@ export function requestPopup(request, openDetails) {
     popup.append(element('p', 'map-popup-meta', `Määräpäivä ${formatDate(request.due_date)}`))
   }
 
+  const links = element('p', 'map-popup-links')
+
   const link = element('a', 'map-popup-link', 'Näytä tiedot →')
   link.href = `/requests/${request.id}`
   link.addEventListener('click', (event) => {
@@ -166,7 +168,15 @@ export function requestPopup(request, openDetails) {
     event.preventDefault()
     openDetails(request)
   })
-  popup.append(link)
+
+  const streetView = element('a', 'map-popup-link', 'Street View ↗')
+  streetView.href = streetViewUrl(request)
+  streetView.target = '_blank'
+  streetView.rel = 'noopener'
+  streetView.title = 'Avaa Google Street View uudessa välilehdessä'
+
+  links.append(link, streetView)
+  popup.append(links)
 
   return popup
 }
