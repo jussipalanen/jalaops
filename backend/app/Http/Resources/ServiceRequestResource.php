@@ -28,6 +28,10 @@ class ServiceRequestResource extends JsonResource
             'city' => $this->city,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
+            // The signature image itself is at /api/requests/{id}/signature, so lists stay small.
+            'has_signature' => $this->completion_signature !== null,
+            'signed_by' => $this->signed_by,
+            'signed_at' => $this->signed_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

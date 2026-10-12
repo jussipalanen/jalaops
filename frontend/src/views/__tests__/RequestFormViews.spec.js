@@ -122,6 +122,8 @@ describe('RequestEditView', () => {
       city: 'Vantaa',
       latitude: 60.2891,
       longitude: 25.0371,
+      // Completed requests carry the sign-off; without a drawing the signature is left out.
+      signed_by: null,
     })
     expect(push).toHaveBeenCalledWith('/requests')
   })

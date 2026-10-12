@@ -35,6 +35,7 @@ Route::get('/health', function () {
 Route::get('/system', [SystemController::class, 'show']);
 
 // The model is ServiceRequest, but the public API uses /api/requests.
+Route::get('/requests/{serviceRequest}/signature', [ServiceRequestController::class, 'signature']);
 Route::apiResource('requests', ServiceRequestController::class)
     ->parameters(['requests' => 'serviceRequest']);
 

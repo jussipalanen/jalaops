@@ -109,6 +109,19 @@ async function deleteRequest() {
           </div>
         </dl>
 
+        <div v-if="request.signed_by || request.has_signature">
+          <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Kuittaus</h2>
+          <img
+            v-if="request.has_signature"
+            :src="`/api/requests/${request.id}/signature?v=${encodeURIComponent(request.signed_at ?? '')}`"
+            :alt="`Allekirjoitus: ${request.signed_by ?? 'kuittaaja'}`"
+            class="mt-2 block aspect-[3/1] w-full max-w-md rounded-lg border border-slate-200 bg-white object-contain dark:border-slate-700"
+          />
+          <p class="mt-2">
+            Kuitannut <strong>{{ request.signed_by ?? '–' }}</strong><template v-if="request.signed_at">, {{ new Date(request.signed_at).toLocaleString('fi-FI') }}</template>
+          </p>
+        </div>
+
         <div v-if="hasLocation(request)">
           <div
             ref="mapContainer"

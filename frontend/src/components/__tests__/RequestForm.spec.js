@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import { flushPromises, mount } from '@vue/test-utils'
 import RequestForm from '../RequestForm.vue'
 
 function jsonResponse(body, status = 200) {
   return { ok: status < 400, status, json: () => Promise.resolve(body) }
+}
+
+// jsdom has no PointerEvent, so the pad gets mouse events with pointer event names.
+async function pointer(element, type, x = 0, y = 0) {
+  element.element.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }))
+  await nextTick()
 }
 
 describe('RequestForm', () => {
@@ -223,5 +230,48 @@ describe('RequestForm', () => {
     expect(wrapper.find('#latitude').element.value).toBe('65.0103')
 
     vi.useRealTimers()
+  })
+
+  it('signs off a completed request with a name and a drawn signature', async () => {
+    const wrapper = mount(RequestForm, { props: { request: { title: 'Huolla trukki' } } })
+
+    expect(wrapper.find('#signed_by').exists()).toBe(false)
+    await wrapper.find('#status').setValue('completed')
+
+    await wrapper.find('#signed_by').setValue('Maija Huoltaja')
+    const pad = wrapper.find('canvas')
+    await pointer(pad, 'pointerdown', 10, 10)
+    await pointer(pad, 'pointerup')
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('submit')[0][0]).toMatchObject({
+      status: 'completed',
+      signed_by: 'Maija Huoltaja',
+      completion_signature: expect.stringMatching(/^data:image\/png;base64,/),
+    })
+  })
+
+  it('keeps a saved signature unless it is redrawn or removed', async () => {
+    const request = { id: 7, title: 'Huolla trukki', status: 'completed', has_signature: true, signed_by: 'Maija', signed_at: '2026-10-12T15:30:00.000000Z' }
+    const wrapper = mount(RequestForm, { props: { request } })
+
+    expect(wrapper.find('img').attributes('src')).toBe(`/api/requests/7/signature?v=${encodeURIComponent(request.signed_at)}`)
+    await wrapper.find('form').trigger('submit')
+    expect(wrapper.emitted('submit')[0][0]).not.toHaveProperty('completion_signature')
+    expect(wrapper.emitted('submit')[0][0].signed_by).toBe('Maija')
+
+    await wrapper.findAll('button').find((button) => button.text() === 'Poista allekirjoitus').trigger('click')
+    expect(wrapper.find('canvas').exists()).toBe(true)
+    await wrapper.find('form').trigger('submit')
+    expect(wrapper.emitted('submit')[1][0].completion_signature).toBeNull()
+  })
+
+  it('leaves the sign-off out for requests that are not completed', async () => {
+    const wrapper = mount(RequestForm, { props: { request: { title: 'Huolla trukki', status: 'in_progress', signed_by: 'Maija' } } })
+
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('submit')[0][0]).not.toHaveProperty('signed_by')
+    expect(wrapper.emitted('submit')[0][0]).not.toHaveProperty('completion_signature')
   })
 })

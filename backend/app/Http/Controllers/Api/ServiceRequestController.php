@@ -9,6 +9,7 @@ use App\Http\Requests\ListServiceRequestsRequest;
 use App\Http\Requests\SaveServiceRequestRequest;
 use App\Http\Resources\ServiceRequestResource;
 use App\Models\ServiceRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
@@ -56,8 +57,11 @@ class ServiceRequestController extends Controller
      */
     public function store(SaveServiceRequestRequest $request): ServiceRequestResource
     {
+        $serviceRequest = new ServiceRequest;
+        $serviceRequest->saveWithSignOff($request->validated());
+
         /** @status 201 */
-        return new ServiceRequestResource(ServiceRequest::create($request->validated()));
+        return new ServiceRequestResource($serviceRequest);
     }
 
     /**
@@ -71,13 +75,34 @@ class ServiceRequestController extends Controller
     /**
      * Update a request.
      *
-     * Replaces all fields, so send the full request.
+     * Replaces all fields, so send the full request. Leave `completion_signature`
+     * out to keep the current signature; changing the status away from
+     * completed removes the sign-off.
      */
     public function update(SaveServiceRequestRequest $request, ServiceRequest $serviceRequest): ServiceRequestResource
     {
-        $serviceRequest->update($request->validated());
+        $serviceRequest->saveWithSignOff($request->validated());
 
         return new ServiceRequestResource($serviceRequest);
+    }
+
+    /**
+     * Get a request's signature.
+     *
+     * The signature drawn when the request was completed, as a PNG image.
+     */
+    public function signature(ServiceRequest $serviceRequest): Response|JsonResponse
+    {
+        $png = $serviceRequest->signaturePng();
+
+        if ($png === null) {
+            return response()->json(['message' => 'Pyynnöllä ei ole allekirjoitusta.'], 404);
+        }
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'private, no-cache',
+        ]);
     }
 
     /**
