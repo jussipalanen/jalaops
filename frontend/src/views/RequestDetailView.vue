@@ -5,6 +5,7 @@ import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
 import { formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import RequestDownloads from '@/components/RequestDownloads.vue'
+import RequestItems from '@/components/RequestItems.vue'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
 import { pageTitle } from '@/pageTitle'
 
@@ -158,6 +159,8 @@ async function deleteRequest() {
           </p>
         </div>
       </div>
+
+      <RequestItems :request-id="request.id" class="mt-5" />
 
       <RouterLink to="/requests" class="mt-5 inline-block font-semibold text-primary-700 hover:underline dark:text-primary-400">
         ← Takaisin pyyntöihin

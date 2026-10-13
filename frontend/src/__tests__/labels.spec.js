@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDate, isNew } from '../labels'
+import { formatDate, formatEuro, formatNumber, isNew, parseDecimal } from '../labels'
 
 describe('formatDate', () => {
   it('formats an ISO date as a Finnish date', () => {
@@ -22,3 +22,21 @@ describe('isNew', () => {
     expect(isNew({ status: 'open' }, now)).toBe(false)
   })
 })
+
+describe('money and numbers', () => {
+  const plain = (value) => value.replace(/\u00a0|\u202f/g, ' ')
+
+  it('formats euros and numbers the Finnish way', () => {
+    expect(plain(formatEuro(1234.5))).toBe('1 234,50 €')
+    expect(formatNumber(1.5)).toBe('1,5')
+    expect(formatNumber(25.5)).toBe('25,5')
+  })
+
+  it('reads numbers typed with a decimal comma', () => {
+    expect(parseDecimal('1,5')).toBe(1.5)
+    expect(parseDecimal(' 65.00 ')).toBe(65)
+    expect(parseDecimal('1 234,5')).toBe(1234.5)
+    expect(parseDecimal('')).toBe('')
+  })
+})
+

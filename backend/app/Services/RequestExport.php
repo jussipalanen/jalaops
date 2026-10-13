@@ -15,7 +15,7 @@ class RequestExport
 {
     public function html(ServiceRequest $request): string
     {
-        return view('exports.request', ['request' => $request, 'forPdf' => false])->render();
+        return view('exports.request', ['request' => $request->loadMissing('items'), 'forPdf' => false])->render();
     }
 
     public function pdf(ServiceRequest $request): string
@@ -28,7 +28,7 @@ class RequestExport
         $options->setDefaultFont('DejaVu Sans');
 
         $dompdf = new Dompdf($options);
-        $dompdf->loadHtml(view('exports.request', ['request' => $request, 'forPdf' => true])->render(), 'UTF-8');
+        $dompdf->loadHtml(view('exports.request', ['request' => $request->loadMissing('items'), 'forPdf' => true])->render(), 'UTF-8');
         $dompdf->setPaper('A4');
         $dompdf->render();
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AiOverviewController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
+use App\Http\Controllers\Api\RequestItemController;
 use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
 use App\Http\Controllers\Api\SystemController;
@@ -44,6 +45,12 @@ Route::apiResource('customers', CustomerController::class);
 // and "import" aren't read as request ids.
 Route::get('/requests/export', [RequestTransferController::class, 'export']);
 Route::post('/requests/import', [RequestTransferController::class, 'import'])->middleware('throttle:imports');
+
+// Work and materials on a request; a row is only found under its own request.
+Route::apiResource('requests.items', RequestItemController::class)
+    ->parameters(['requests' => 'serviceRequest', 'items' => 'item'])
+    ->except(['show'])
+    ->scoped();
 
 // The model is ServiceRequest, but the public API uses /api/requests.
 Route::get('/requests/{serviceRequest}/signature', [ServiceRequestController::class, 'signature']);

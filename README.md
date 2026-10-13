@@ -33,6 +33,7 @@ A user can:
 - give a request an address and see the requests on a full-screen map
 - view a dashboard with the request counts, each linking to the matching list
 - keep a register of customers (Asiakkaat) and choose the customer for each request
+- record the work and materials of a request, with VAT and totals (the basis for invoicing)
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -125,6 +126,8 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | POST   | `/api/requests/import` | Import requests from a CSV or JSON file (`dry_run` to check it first) |
 | GET    | `/api/requests/{id}` | Get a single request        |
 | GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
+| GET/POST | `/api/requests/{id}/items` | A request's work and materials with totals, or add a row |
+| PUT/DELETE | `/api/requests/{id}/items/{item}` | Update or delete a row |
 | GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF |
 | GET    | `/api/requests/{id}/export/html` | Download the request as a self-contained HTML file |
 | POST   | `/api/requests`      | Create a request            |

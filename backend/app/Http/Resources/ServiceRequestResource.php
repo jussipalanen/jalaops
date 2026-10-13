@@ -33,6 +33,9 @@ class ServiceRequestResource extends JsonResource
             'has_signature' => $this->completion_signature !== null,
             'signed_by' => $this->signed_by,
             'signed_at' => $this->signed_at,
+            // Work and materials with their totals in euros, on a single request.
+            'items' => RequestItemResource::collection($this->whenLoaded('items')),
+            'totals' => $this->whenLoaded('items', fn () => array_map(fn (int $cents) => $cents / 100, $this->totalsCents())),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -33,6 +33,7 @@ Käyttäjä voi:
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella koontinäkymää, jonka lukumäärät vievät vastaavaan listaan
 - pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
+- kirjata pyynnön työt ja tarvikkeet arvonlisäveroineen ja summineen (laskutuksen perusta)
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -125,6 +126,8 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | POST   | `/api/requests/import` | Tuo pyyntöjä CSV- tai JSON-tiedostosta (`dry_run` tarkistaa ensin) |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
 | GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
+| GET/POST | `/api/requests/{id}/items` | Pyynnön työt ja tarvikkeet summineen, tai lisää rivi |
+| PUT/DELETE | `/api/requests/{id}/items/{item}` | Päivitä tai poista rivi |
 | GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona |
 | GET    | `/api/requests/{id}/export/html` | Lataa pyyntö itsenäisenä HTML-tiedostona |
 | POST   | `/api/requests`      | Luo pyyntö                    |

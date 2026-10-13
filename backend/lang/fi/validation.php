@@ -9,13 +9,19 @@ return [
         'numeric' => 'Kentän :attribute on oltava välillä :min–:max.',
     ],
     'date_format' => 'Kentän :attribute on oltava muodossa :format.',
+    // Every decimal rule in the API allows at most two decimals (decimal:0,2).
+    'decimal' => 'Kentässä :attribute saa olla enintään kaksi desimaalia.',
     'email' => 'Kentän :attribute on oltava sähköpostiosoite.',
     'enum' => 'Kentän :attribute arvo on virheellinen.',
     'exists' => 'Valittua kohdetta (:attribute) ei löytynyt.',
     'file' => 'Kentän :attribute on oltava tiedosto.',
+    'gt' => [
+        'numeric' => 'Kentän :attribute on oltava suurempi kuin :value.',
+    ],
     'in' => 'Kentän :attribute arvo on virheellinen.',
     'integer' => 'Kentän :attribute on oltava kokonaisluku.',
     'max' => [
+        'numeric' => 'Kenttä :attribute saa olla enintään :max.',
         'file' => 'Tiedosto saa olla enintään :max kilotavua.',
         'string' => 'Kenttä :attribute saa olla enintään :max merkkiä pitkä.',
     ],
@@ -60,6 +66,13 @@ return [
         'format' => 'muoto',
         'ids' => 'valitut pyynnöt',
         'file' => 'tiedosto',
+
+        // Work and materials
+        'type' => 'rivin tyyppi',
+        'quantity' => 'määrä',
+        'unit' => 'yksikkö',
+        'unit_price' => 'yksikköhinta',
+        'vat_rate' => 'ALV-prosentti',
 
         // Customers
         'name' => 'nimi',

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
+use App\Models\RequestItem;
 use App\Models\ServiceRequest;
 use Illuminate\Database\Seeder;
 
@@ -59,6 +60,15 @@ class ServiceRequestSeeder extends Seeder
                 ['Tyhjennä rasvanerotin', 'Vaihda kulunvalvonnan kortinlukija', 'Puhdista ilmanvaihtokanavat', 'Vaihda WC:n poistoilmapuhallin']],
         ];
 
+        // Work and materials on some demo requests: [type, description, quantity, unit, unit price in cents].
+        $items = [
+            'Vaihda toimiston loisteputket' => [['work', 'Loisteputkien vaihto', 1.5, 'h', 6500], ['material', 'Loisteputki T8 18 W', 2, 'kpl', 890]],
+            'Testaa paloilmoitinjärjestelmä' => [['work', 'Paloilmoitinjärjestelmän koestus ja kirjaus', 2, 'h', 7200]],
+            'Lumityöt pihalla' => [['work', 'Auraus ja hiekoitus', 3, 'h', 6500], ['material', 'Hiekoitussepeli', 0.5, 't', 4500]],
+            'Tarkasta ensiapukaapit' => [['work', 'Ensiapukaappien tarkastus', 0.75, 'h', 6500], ['material', 'Ensiapupakkauksen täydennys', 3, 'kpl', 1290]],
+            'Tarkasta varaston nosto-ovi' => [['work', 'Nosto-oven vianetsintä', 1, 'h', 7200]],
+        ];
+
         // Seeding again never duplicates the demo data: a table that already has
         // requests only gets the locations added to demo requests that lack one.
         $customerIds = $this->seedCustomers($customers);
@@ -76,6 +86,8 @@ class ServiceRequestSeeder extends Seeder
                         ->update($this->locationFields($location));
                 }
             }
+
+            $this->seedItems($items);
 
             return;
         }
@@ -96,6 +108,8 @@ class ServiceRequestSeeder extends Seeder
             $request->updated_at = $request->created_at;
             $request->save();
         }
+
+        $this->seedItems($items);
     }
 
     /**
@@ -138,5 +152,28 @@ class ServiceRequestSeeder extends Seeder
         }
 
         return $ids;
+    }
+
+    /**
+     * Adds work and materials to the demo requests that have none.
+     *
+     * @param  array<string, list<array{string, string, float|int, string, int}>>  $items
+     */
+    private function seedItems(array $items): void
+    {
+        foreach ($items as $title => $rows) {
+            $request = ServiceRequest::query()->where('title', $title)->doesntHave('items')->first();
+
+            foreach ($request ? $rows : [] as [$type, $description, $quantity, $unit, $priceCents]) {
+                $request->items()->save(new RequestItem([
+                    'type' => $type,
+                    'description' => $description,
+                    'quantity' => $quantity,
+                    'unit' => $unit,
+                    'unit_price_cents' => $priceCents,
+                    'vat_rate_basis_points' => 2550,
+                ]));
+            }
+        }
     }
 }
