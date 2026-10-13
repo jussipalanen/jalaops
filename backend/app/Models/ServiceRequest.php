@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int|null $customer_id
+ * @property int|null $invoice_id
  * @property string $title
  * @property string|null $description
  * @property RequestPriority $priority
@@ -91,6 +92,16 @@ class ServiceRequest extends Model
         $vat = $this->items->sum(fn (RequestItem $item) => $item->vatCents());
 
         return ['net' => $net, 'vat' => $vat, 'total' => $net + $vat];
+    }
+
+    /**
+     * The invoice the request is billed on, if any.
+     *
+     * @return BelongsTo<Invoice, $this>
+     */
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     /**

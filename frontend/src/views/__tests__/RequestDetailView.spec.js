@@ -80,6 +80,19 @@ describe('RequestDetailView', () => {
     expect(wrapper.text()).toMatch(/Kuitannut Maija Huoltaja, \d+\.\d+\.2026/)
   })
 
+  it("offers 'Luo lasku' for a billable request, and links to its invoice once invoiced", async () => {
+    const billable = { ...request, status: 'completed', customer: { id: 3, name: 'Esimerkki Kiinteistöt Oy' }, invoice: null, items: [{ id: 1 }] }
+    let wrapper = await mountView(billable)
+    let links = wrapper.findAllComponents(RouterLinkStub).map((link) => [link.text(), link.props('to')])
+    expect(links).toContainEqual(['Luo lasku', '/invoices/new?customer=3&request=1'])
+
+    wrapper.unmount()
+    wrapper = await mountView({ ...billable, invoice: { id: 9, number: 1001, status: 'sent' } })
+    links = wrapper.findAllComponents(RouterLinkStub).map((link) => [link.text(), link.props('to')])
+    expect(links).toContainEqual(['Laskulla 1001 (Lähetetty)', '/invoices/9'])
+    expect(links.map(([text]) => text)).not.toContain('Luo lasku')
+  })
+
   it('has no map for a request without a location', async () => {
     const wrapper = await mountView({ ...request, street_address: null, postal_code: null, city: null, latitude: null, longitude: null })
 

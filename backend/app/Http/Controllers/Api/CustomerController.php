@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use App\Models\Invoice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -79,13 +80,19 @@ class CustomerController extends Controller
     /**
      * Delete a customer.
      *
-     * Only a customer without requests can be deleted.
+     * Only a customer without requests and invoices can be deleted.
      */
     public function destroy(Customer $customer): Response|JsonResponse
     {
         if ($customer->serviceRequests()->exists()) {
             return response()->json([
                 'message' => 'Asiakasta ei voi poistaa, koska sillä on pyyntöjä. Vaihda pyyntöjen asiakas tai poista pyynnöt ensin.',
+            ], 409);
+        }
+
+        if (Invoice::query()->where('customer_id', $customer->id)->exists()) {
+            return response()->json([
+                'message' => 'Asiakasta ei voi poistaa, koska sillä on laskuja. Laskut säilytetään kirjanpitoa varten.',
             ], 409);
         }
 

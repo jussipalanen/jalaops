@@ -11,6 +11,8 @@ const props = defineProps({
 const items = ref([])
 const totals = ref({ net: 0, vat: 0, total: 0 })
 const defaults = ref({ vat_rate: 25.5, hourly_rate: 65 })
+// An invoiced request's rows can't change.
+const locked = ref(false)
 const loading = ref(true)
 const error = ref('')
 
@@ -30,6 +32,7 @@ function apply(response) {
   items.value = response.data
   totals.value = response.totals
   defaults.value = response.defaults
+  locked.value = Boolean(response.locked)
 }
 
 onMounted(async () => {
@@ -125,8 +128,10 @@ const fieldError = (field) => errors.value[field]?.[0]
   <section class="card card-body" aria-labelledby="request-items-title">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2 id="request-items-title" class="text-lg font-bold">Työt ja tarvikkeet</h2>
-      <button v-if="!formOpen" type="button" class="btn btn-secondary max-sm:w-full" @click="openNew">+ Lisää rivi</button>
+      <button v-if="!formOpen && !locked && !loading" type="button" class="btn btn-secondary max-sm:w-full" @click="openNew">+ Lisää rivi</button>
     </div>
+
+    <p v-if="locked" class="mt-2 text-sm text-slate-500 dark:text-slate-400">Pyyntö on laskutettu, joten rivejä ei voi enää muuttaa.</p>
 
     <p v-if="error" class="alert-error mt-3" role="alert">{{ error }}</p>
     <p v-if="loading" class="mt-3 text-slate-500 dark:text-slate-400">Ladataan…</p>
@@ -158,8 +163,10 @@ const fieldError = (field) => errors.value[field]?.[0]
             <td class="py-2 pr-3 text-right tabular-nums whitespace-nowrap">{{ formatNumber(item.vat_rate) }} %</td>
             <td class="py-2 pr-3 text-right font-semibold tabular-nums whitespace-nowrap">{{ formatEuro(item.total) }}</td>
             <td class="py-2 text-right whitespace-nowrap">
+              <template v-if="!locked">
               <button type="button" class="font-semibold text-primary-700 hover:underline dark:text-primary-400" :aria-label="`Muokkaa: ${item.description}`" @click="openEdit(item)">Muokkaa</button>
               <button type="button" class="ml-3 font-semibold text-red-600 hover:underline dark:text-red-400" :aria-label="`Poista: ${item.description}`" @click="remove(item)">Poista</button>
+              </template>
             </td>
           </tr>
         </tbody>
@@ -172,7 +179,7 @@ const fieldError = (field) => errors.value[field]?.[0]
             <span>{{ formatNumber(item.quantity) }} {{ item.unit }} × {{ formatEuro(item.unit_price) }} + {{ formatNumber(item.vat_rate) }} %</span>
             <strong>{{ formatEuro(item.total) }}</strong>
           </p>
-          <div class="mt-2 grid grid-cols-2 gap-2">
+          <div v-if="!locked" class="mt-2 grid grid-cols-2 gap-2">
             <button type="button" class="btn btn-secondary" :aria-label="`Muokkaa: ${item.description}`" @click="openEdit(item)">Muokkaa</button>
             <button type="button" class="btn btn-danger" :aria-label="`Poista: ${item.description}`" @click="remove(item)">Poista</button>
           </div>

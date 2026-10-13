@@ -34,6 +34,7 @@ Käyttäjä voi:
 - tarkastella koontinäkymää, jonka lukumäärät vievät vastaavaan listaan
 - pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
 - kirjata pyynnön työt ja tarvikkeet arvonlisäveroineen ja summineen (laskutuksen perusta)
+- laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku-PDF ja vienti kirjanpitoon
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -122,6 +123,12 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/customers`     | Listaa asiakkaat (`search`) pyyntöjen määrineen |
 | POST   | `/api/customers`     | Luo asiakas                   |
 | GET/PUT/DELETE | `/api/customers/{id}` | Hae, päivitä tai poista asiakas (vain ilman pyyntöjä) |
+| GET/POST | `/api/invoices`    | Listaa laskut (`status`, `customer`) tai luo lasku laskutettavista pyynnöistä |
+| GET/DELETE | `/api/invoices/{id}` | Hae lasku tai poista luonnos |
+| PATCH  | `/api/invoices/{id}/status` | Luonnos → lähetetty → maksettu |
+| GET    | `/api/invoices/{id}/pdf` | Lasku PDF-tiedostona |
+| GET    | `/api/invoices/export?format=csv\|json` | Laskut kirjanpitoon, rivi ALV-kantaa kohden |
+| GET    | `/api/customers/{id}/billable-requests` | Asiakkaan laskutettavat pyynnöt |
 | GET    | `/api/requests/export?format=csv\|json` | Vie suodattimia vastaavat pyynnöt, tai `ids=1,2` |
 | POST   | `/api/requests/import` | Tuo pyyntöjä CSV- tai JSON-tiedostosta (`dry_run` tarkistaa ensin) |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |

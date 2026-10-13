@@ -44,6 +44,7 @@ class ServiceRequestApiTest extends TestCase
             ->assertExactJson(['data' => [
                 'id' => $request->id,
                 'customer' => null,
+                'invoice' => null,
                 'title' => 'Vaihda ilmansuodatin',
                 'description' => 'Vaihda varaston ilmanvaihtokoneen ilmansuodatin.',
                 'priority' => 'high',

@@ -19,6 +19,8 @@ class ServiceRequestResource extends JsonResource
         return [
             'id' => $this->id,
             'customer' => $this->whenLoaded('customer', fn () => $this->customer ? ['id' => $this->customer->id, 'name' => $this->customer->name] : null),
+            // The invoice the request is billed on, if any.
+            'invoice' => $this->whenLoaded('invoice', fn () => $this->invoice ? ['id' => $this->invoice->id, 'number' => $this->invoice->number, 'status' => $this->invoice->status] : null),
             'title' => $this->title,
             'description' => $this->description,
             'priority' => $this->priority,

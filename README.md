@@ -34,6 +34,7 @@ A user can:
 - view a dashboard with the request counts, each linking to the matching list
 - keep a register of customers (Asiakkaat) and choose the customer for each request
 - record the work and materials of a request, with VAT and totals (the basis for invoicing)
+- invoice completed requests: invoice numbers, Finnish reference numbers, due dates, statuses, an invoice PDF and an export for accounting software
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -122,6 +123,12 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/customers`     | List customers (`search`), with their request counts |
 | POST   | `/api/customers`     | Create a customer           |
 | GET/PUT/DELETE | `/api/customers/{id}` | Get, update or delete a customer (only one without requests can be deleted) |
+| GET/POST | `/api/invoices`    | List invoices (`status`, `customer`) or create one from billable requests |
+| GET/DELETE | `/api/invoices/{id}` | Get an invoice or delete a draft |
+| PATCH  | `/api/invoices/{id}/status` | Draft → sent → paid |
+| GET    | `/api/invoices/{id}/pdf` | The invoice as a PDF |
+| GET    | `/api/invoices/export?format=csv\|json` | Invoices for accounting, one row per VAT rate |
+| GET    | `/api/customers/{id}/billable-requests` | A customer's requests that can be invoiced |
 | GET    | `/api/requests/export?format=csv\|json` | Export the requests matching the filters, or `ids=1,2` |
 | POST   | `/api/requests/import` | Import requests from a CSV or JSON file (`dry_run` to check it first) |
 | GET    | `/api/requests/{id}` | Get a single request        |

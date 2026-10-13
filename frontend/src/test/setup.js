@@ -1,4 +1,5 @@
-import { beforeEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
+import { enableAutoUnmount } from '@vue/test-utils'
 import { resetLeaflet } from './leaflet'
 
 // Every test gets the Leaflet stand-in instead of the real library. jsdom has
@@ -9,6 +10,10 @@ vi.mock('maplibre-gl', () => ({ setWorkerUrl: vi.fn() }))
 vi.mock('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url', () => ({ default: '/maplibre-worker.js' }))
 
 beforeEach(resetLeaflet)
+
+// Unmount every component after its test, so no timer (like the address
+// suggestions' typing pause) can fire during the next test.
+enableAutoUnmount(afterEach)
 
 // jsdom can't draw on a canvas; the signature pad gets a 2D context that records nothing.
 HTMLCanvasElement.prototype.getContext = function () {

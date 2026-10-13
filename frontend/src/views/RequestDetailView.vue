@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
-import { formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
+import { formatAddress, formatDate, hasLocation, invoiceStatusLabels, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
 import RequestDownloads from '@/components/RequestDownloads.vue'
 import RequestItems from '@/components/RequestItems.vue'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
@@ -18,6 +18,12 @@ const notFound = ref(false)
 const error = ref('')
 
 const address = computed(() => (request.value ? formatAddress(request.value) : ''))
+
+// A completed request of a customer, with rows and not invoiced yet, can be invoiced.
+const billable = computed(
+  () =>
+    request.value?.status === 'completed' && request.value.customer && !request.value.invoice && (request.value.items?.length ?? 0) > 0,
+)
 
 const mapContainer = useTemplateRef('mapContainer')
 let destroyMap = null
@@ -94,7 +100,23 @@ async function deleteRequest() {
         </div>
       </header>
 
-      <RequestDownloads :request-id="request.id" class="mb-4" />
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <RequestDownloads :request-id="request.id" />
+        <RouterLink
+          v-if="billable"
+          :to="`/invoices/new?customer=${request.customer.id}&request=${request.id}`"
+          class="btn btn-primary max-sm:w-full"
+        >
+          Luo lasku
+        </RouterLink>
+        <RouterLink
+          v-if="request.invoice"
+          :to="`/invoices/${request.invoice.id}`"
+          class="font-semibold text-primary-700 hover:underline max-sm:w-full dark:text-primary-400"
+        >
+          Laskulla {{ request.invoice.number }} ({{ invoiceStatusLabels[request.invoice.status] }})
+        </RouterLink>
+      </div>
 
       <div class="card card-body grid gap-5">
         <div>

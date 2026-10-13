@@ -22,6 +22,7 @@ const navLinks = [
   { to: '/requests', label: 'Pyynnöt' },
   { to: '/map', label: 'Kartta' },
   { to: '/customers', label: 'Asiakkaat' },
+  { to: '/invoices', label: 'Laskut' },
   { to: '/tools', label: 'Työkalut' },
 ]
 

@@ -124,4 +124,15 @@ describe('RequestItems', () => {
     expect(wrapper.findAll('tbody tr')).toHaveLength(1)
     expect(text(wrapper.find('[aria-label="Summat"]'))).toContain('Yhteensä122,36 €')
   })
+
+  it("hides the controls of an invoiced request's locked rows", async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ ...listing, locked: true })))
+
+    const wrapper = mount(RequestItems, { props: { requestId: 7 } })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Pyyntö on laskutettu, joten rivejä ei voi enää muuttaa.')
+    expect(wrapper.findAll('button')).toHaveLength(0)
+    expect(wrapper.findAll('tbody tr')).toHaveLength(2)
+  })
 })

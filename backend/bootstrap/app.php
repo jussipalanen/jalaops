@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\NoIndex;
 use App\Models\Customer;
+use App\Models\Invoice;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $previous = $e->getPrevious();
             $message = match (true) {
                 $previous instanceof ModelNotFoundException && $previous->getModel() === Customer::class => 'Asiakasta ei löytynyt.',
+                $previous instanceof ModelNotFoundException && $previous->getModel() === Invoice::class => 'Laskua ei löytynyt.',
                 $previous instanceof ModelNotFoundException => 'Pyyntöä ei löytynyt.',
                 default => 'Osoitetta ei löytynyt.',
             };

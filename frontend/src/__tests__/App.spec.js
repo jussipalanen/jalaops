@@ -8,7 +8,7 @@ async function mountApp() {
   const page = { template: '<div />' }
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: ['/', '/requests', '/map', '/customers', '/tools', '/about'].map((path) => ({ path, component: page })),
+    routes: ['/', '/requests', '/map', '/customers', '/invoices', '/tools', '/about'].map((path) => ({ path, component: page })),
   })
   await router.push('/')
   const wrapper = mount(App, { global: { plugins: [router] }, attachTo: document.body })
@@ -31,6 +31,7 @@ describe('App navigation', () => {
       ['Pyynnöt', '/requests'],
       ['Kartta', '/map'],
       ['Asiakkaat', '/customers'],
+      ['Laskut', '/invoices'],
       ['Työkalut', '/tools'],
     ])
     wrapper.unmount()
