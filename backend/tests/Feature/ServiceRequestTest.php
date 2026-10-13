@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\RequestPriority;
 use App\Enums\RequestStatus;
+use App\Models\Customer;
 use App\Models\ServiceRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -80,6 +81,17 @@ class ServiceRequestTest extends TestCase
             'Vaihda WC:n poistoilmapuhallin',
             'Vaihda ilmansuodatin',
         ], $new);
+    }
+
+    public function test_seeded_requests_belong_to_demo_customers(): void
+    {
+        $this->seed();
+
+        $this->assertSame(4, Customer::count());
+        $this->assertSame(0, ServiceRequest::whereNull('customer_id')->count());
+        $this->assertSame('Esimerkki Kiinteistöt Oy', ServiceRequest::where('title', 'Vaihda ilmansuodatin')->first()->customer->name);
+        // Made-up contact details only.
+        $this->assertSame(0, Customer::where('email', 'not like', '%.example.com')->count());
     }
 
     public function test_seeded_requests_cover_every_status_and_priority(): void

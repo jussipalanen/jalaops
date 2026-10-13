@@ -36,6 +36,24 @@ const router = createRouter({
       component: () => import('../views/RequestEditView.vue'),
     },
     {
+      path: '/customers',
+      name: 'customers',
+      meta: { title: 'Asiakkaat' },
+      component: () => import('../views/CustomersView.vue'),
+    },
+    {
+      path: '/customers/new',
+      name: 'customer-create',
+      meta: { title: 'Uusi asiakas' },
+      component: () => import('../views/CustomerFormView.vue'),
+    },
+    {
+      path: '/customers/:id(\\d+)/edit',
+      name: 'customer-edit',
+      meta: { title: 'Muokkaa asiakasta' },
+      component: () => import('../views/CustomerFormView.vue'),
+    },
+    {
       path: '/tools',
       name: 'tools',
       meta: { title: 'Työkalut' },

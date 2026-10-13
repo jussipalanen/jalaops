@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\ServiceRequest;
 use Illuminate\Database\Seeder;
 
@@ -45,9 +46,28 @@ class ServiceRequestSeeder extends Seeder
             'Säädä toimiston lämmitys' => 0,
         ];
 
+        // Made-up customers (example.com addresses, placeholder names), and the
+        // demo requests each belongs to, by region.
+        $customers = [
+            'Esimerkki Kiinteistöt Oy' => [['Maija Mallikas', 'laskutus@esimerkkikiinteistot.example.com', 'Mannerheimintie 12', '00100', 'Helsinki', 14],
+                ['Vaihda ilmansuodatin', 'Vaihda toimiston loisteputket', 'Testaa paloilmoitinjärjestelmä', 'Tarkasta ensiapukaapit', 'Säädä toimiston lämmitys']],
+            'Pirkan Demohalli Oy' => [['Matti Meikäläinen', 'reskontra@pirkandemohalli.example.com', 'Hatanpään valtatie 24', '33100', 'Tampere', 30],
+                ['Tarkasta varaston nosto-ovi', 'Korjaa vuotava hana', 'Maalaa varaston lattiamerkinnät']],
+            'Pohjoisen Testivarasto Oy' => [['Liisa Esimerkki', 'laskut@pohjoisentestivarasto.example.com', 'Isokatu 32', '90100', 'Oulu', 14],
+                ['Huolla trukki', 'Lumityöt pihalla', 'Korjaa lastauslaiturin tasoitin']],
+            'Itä-Suomen Malliasunnot Oy' => [['Pekka Malli', 'talous@itasuomenmalliasunnot.example.com', 'Puijonkatu 20', '70100', 'Kuopio', 21],
+                ['Tyhjennä rasvanerotin', 'Vaihda kulunvalvonnan kortinlukija', 'Puhdista ilmanvaihtokanavat', 'Vaihda WC:n poistoilmapuhallin']],
+        ];
+
         // Seeding again never duplicates the demo data: a table that already has
         // requests only gets the locations added to demo requests that lack one.
+        $customerIds = $this->seedCustomers($customers);
+
         if (ServiceRequest::query()->exists()) {
+            foreach ($customerIds as $titles) {
+                ServiceRequest::query()->whereIn('title', $titles['requests'])->whereNull('customer_id')->update(['customer_id' => $titles['id']]);
+            }
+
             foreach ($requests as [$title, , , , , $location]) {
                 if ($location !== null) {
                     ServiceRequest::query()
@@ -62,6 +82,7 @@ class ServiceRequestSeeder extends Seeder
 
         foreach ($requests as $index => [$title, $description, $priority, $status, $dueInDays, $location]) {
             $request = new ServiceRequest([
+                'customer_id' => collect($customerIds)->first(fn ($customer) => in_array($title, $customer['requests'], true))['id'] ?? null,
                 'title' => $title,
                 'description' => $description,
                 'priority' => $priority,
@@ -92,5 +113,30 @@ class ServiceRequestSeeder extends Seeder
             'latitude' => $latitude,
             'longitude' => $longitude,
         ];
+    }
+
+    /**
+     * Creates the demo customers that don't exist yet.
+     *
+     * @param  array<string, array{array{string, string, string, string, string, int}, list<string>}>  $customers
+     * @return list<array{id: int, requests: list<string>}>
+     */
+    private function seedCustomers(array $customers): array
+    {
+        $ids = [];
+
+        foreach ($customers as $name => [[$contact, $email, $street, $postalCode, $city, $terms], $requests]) {
+            $customer = Customer::firstOrCreate(['name' => $name], [
+                'contact_person' => $contact,
+                'email' => $email,
+                'billing_street_address' => $street,
+                'billing_postal_code' => $postalCode,
+                'billing_city' => $city,
+                'payment_terms_days' => $terms,
+            ]);
+            $ids[] = ['id' => $customer->id, 'requests' => $requests];
+        }
+
+        return $ids;
     }
 }

@@ -19,6 +19,7 @@ class SaveServiceRequestRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'priority' => ['required', Rule::enum(RequestPriority::class)],

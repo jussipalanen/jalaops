@@ -1,7 +1,13 @@
+import { ref } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
 import RequestCreateView from '../RequestCreateView.vue'
 import RequestEditView from '../RequestEditView.vue'
+
+// The "Asiakas" selects load customers separately; mocked so these tests' queued
+// fetch responses stay as they were.
+const customerOptions = ref([])
+vi.mock('@/composables/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptions }))
 
 const push = vi.fn()
 
@@ -122,6 +128,7 @@ describe('RequestEditView', () => {
       city: 'Vantaa',
       latitude: 60.2891,
       longitude: 25.0371,
+      customer_id: null,
       // Completed requests carry the sign-off; without a drawing the signature is left out.
       signed_by: null,
     })

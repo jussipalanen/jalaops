@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\NoIndex;
+use App\Models\Customer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -30,9 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            $message = $e->getPrevious() instanceof ModelNotFoundException
-                ? 'Pyyntöä ei löytynyt.'
-                : 'Osoitetta ei löytynyt.';
+            $previous = $e->getPrevious();
+            $message = match (true) {
+                $previous instanceof ModelNotFoundException && $previous->getModel() === Customer::class => 'Asiakasta ei löytynyt.',
+                $previous instanceof ModelNotFoundException => 'Pyyntöä ei löytynyt.',
+                default => 'Osoitetta ei löytynyt.',
+            };
 
             return response()->json(['message' => $message], 404);
         });

@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
+ * @property int|null $customer_id
  * @property string $title
  * @property string|null $description
  * @property RequestPriority $priority
@@ -35,6 +37,7 @@ class ServiceRequest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'customer_id',
         'title',
         'description',
         'priority',
@@ -64,6 +67,14 @@ class ServiceRequest extends Model
             'longitude' => 'float',
             'signed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Customer, $this>
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     /**

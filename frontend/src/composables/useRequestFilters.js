@@ -13,6 +13,7 @@ export function useRequestFilters() {
   const router = useRouter()
 
   const filters = computed(() => ({
+    customer: /^\d+$/.test(route.query.customer ?? '') ? route.query.customer : '',
     status: route.query.status in statusLabels ? route.query.status : '',
     priority: route.query.priority in priorityLabels ? route.query.priority : '',
     search: typeof route.query.search === 'string' ? route.query.search.trim() : '',

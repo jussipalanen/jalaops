@@ -15,11 +15,14 @@ const props = defineProps({
   errors: { type: Object, default: () => ({}) },
   saving: { type: Boolean, default: false },
   submitLabel: { type: String, default: 'Tallenna' },
+  // Customers for the "Asiakas" select, as { id, name }.
+  customers: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['submit', 'cancel'])
 
 const form = reactive({
+  customer_id: props.request.customer?.id ?? '',
   title: props.request.title ?? '',
   description: props.request.description ?? '',
   priority: props.request.priority ?? 'normal',
@@ -60,6 +63,7 @@ function submit() {
 
   emit('submit', {
     ...fields,
+    customer_id: form.customer_id === '' ? null : Number(form.customer_id),
     description: form.description.trim() === '' ? null : form.description,
     due_date: form.due_date === '' ? null : form.due_date,
     street_address: textOrNull(form.street_address),
@@ -135,6 +139,23 @@ function fieldError(field) {
 
 <template>
   <form class="grid gap-5" novalidate @submit.prevent="submit">
+    <div class="grid min-w-0 content-start gap-1.5 sm:max-w-md">
+      <label for="customer_id" class="text-[0.9375rem] font-semibold">Asiakas</label>
+      <select
+        id="customer_id"
+        v-model="form.customer_id"
+        class="form-control"
+        :aria-invalid="Boolean(fieldError('customer_id'))"
+        :aria-describedby="fieldError('customer_id') ? 'customer_id-error' : undefined"
+      >
+        <option value="">Ei asiakasta</option>
+        <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }}</option>
+      </select>
+      <p v-if="fieldError('customer_id')" id="customer_id-error" class="text-sm text-red-600 dark:text-red-400">
+        {{ fieldError('customer_id') }}
+      </p>
+    </div>
+
     <div class="grid min-w-0 content-start gap-1.5">
       <label for="title" class="text-[0.9375rem] font-semibold">Otsikko <span class="text-red-600 dark:text-red-400" aria-hidden="true">*</span></label>
       <input

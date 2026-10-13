@@ -32,6 +32,7 @@ A user can:
 - filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
 - view a dashboard with the request counts, each linking to the matching list
+- keep a register of customers (Asiakkaat) and choose the customer for each request
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -117,6 +118,9 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/health`        | API and database health     |
 | GET    | `/api/system`        | App details and health for the "Tietoja" page (server versions only with `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | List requests               |
+| GET    | `/api/customers`     | List customers (`search`), with their request counts |
+| POST   | `/api/customers`     | Create a customer           |
+| GET/PUT/DELETE | `/api/customers/{id}` | Get, update or delete a customer (only one without requests can be deleted) |
 | GET    | `/api/requests/export?format=csv\|json` | Export the requests matching the filters, or `ids=1,2` |
 | POST   | `/api/requests/import` | Import requests from a CSV or JSON file (`dry_run` to check it first) |
 | GET    | `/api/requests/{id}` | Get a single request        |
