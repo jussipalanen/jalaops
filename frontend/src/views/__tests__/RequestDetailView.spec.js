@@ -58,7 +58,7 @@ describe('RequestDetailView', () => {
     expect(links).toContain('/requests/1/edit')
     expect(links).toContain('/map?request=1')
 
-    const streetView = wrapper.find('a[target="_blank"]')
+    const streetView = wrapper.find('a[target="_blank"][href^="https://www.google.com"]')
     expect(streetView.attributes('href')).toBe(
       'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=60.2891,25.0371',
     )
@@ -78,6 +78,19 @@ describe('RequestDetailView', () => {
     expect(signature.attributes('src')).toBe(`/api/requests/1/signature?v=${encodeURIComponent('2026-10-12T12:30:00.000000Z')}`)
     expect(signature.attributes('alt')).toBe('Allekirjoitus: Maija Huoltaja')
     expect(wrapper.text()).toMatch(/Kuitannut Maija Huoltaja, \d+\.\d+\.2026/)
+  })
+
+  it("offers 'Luo lasku' for a billable request, and links to its invoice once invoiced", async () => {
+    const billable = { ...request, status: 'completed', customer: { id: 3, name: 'Esimerkki Kiinteistöt Oy' }, invoice: null, items: [{ id: 1 }] }
+    let wrapper = await mountView(billable)
+    let links = wrapper.findAllComponents(RouterLinkStub).map((link) => [link.text(), link.props('to')])
+    expect(links).toContainEqual(['Luo lasku', '/invoices/new?customer=3&request=1'])
+
+    wrapper.unmount()
+    wrapper = await mountView({ ...billable, invoice: { id: 9, number: 1001, status: 'sent' } })
+    links = wrapper.findAllComponents(RouterLinkStub).map((link) => [link.text(), link.props('to')])
+    expect(links).toContainEqual(['Laskulla 1001 (Lähetetty)', '/invoices/9'])
+    expect(links.map(([text]) => text)).not.toContain('Luo lasku')
   })
 
   it('has no map for a request without a location', async () => {

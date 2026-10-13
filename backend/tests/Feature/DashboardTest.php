@@ -29,6 +29,7 @@ class DashboardTest extends TestCase
                 'completed' => 1,
                 'overdue' => 2,
                 'total' => 5,
+                'invoices' => ['unpaid' => 0, 'unpaid_total' => 0, 'overdue' => 0],
             ]);
     }
 
@@ -36,6 +37,6 @@ class DashboardTest extends TestCase
     {
         $this->getJson('/api/dashboard')
             ->assertOk()
-            ->assertExactJson(['open' => 0, 'in_progress' => 0, 'completed' => 0, 'overdue' => 0, 'total' => 0]);
+            ->assertExactJson(['open' => 0, 'in_progress' => 0, 'completed' => 0, 'overdue' => 0, 'total' => 0, 'invoices' => ['unpaid' => 0, 'unpaid_total' => 0, 'overdue' => 0]]);
     }
 }

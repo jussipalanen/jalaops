@@ -8,10 +8,11 @@ use App\Http\Requests\SaveServiceRequestRequest;
 use App\Http\Resources\ServiceRequestResource;
 use App\Models\ServiceRequest;
 use App\Services\RequestExport;
+use App\Support\DocumentResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
  * @tags Requests
@@ -56,7 +57,7 @@ class ServiceRequestController extends Controller
      */
     public function show(ServiceRequest $serviceRequest): ServiceRequestResource
     {
-        return new ServiceRequestResource($serviceRequest->load('customer', 'items'));
+        return new ServiceRequestResource($serviceRequest->load('customer', 'items', 'invoice'));
     }
 
     /**
@@ -97,19 +98,14 @@ class ServiceRequestController extends Controller
      *
      * The request as a file: `pdf` or `html` (a self-contained page that opens
      * offline). Includes the sign-off with the signature, or empty signature
-     * lines for signing a printed copy.
+     * lines for signing a printed copy. With `inline=1` the browser shows it in
+     * the tab instead of saving it.
      */
-    public function export(ServiceRequest $serviceRequest, string $format, RequestExport $export): Response
+    public function export(Request $request, ServiceRequest $serviceRequest, string $format, RequestExport $export): Response
     {
-        [$content, $type] = $format === 'pdf'
-            ? [$export->pdf($serviceRequest), 'application/pdf']
-            : [$export->html($serviceRequest), 'text/html; charset=utf-8'];
+        $content = $format === 'pdf' ? $export->pdf($serviceRequest) : $export->html($serviceRequest);
 
-        return response($content, 200, [
-            'Content-Type' => $type,
-            'Content-Disposition' => HeaderUtils::makeDisposition('attachment', $export->filename($serviceRequest, $format)),
-            'Cache-Control' => 'private, no-cache',
-        ]);
+        return DocumentResponse::make($content, $format, $export->filename($serviceRequest, $format), $request->boolean('inline'));
     }
 
     /**

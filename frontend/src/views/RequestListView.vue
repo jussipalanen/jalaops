@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet } from '@/api/client'
 import ExportMenu from '@/components/ExportMenu.vue'
-import RequestDownloads from '@/components/RequestDownloads.vue'
+import DocumentLinks from '@/components/DocumentLinks.vue'
 import RequestSearch from '@/components/RequestSearch.vue'
 import { useCustomerOptions } from '@/composables/useCustomerOptions'
 import { useRequestFilters } from '@/composables/useRequestFilters'
@@ -378,7 +378,7 @@ watch(listPath, loadRequests, { immediate: true })
                 >
                   Kartalla
                 </RouterLink>
-                <RequestDownloads variant="menu" :request-id="request.id" :title="request.title" />
+                <DocumentLinks variant="menu" :base="`/api/requests/${request.id}/export`" :title="request.title" />
                 <RouterLink :to="`/requests/${request.id}/edit`" class="btn btn-secondary">
                   Muokkaa
                 </RouterLink>

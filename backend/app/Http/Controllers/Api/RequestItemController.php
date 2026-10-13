@@ -35,6 +35,10 @@ class RequestItemController extends Controller
      */
     public function store(SaveRequestItemRequest $request, ServiceRequest $serviceRequest): JsonResponse
     {
+        if ($locked = $this->lockedResponse($serviceRequest)) {
+            return $locked;
+        }
+
         $serviceRequest->items()->create($request->itemData());
 
         return $this->listing($serviceRequest, 201);
@@ -47,6 +51,10 @@ class RequestItemController extends Controller
      */
     public function update(SaveRequestItemRequest $request, ServiceRequest $serviceRequest, RequestItem $item): JsonResponse
     {
+        if ($locked = $this->lockedResponse($serviceRequest)) {
+            return $locked;
+        }
+
         $item->update($request->itemData());
 
         return $this->listing($serviceRequest);
@@ -55,11 +63,29 @@ class RequestItemController extends Controller
     /**
      * Delete a row.
      */
-    public function destroy(ServiceRequest $serviceRequest, RequestItem $item): Response
+    public function destroy(ServiceRequest $serviceRequest, RequestItem $item): Response|JsonResponse
     {
+        if ($locked = $this->lockedResponse($serviceRequest)) {
+            return $locked;
+        }
+
         $item->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * An invoiced request's rows can't change: the invoice was made from them.
+     */
+    private function lockedResponse(ServiceRequest $serviceRequest): ?JsonResponse
+    {
+        if (! $serviceRequest->invoice) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => "Pyyntö on laskulla {$serviceRequest->invoice->number}, joten sen töitä ja tarvikkeita ei voi muuttaa. Poista laskuluonnos ensin, jos rivejä pitää korjata.",
+        ], 409);
     }
 
     private function listing(ServiceRequest $serviceRequest, int $status = 200): JsonResponse
@@ -70,6 +96,7 @@ class RequestItemController extends Controller
         return response()->json([
             'data' => RequestItemResource::collection($serviceRequest->items),
             'totals' => array_map(fn (int $cents) => $cents / 100, $totals),
+            'locked' => $serviceRequest->invoice_id !== null,
             'defaults' => [
                 'vat_rate' => config('billing.default_vat_rate'),
                 'hourly_rate' => config('billing.default_hourly_rate'),

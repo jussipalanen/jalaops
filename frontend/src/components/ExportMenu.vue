@@ -7,13 +7,15 @@ import { useDropdown } from '@/composables/useDropdown'
 const props = defineProps({
   query: { type: String, default: '' },
   label: { type: String, default: 'Vie' },
+  // The export endpoint; requests by default.
+  base: { type: String, default: '/api/requests/export' },
 })
 
 const formats = computed(() =>
   ['csv', 'json'].map((format) => ({
     format,
     label: format === 'csv' ? 'CSV (Excel)' : 'JSON (täysi kopio)',
-    href: `/api/requests/export?format=${format}${props.query ? `&${props.query}` : ''}`,
+    href: `${props.base}?format=${format}${props.query ? `&${props.query}` : ''}`,
   })),
 )
 

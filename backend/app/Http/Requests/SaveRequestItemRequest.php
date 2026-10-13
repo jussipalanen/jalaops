@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\RequestItemType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 /**
  * Validates a row of work or material. Prices are euros without VAT and the
@@ -30,6 +31,25 @@ class SaveRequestItemRequest extends FormRequest
             /** Percent, e.g. 25.5. */
             'vat_rate' => ['required', 'numeric', 'min:0', 'max:100', 'decimal:0,2'],
         ];
+    }
+
+    /**
+     * A row's total (quantity × unit price) is at most 9 999 999,99 €, so it
+     * fits invoices and documents.
+     *
+     * @return list<\Closure>
+     */
+    public function after(): array
+    {
+        return [function (Validator $validator) {
+            if ($validator->errors()->hasAny(['quantity', 'unit_price'])) {
+                return;
+            }
+
+            if ((float) $this->input('quantity') * (float) $this->input('unit_price') > 9999999.99) {
+                $validator->errors()->add('unit_price', 'Rivin summa saa olla enintään 9 999 999,99 €.');
+            }
+        }];
     }
 
     /**

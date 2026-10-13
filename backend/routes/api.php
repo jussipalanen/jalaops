@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AiOverviewController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\RequestItemController;
 use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
@@ -40,6 +41,15 @@ Route::get('/system', [SystemController::class, 'show']);
 
 // Customers whose maintenance work is billed.
 Route::apiResource('customers', CustomerController::class);
+Route::get('/customers/{customer}/billable-requests', [InvoiceController::class, 'billable']);
+
+// Invoices from completed requests. The export route comes before the
+// resource routes, so "export" isn't read as an invoice id.
+Route::get('/invoices/export', [InvoiceController::class, 'export']);
+Route::apiResource('invoices', InvoiceController::class)->except(['update']);
+Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
+Route::get('/invoices/{invoice}/export/{format}', [InvoiceController::class, 'document'])
+    ->whereIn('format', ['pdf', 'html']);
 
 // Bulk export and import. Registered before the resource routes, so "export"
 // and "import" aren't read as request ids.

@@ -47,6 +47,11 @@ export function apiPut(path, body) {
   return apiRequest('PUT', path, body)
 }
 
+// Any other method, e.g. PATCH.
+export function apiRequestMethod(method, path, body) {
+  return apiRequest(method, path, body)
+}
+
 export function apiDelete(path) {
   return apiRequest('DELETE', path)
 }

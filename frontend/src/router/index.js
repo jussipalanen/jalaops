@@ -54,6 +54,24 @@ const router = createRouter({
       component: () => import('../views/CustomerFormView.vue'),
     },
     {
+      path: '/invoices',
+      name: 'invoices',
+      meta: { title: 'Laskut' },
+      component: () => import('../views/InvoicesView.vue'),
+    },
+    {
+      path: '/invoices/new',
+      name: 'invoice-create',
+      meta: { title: 'Uusi lasku' },
+      component: () => import('../views/InvoiceCreateView.vue'),
+    },
+    {
+      path: '/invoices/:id(\\d+)',
+      name: 'invoice-details',
+      meta: { title: 'Lasku' },
+      component: () => import('../views/InvoiceDetailView.vue'),
+    },
+    {
       path: '/tools',
       name: 'tools',
       meta: { title: 'Työkalut' },

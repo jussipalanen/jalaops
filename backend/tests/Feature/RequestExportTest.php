@@ -43,6 +43,21 @@ class RequestExportTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $response->getContent());
     }
 
+    public function test_opens_the_files_in_the_browser_for_a_preview(): void
+    {
+        $request = $this->signedRequest();
+
+        $this->get("/api/requests/{$request->id}/export/pdf?inline=1")
+            ->assertOk()
+            ->assertHeader('Content-Disposition', "inline; filename=pyynto-{$request->id}-vaihda-ilmansuodatin.pdf");
+
+        // The HTML page opens on the API's origin, so it may not run scripts or load anything.
+        $this->get("/api/requests/{$request->id}/export/html?inline=1")
+            ->assertOk()
+            ->assertHeader('Content-Disposition', "inline; filename=pyynto-{$request->id}-vaihda-ilmansuodatin.html")
+            ->assertHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:");
+    }
+
     public function test_downloads_a_self_contained_html_file(): void
     {
         $this->travelTo('2026-10-12 12:00:00');

@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { apiGet } from '@/api/client'
+import { formatEuro } from '@/labels'
 
 // The dashboard's request counts. Each card opens the request list filtered to
 // the same requests.
@@ -14,6 +15,20 @@ const cards = computed(() => [
   { key: 'completed', label: 'Valmiit', to: '/requests?status=completed' },
   { key: 'overdue', label: 'Myöhässä', to: '/requests?due=overdue', alert: (counts.value?.overdue ?? 0) > 0 },
 ])
+
+// Unpaid (sent) invoices and those past their due date.
+const invoiceCards = computed(() => {
+  const invoices = counts.value?.invoices
+  return [
+    {
+      key: 'unpaid',
+      label: invoices ? `Maksamatta · ${formatEuro(invoices.unpaid_total)}` : 'Maksamatta',
+      value: invoices?.unpaid,
+      to: '/invoices?status=sent',
+    },
+    { key: 'overdue', label: 'Erääntyneet laskut', value: invoices?.overdue, to: '/invoices?status=overdue', alert: (invoices?.overdue ?? 0) > 0 },
+  ]
+})
 
 onMounted(async () => {
   try {
@@ -49,5 +64,22 @@ onMounted(async () => {
         </RouterLink>
       </li>
     </ul>
+
+    <template v-if="!failed">
+      <h2 class="mt-6 mb-3 text-lg font-semibold">Laskutus</h2>
+      <ul class="grid grid-cols-2 gap-3 sm:gap-4">
+        <li v-for="card in invoiceCards" :key="card.key">
+          <RouterLink
+            :to="card.to"
+            :aria-label="`${card.label}: ${card.value ?? 'ladataan'}`"
+            class="card block h-full p-4 transition-colors hover:border-primary-300 sm:p-5 dark:hover:border-primary-500/50"
+            :class="card.alert ? 'border-red-200 bg-red-50 hover:border-red-300 dark:border-red-500/30 dark:bg-red-500/10' : ''"
+          >
+            <span class="block text-3xl font-bold tabular-nums sm:text-4xl" :class="card.alert ? 'text-red-700 dark:text-red-300' : ''">{{ card.value ?? '–' }}</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-600 dark:text-slate-300">{{ card.label }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </template>
   </section>
 </template>

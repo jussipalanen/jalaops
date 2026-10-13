@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\RequestItem;
 use App\Models\ServiceRequest;
+use App\Services\Invoicing;
 use Illuminate\Database\Seeder;
 
 class ServiceRequestSeeder extends Seeder
@@ -88,6 +91,7 @@ class ServiceRequestSeeder extends Seeder
             }
 
             $this->seedItems($items);
+            $this->seedInvoices();
 
             return;
         }
@@ -110,6 +114,7 @@ class ServiceRequestSeeder extends Seeder
         }
 
         $this->seedItems($items);
+        $this->seedInvoices();
     }
 
     /**
@@ -174,6 +179,38 @@ class ServiceRequestSeeder extends Seeder
                     'vat_rate_basis_points' => 2550,
                 ]));
             }
+        }
+    }
+
+    /**
+     * Two demo invoices, when there are none yet: a sent one that's past its
+     * due date and a paid one. The other billable requests are left for
+     * trying "Luo lasku".
+     */
+    private function seedInvoices(): void
+    {
+        if (Invoice::query()->exists()) {
+            return;
+        }
+
+        $invoicing = app(Invoicing::class);
+
+        foreach ([['Testaa paloilmoitinjärjestelmä', InvoiceStatus::Sent, 20], ['Lumityöt pihalla', InvoiceStatus::Paid, 30]] as [$title, $status, $daysAgo]) {
+            $request = ServiceRequest::query()->where('title', $title)->where('status', 'completed')->whereNull('invoice_id')->has('items')->with('customer')->first();
+
+            if (! $request?->customer) {
+                continue;
+            }
+
+            $invoice = $invoicing->create($request->customer, [$request->id]);
+            $issued = today()->subDays($daysAgo);
+            $invoice->forceFill([
+                'issue_date' => $issued,
+                'due_date' => $issued->copy()->addDays($request->customer->payment_terms_days),
+                'status' => $status,
+                'sent_at' => $issued,
+                'paid_at' => $status === InvoiceStatus::Paid ? $issued->copy()->addDays(10) : null,
+            ])->save();
         }
     }
 }

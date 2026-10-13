@@ -132,6 +132,9 @@ The Android app opens the frontend's address (`host` in [`android/twa-manifest.j
 | `DB_*`, `MYSQL_ATTR_SSL_CA` | (unset) | Database connection when `DEMO_MODE=false`. |
 | `PORT` | set by Render | The port the server listens on (`10000` if unset). |
 | `DEFAULT_VAT_RATE` / `DEFAULT_HOURLY_RATE` | `25.5` / `65` | Pre-filled VAT percent and hourly rate (euros, without VAT) for new rows of work and materials. Existing rows keep their own values. |
+| `SELLER_NAME`, `SELLER_BUSINESS_ID`, `SELLER_STREET_ADDRESS`, `SELLER_POSTAL_CODE`, `SELLER_CITY`, `SELLER_EMAIL` | made-up demo values | The seller shown on invoices. |
+| `SELLER_IBAN` / `SELLER_BIC` | (unset) | The bank account on invoices; without it the invoice says the account isn't set. |
+| `FIRST_INVOICE_NUMBER` | `1001` | The number of the first invoice; later invoices continue from the highest number. |
 | `DISPLAY_TIMEZONE` | `Europe/Helsinki` | Time zone of the times in downloaded PDF and HTML files (the app stores UTC). |
 | `SHOW_SYSTEM_DETAILS` | `false` | `true` shows the PHP, Laravel and database versions on the "Tietoja" page (`/api/system`). Off on public servers so exact versions aren't advertised. |
 | `NOMINATIM_USER_AGENT` | `JalaOps demo (https://github.com/jussipalanen/jalaops)` | Identifies the app to Nominatim and Photon (address lookup and suggestions), as their usage policies require. Set it to your own app name and contact URL or email. |

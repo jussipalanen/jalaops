@@ -31,6 +31,7 @@ class RequestExport
         $dompdf->loadHtml(view('exports.request', ['request' => $request->loadMissing('items'), 'forPdf' => true])->render(), 'UTF-8');
         $dompdf->setPaper('A4');
         $dompdf->render();
+        PdfPageNumbers::add($dompdf, "Huoltopyyntö #{$request->id}");
 
         return (string) $dompdf->output();
     }

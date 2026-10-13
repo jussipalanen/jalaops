@@ -84,3 +84,20 @@ export function parseDecimal(text) {
   const normalised = String(text ?? '').trim().replace(/\s/g, '').replace(',', '.')
   return normalised === '' ? '' : Number(normalised)
 }
+
+// Invoice statuses; "overdue" is a sent invoice past its due date.
+export const invoiceStatusLabels = {
+  draft: 'Luonnos',
+  sent: 'Lähetetty',
+  paid: 'Maksettu',
+}
+
+export function invoiceStatusLabel(invoice) {
+  return invoice.overdue ? 'Erääntynyt' : invoiceStatusLabels[invoice.status]
+}
+
+// Badge classes in the app's existing colours.
+export function invoiceStatusClass(invoice) {
+  if (invoice.overdue) return 'priority-high'
+  return { draft: 'status-open', sent: 'status-in_progress', paid: 'status-completed' }[invoice.status]
+}

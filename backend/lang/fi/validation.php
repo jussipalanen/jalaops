@@ -4,6 +4,7 @@
 // listed here fall back to Laravel's English messages.
 return [
     'after_or_equal' => 'Kentän :attribute on oltava sama tai myöhempi päivä kuin :date.',
+    'array' => 'Kentän :attribute on oltava lista.',
     'between' => [
         'integer' => 'Kentän :attribute on oltava välillä :min–:max.',
         'numeric' => 'Kentän :attribute on oltava välillä :min–:max.',
@@ -27,6 +28,7 @@ return [
     ],
     'mimes' => 'Tiedoston on oltava tyyppiä :values.',
     'min' => [
+        'array' => 'Valitse vähintään :min kohde kenttään :attribute.',
         'numeric' => 'Kentän :attribute on oltava vähintään :min.',
         'string' => 'Kentän :attribute on oltava vähintään :min merkkiä pitkä.',
     ],
@@ -73,6 +75,9 @@ return [
         'unit' => 'yksikkö',
         'unit_price' => 'yksikköhinta',
         'vat_rate' => 'ALV-prosentti',
+
+        // Invoices
+        'request_ids' => 'pyynnöt',
 
         // Customers
         'name' => 'nimi',
