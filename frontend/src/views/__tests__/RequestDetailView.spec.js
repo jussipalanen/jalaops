@@ -58,7 +58,7 @@ describe('RequestDetailView', () => {
     expect(links).toContain('/requests/1/edit')
     expect(links).toContain('/map?request=1')
 
-    const streetView = wrapper.find('a[target="_blank"]')
+    const streetView = wrapper.find('a[target="_blank"][href^="https://www.google.com"]')
     expect(streetView.attributes('href')).toBe(
       'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=60.2891,25.0371',
     )

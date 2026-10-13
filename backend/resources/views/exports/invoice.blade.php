@@ -1,6 +1,7 @@
 @php
-    // An invoice for the PDF. dompdf understands only part of CSS, so the
-    // layout uses plain blocks and tables.
+    // An invoice as a PDF ($forPdf) or an HTML page. dompdf understands only
+    // part of CSS, so the layout uses plain blocks and tables; the HTML page
+    // adds a few screen styles on top.
     use App\Support\ReferenceNumber;
 
     $euros = fn (int $cents) => number_format($cents / 100, 2, ',', "\u{00A0}")."\u{00A0}€";
@@ -18,10 +19,14 @@
     <title>Lasku {{ $invoice->number }}</title>
     <style>
         @page { margin: 18mm 18mm 20mm; }
-        body { margin: 0; color: #0f172a; font-family: 'DejaVu Sans', sans-serif; font-size: 9.5pt; line-height: 1.45; }
+        body { margin: 0; color: #0f172a; font-family: {!! $forPdf ? "'DejaVu Sans', sans-serif" : "system-ui, -apple-system, 'Segoe UI', Roboto, 'DejaVu Sans', sans-serif" !!}; font-size: 9.5pt; line-height: 1.45; }
         table { border-collapse: collapse; }
         .muted { color: #64748b; }
         .head td { vertical-align: top; padding: 0; }
+        .brand { margin-bottom: 10px; }
+        .brand img { width: 34px; height: 34px; vertical-align: middle; }
+        .brand span { margin-left: 6px; font-size: 15pt; font-weight: bold; vertical-align: middle; }
+        .brand .ops { margin: 0; color: #0369a1; }
         .seller strong { font-size: 13pt; }
         .title { font-size: 20pt; font-weight: bold; letter-spacing: 0.04em; margin: 0 0 6px; }
         .facts td { padding: 1px 0 1px 12px; }
@@ -30,11 +35,17 @@
         .stamp.draft { color: #92400e; border-color: #f59e0b; }
         .stamp.paid { color: #047857; border-color: #10b981; }
         .buyer { margin: 26px 0 22px; }
-        .lines { width: 100%; }
+        /* Fixed column widths: the description gets most of the room, and long
+           words wrap instead of widening the table past the page. */
+        .lines { width: 100%; table-layout: fixed; }
         .lines th { text-align: left; font-weight: normal; color: #475569; font-size: 8.5pt; border-bottom: 1px solid #94a3b8; padding: 5px 6px 5px 0; }
         .lines td { padding: 4px 6px 4px 0; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        .lines td.text { word-wrap: break-word; }
+        .lines tr { page-break-inside: avoid; }
         .lines .group td { padding-top: 10px; font-weight: bold; border-bottom: 0; }
         .num { text-align: right; white-space: nowrap; }
+        /* The totals, payment details and footer always stay together. */
+        .closing { page-break-inside: avoid; }
         .summary { width: 62%; margin: 14px 0 0 auto; }
         .summary td { padding: 3px 0 3px 10px; }
         .summary th { padding: 3px 0 3px 10px; text-align: right; font-weight: normal; color: #475569; font-size: 8.5pt; border-bottom: 1px solid #cbd5e1; }
@@ -45,12 +56,32 @@
         .payment .value { font-size: 10.5pt; font-weight: bold; }
         .notes { margin-top: 16px; }
         .footer { margin-top: 26px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 8pt; color: #64748b; }
+        @if (! $forPdf)
+        /* The HTML page: an A4-wide sheet on a grey background, full width on a phone. */
+        html { background: #e2e8f0; }
+        body { max-width: 210mm; box-sizing: border-box; margin: 24px auto; padding: 18mm; background: #fff; font-size: 10.5pt; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15); }
+        .scroll { overflow-x: auto; }
+        @media (max-width: 640px) {
+            body { margin: 0; padding: 20px 16px; box-shadow: none; }
+            .head > tbody > tr > td { display: block; width: auto !important; padding-bottom: 18px; }
+            .lines { min-width: 620px; }
+            .summary { width: 100%; }
+            .payment, .payment tbody, .payment tr, .payment td { display: block; width: auto !important; }
+            .payment td { border-width: 0 0 1px; }
+            .payment tr:last-child td:last-child { border-bottom: 0; }
+        }
+        @media print {
+            html { background: none; }
+            body { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+        }
+        @endif
     </style>
 </head>
 <body>
     <table class="head" style="width: 100%;">
         <tr>
             <td class="seller" style="width: 52%;">
+                <div class="brand"><img src="{{ $logo }}" alt=""><span>Jala<span class="ops">Ops</span></span></div>
                 <strong>{{ $seller['name'] }}</strong><br>
                 {{ $seller['street_address'] }}<br>
                 {{ $seller['postal_code'] }} {{ $seller['city'] }}<br>
@@ -80,36 +111,40 @@
         {{ trim($invoice->billing_postal_code.' '.$invoice->billing_city) }}
     </div>
 
+    <div class="scroll">
     <table class="lines">
         <thead>
             <tr>
-                <th>Kuvaus</th>
-                <th class="num">Määrä</th>
-                <th class="num">á-hinta (alv 0 %)</th>
-                <th class="num">ALV</th>
-                <th class="num">Yhteensä (alv 0 %)</th>
+                <th style="width: 47%;">Kuvaus</th>
+                <th class="num" style="width: 12%;">Määrä</th>
+                <th class="num" style="width: 15%;">á-hinta (alv 0 %)</th>
+                <th class="num" style="width: 9%;">ALV</th>
+                <th class="num" style="width: 17%;">Yhteensä (alv 0 %)</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach ($groups as $lines)
+        @foreach ($groups as $lines)
+            <tbody>
                 <tr class="group">
-                    <td colspan="5">{{ $lines->first()->request_title }}
+                    <td colspan="5" class="text">{{ $lines->first()->request_title }}
                         @if ($lines->first()->delivered_on)<span class="muted" style="font-weight: normal;"> · toimitettu {{ $date($lines->first()->delivered_on) }}</span>@endif
                     </td>
                 </tr>
                 @foreach ($lines as $line)
                     <tr>
-                        <td>{{ $line->description }} <span class="muted">· {{ $line->type->label() }}</span></td>
+                        <td class="text">{{ $line->description }} <span class="muted">· {{ $line->type->label() }}</span></td>
                         <td class="num">{{ $number($line->quantity) }} {{ $line->unit }}</td>
                         <td class="num">{{ $euros($line->unit_price_cents) }}</td>
                         <td class="num">{{ $number($line->vat_rate_basis_points / 100) }} %</td>
                         <td class="num">{{ $euros($line->netCents()) }}</td>
                     </tr>
                 @endforeach
-            @endforeach
-        </tbody>
+            </tbody>
+        @endforeach
     </table>
+    </div>
 
+    <div class="closing">
+    <div class="scroll">
     <table class="summary">
         <tr><th>ALV</th><th>Veroton</th><th>Vero</th><th>Yhteensä</th></tr>
         @foreach ($totals['by_rate'] as $rate => $sums)
@@ -122,6 +157,7 @@
         @endforeach
         <tr class="grand"><td colspan="3" class="num">Maksettava yhteensä</td><td class="num">{{ $euros($totals['total']) }}</td></tr>
     </table>
+    </div>
 
     <table class="payment">
         <tr>
@@ -144,6 +180,7 @@
 
     <div class="footer">
         Maksaessasi käytä viitenumeroa {{ $reference }}. JalaOps on demosovellus; laskun tiedot ovat esimerkkidataa.
+    </div>
     </div>
 </body>
 </html>

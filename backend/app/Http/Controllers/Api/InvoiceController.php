@@ -8,9 +8,10 @@ use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\ServiceRequestResource;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Services\InvoicePdf;
+use App\Services\InvoiceExport;
 use App\Services\Invoicing;
 use App\Services\InvoicingException;
+use App\Support\DocumentResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -127,15 +128,17 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Download an invoice as a PDF.
+     * Download an invoice.
+     *
+     * The invoice as a file: `pdf` (A4, page numbers on every page) or `html`
+     * (a self-contained page that opens offline). With `inline=1` the browser
+     * shows it in the tab instead of saving it.
      */
-    public function pdf(Invoice $invoice, InvoicePdf $pdf): Response
+    public function document(Request $request, Invoice $invoice, string $format, InvoiceExport $export): Response
     {
-        return response($pdf->render($invoice->load('lines')), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => HeaderUtils::makeDisposition('attachment', "lasku-{$invoice->number}.pdf"),
-            'Cache-Control' => 'private, no-cache',
-        ]);
+        $content = $format === 'pdf' ? $export->pdf($invoice) : $export->html($invoice);
+
+        return DocumentResponse::make($content, $format, $export->filename($invoice, $format), $request->boolean('inline'));
     }
 
     /**

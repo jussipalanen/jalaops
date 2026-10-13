@@ -48,7 +48,8 @@ Route::get('/customers/{customer}/billable-requests', [InvoiceController::class,
 Route::get('/invoices/export', [InvoiceController::class, 'export']);
 Route::apiResource('invoices', InvoiceController::class)->except(['update']);
 Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
-Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf']);
+Route::get('/invoices/{invoice}/export/{format}', [InvoiceController::class, 'document'])
+    ->whereIn('format', ['pdf', 'html']);
 
 // Bulk export and import. Registered before the resource routes, so "export"
 // and "import" aren't read as request ids.

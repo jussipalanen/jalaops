@@ -4,7 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
 import { formatAddress, formatDate, hasLocation, invoiceStatusLabels, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
-import RequestDownloads from '@/components/RequestDownloads.vue'
+import DocumentLinks from '@/components/DocumentLinks.vue'
 import RequestItems from '@/components/RequestItems.vue'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
 import { pageTitle } from '@/pageTitle'
@@ -101,7 +101,7 @@ async function deleteRequest() {
       </header>
 
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <RequestDownloads :request-id="request.id" />
+        <DocumentLinks :base="`/api/requests/${request.id}/export`" />
         <RouterLink
           v-if="billable"
           :to="`/invoices/new?customer=${request.customer.id}&request=${request.id}`"

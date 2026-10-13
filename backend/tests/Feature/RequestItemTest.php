@@ -118,4 +118,15 @@ class RequestItemTest extends TestCase
         $this->assertStringContainsString("65,00\u{00A0}€", $html);
         $this->assertStringContainsString("122,36\u{00A0}€", $html);
     }
+
+    public function test_a_rows_total_is_at_most_ten_million_euros(): void
+    {
+        $request = ServiceRequest::factory()->create();
+
+        $this->postJson("/api/requests/{$request->id}/items", $this->row(['quantity' => 99999.99, 'unit_price' => 999999.99]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.unit_price.0', 'Rivin summa saa olla enintään 9 999 999,99 €.');
+
+        $this->postJson("/api/requests/{$request->id}/items", $this->row(['quantity' => 10, 'unit_price' => 999999.99]))->assertCreated();
+    }
 }

@@ -136,7 +136,8 @@ describe('InvoiceDetailView', () => {
     expect(vat).toContain('25,5 %97,50 €24,86 €122,36 €')
     expect(vat).toContain('14 %10,00 €1,40 €11,40 €')
     expect(plain(wrapper.text())).toContain('Maksettava yhteensä133,76 €')
-    expect(wrapper.find('a[href="/api/invoices/5/pdf"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/api/invoices/5/export/pdf?inline=1"]').attributes('target')).toBe('_blank')
+    expect(wrapper.find('a[href="/api/invoices/5/export/html"]').exists()).toBe(true)
   })
 
   it('marks a draft as sent after confirmation, then as paid', async () => {

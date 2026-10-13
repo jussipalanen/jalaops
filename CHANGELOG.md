@@ -6,24 +6,29 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
-## [1.3.0] - 2026-10-13
+## [1.3.0] - 2026-10-14
 
 ### Added
 - Laskut, invoices from completed requests (#65), the third and last step of invoicing, linked from the main menu. "+ Uusi lasku" picks a customer and which of their billable requests (completed, with work or materials, not invoiced yet) go on the invoice; a completed request's details page has a "Luo lasku" shortcut.
 - An invoice gets a running number (from 1001), a Finnish reference number (viitenumero) with its check digit, the invoice date and a due date from the customer's payment terms. It keeps copies of the customer's billing details and of the rows, with each request's delivery date, so later changes never alter it.
 - Statuses Luonnos → Lähetetty → Maksettu (and back from paid to sent); a sent invoice past its due date shows as Erääntynyt. Only drafts can be deleted, which makes their requests billable again.
-- The invoice page shows the rows by request, the VAT by rate and the amount to pay, and an invoice PDF in Finnish invoice layout: seller, customer, invoice number, dates, payment terms, reference number, VAT breakdown and payment details.
+- The invoice page shows the rows by request, the VAT by rate and the amount to pay, and the invoice as a PDF or HTML page in Finnish invoice layout with the JalaOps logo: seller, customer, invoice number, dates, payment terms, reference number, VAT breakdown and payment details.
 - "Vie kirjanpitoon": CSV (semicolons and decimal commas, for Excel) or JSON with one row per invoice and VAT rate, for accounting software.
 - Laskutus on the dashboard: unpaid invoices with their sum, and overdue invoices.
-- `GET/POST /api/invoices`, `GET/DELETE /api/invoices/{id}`, `PATCH /api/invoices/{id}/status`, `GET /api/invoices/{id}/pdf`, `GET /api/invoices/export`, `GET /api/customers/{id}/billable-requests`; the dashboard returns `invoices`.
+- `GET/POST /api/invoices`, `GET/DELETE /api/invoices/{id}`, `PATCH /api/invoices/{id}/status`, `GET /api/invoices/{id}/export/pdf|html`, `GET /api/invoices/export`, `GET /api/customers/{id}/billable-requests`; the dashboard returns `invoices`.
 - Seller and invoice settings: `SELLER_NAME`, `SELLER_BUSINESS_ID`, `SELLER_STREET_ADDRESS`, `SELLER_POSTAL_CODE`, `SELLER_CITY`, `SELLER_EMAIL`, `SELLER_IBAN`, `SELLER_BIC` and `FIRST_INVOICE_NUMBER` (made-up demo defaults).
 - Two demo invoices: a sent one past its due date and a paid one.
+- "Esikatsele PDF" and "Esikatsele HTML" open an invoice or a request in a new browser tab; "Lataa PDF" and "Lataa HTML" save it as before. In the request list the row's "Tiedosto" menu has the same four choices. The API takes `inline=1` on the export addresses.
+- Page numbers on every page of invoice and request PDFs ("Lasku 1042 · Sivu 2/3").
 
 ### Changed
 - An invoiced request's work and materials are locked; its details page links to the invoice.
 - A customer with invoices can't be deleted.
+- A row of work or materials can total at most 9 999 999,99 € (quantity × unit price), so it always fits on an invoice.
+- The request list's "Lataa" menu is now "Tiedosto".
 
 ### Fixed
+- Long descriptions or long words in a request PDF's work and materials table no longer push the price columns off the page; the columns have fixed widths and long words wrap.
 - A frontend test could fail at random when an earlier test's address suggestion timer fired late; every test's components are now unmounted after it.
 
 ## [1.2.0] - 2026-10-13

@@ -174,17 +174,40 @@ class InvoiceTest extends TestCase
     {
         $id = $this->createInvoice([$this->billable(['quantity' => 1.5, 'unit_price_cents' => 6500])->id])->json('data.id');
 
-        $pdf = $this->get("/api/invoices/{$id}/pdf")
+        $pdf = $this->get("/api/invoices/{$id}/export/pdf")
             ->assertOk()
             ->assertHeader('Content-Type', 'application/pdf')
             ->assertHeader('Content-Disposition', 'attachment; filename=lasku-1001.pdf');
         $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+        $this->get("/api/invoices/{$id}/export/pdf?inline=1")->assertHeader('Content-Disposition', 'inline; filename=lasku-1001.pdf');
 
         $csv = $this->get('/api/invoices/export?format=csv')->assertOk()->assertHeader('Content-Type', 'text/csv; charset=utf-8')->getContent();
         $this->assertStringContainsString('number;reference_number;issue_date;due_date;customer;customer_business_id;status;vat_rate;net;vat;total', $csv);
         $this->assertStringContainsString('1001;10016;2026-10-14;2026-10-28;"Esimerkki Kiinteistöt Oy";1234567-1;draft;25,50;97,50;24,86;122,36', $csv);
 
         $this->get('/api/invoices/export?format=json')->assertOk()->assertJsonPath('invoices.0.total', 122.36);
+    }
+
+    public function test_shows_the_invoice_as_a_self_contained_html_page(): void
+    {
+        $id = $this->createInvoice([$this->billable(['quantity' => 1.5, 'unit_price_cents' => 6500])->id])->json('data.id');
+
+        $html = $this->get("/api/invoices/{$id}/export/html?inline=1")
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/html; charset=utf-8')
+            ->assertHeader('Content-Disposition', 'inline; filename=lasku-1001.html')
+            ->assertHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:")
+            ->getContent();
+
+        $this->assertStringContainsString('<title>Lasku 1001</title>', $html);
+        $this->assertStringContainsString('LUONNOS', $html);
+        $this->assertStringContainsString('Maksettava yhteensä', $html);
+        $this->assertStringContainsString("122,36\u{00A0}€", $html);
+        // The logo is built in, and nothing is loaded from elsewhere.
+        $this->assertStringContainsString('<img src="data:image/png;base64,', $html);
+        $this->assertDoesNotMatchRegularExpression('/<(link|script)\b|src="http/i', $html);
+
+        $this->get("/api/invoices/{$id}/export/docx")->assertNotFound();
     }
 
     public function test_a_customer_with_invoices_cannot_be_deleted(): void

@@ -52,7 +52,9 @@
         table.signed td { vertical-align: top; padding: 0; }
         .signature { border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; }
         .signature img { display: block; width: 100%; height: auto; }
-        table.items { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+        table.items { width: 100%; border-collapse: collapse; font-size: 0.92em; table-layout: fixed; }
+        table.items td.text { word-wrap: break-word; }
+        table.items tr { page-break-inside: avoid; }
         table.items th, table.items td { padding: 6px 6px 6px 0; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
         table.items th { color: #475569; font-weight: normal; font-size: 0.85em; }
         table.items .num { text-align: right; white-space: nowrap; }
@@ -117,17 +119,17 @@
         <table class="items">
             <thead>
                 <tr>
-                    <th>Kuvaus</th>
-                    <th class="num">Määrä</th>
-                    <th class="num">á-hinta (alv 0 %)</th>
-                    <th class="num">ALV</th>
-                    <th class="num">Yhteensä</th>
+                    <th style="width: 44%;">Kuvaus</th>
+                    <th class="num" style="width: 13%;">Määrä</th>
+                    <th class="num" style="width: 16%;">á-hinta (alv 0 %)</th>
+                    <th class="num" style="width: 10%;">ALV</th>
+                    <th class="num" style="width: 17%;">Yhteensä</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($request->items as $item)
                     <tr>
-                        <td>{{ $item->description }} <span class="muted">· {{ $item->type->label() }}</span></td>
+                        <td class="text">{{ $item->description }} <span class="muted">· {{ $item->type->label() }}</span></td>
                         <td class="num">{{ $number($item->quantity) }} {{ $item->unit }}</td>
                         <td class="num">{{ $euros($item->unit_price_cents) }}</td>
                         <td class="num">{{ $number($item->vat_rate_basis_points / 100) }} %</td>

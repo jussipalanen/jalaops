@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet, apiRequestMethod } from '@/api/client'
+import DocumentLinks from '@/components/DocumentLinks.vue'
 import { formatDate, formatEuro, formatNumber, invoiceStatusClass, invoiceStatusLabel, itemTypeLabels } from '@/labels'
 import { pageTitle } from '@/pageTitle'
 
@@ -82,13 +83,14 @@ async function remove() {
           <p class="mt-2"><span class="badge" :class="invoiceStatusClass(invoice)">{{ invoiceStatusLabel(invoice) }}</span></p>
         </div>
         <div class="flex w-full flex-wrap gap-2 sm:w-auto max-sm:*:flex-1">
-          <a :href="`/api/invoices/${invoice.id}/pdf`" download class="btn btn-secondary">Lataa PDF</a>
           <button v-if="invoice.status === 'draft'" type="button" class="btn btn-primary" :disabled="working" @click="setStatus('sent', 'Merkitäänkö lasku lähetetyksi? Lähetettyä laskua ei voi enää poistaa.')">Merkitse lähetetyksi</button>
           <button v-if="invoice.status === 'sent'" type="button" class="btn btn-primary" :disabled="working" @click="setStatus('paid')">Merkitse maksetuksi</button>
           <button v-if="invoice.status === 'paid'" type="button" class="btn btn-secondary" :disabled="working" @click="setStatus('sent', 'Palautetaanko lasku maksamattomaksi?')">Palauta maksamattomaksi</button>
           <button v-if="invoice.status === 'draft'" type="button" class="btn btn-danger" @click="remove">Poista luonnos</button>
         </div>
       </header>
+
+      <DocumentLinks :base="`/api/invoices/${invoice.id}/export`" class="mb-4" />
 
       <div class="grid gap-4">
         <div class="card card-body grid gap-5 sm:grid-cols-2">

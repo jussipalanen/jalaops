@@ -27,14 +27,14 @@ A user can:
 
 - view, create, edit and delete requests
 - change a request's status, and sign off a completed request with a name and a drawn signature
-- download a request as a PDF or HTML file
+- preview a request as a PDF or HTML file in a browser tab, or download it
 - export requests to CSV (Excel) or JSON and import them back on the Työkalut page
 - filter requests by status, priority and due date, and search them by title or address
 - give a request an address and see the requests on a full-screen map
 - view a dashboard with the request counts, each linking to the matching list
 - keep a register of customers (Asiakkaat) and choose the customer for each request
 - record the work and materials of a request, with VAT and totals (the basis for invoicing)
-- invoice completed requests: invoice numbers, Finnish reference numbers, due dates, statuses, an invoice PDF and an export for accounting software
+- invoice completed requests: invoice numbers, Finnish reference numbers, due dates, statuses, an invoice PDF and HTML page with the JalaOps logo and page numbers, and an export for accounting software
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -126,7 +126,8 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET/POST | `/api/invoices`    | List invoices (`status`, `customer`) or create one from billable requests |
 | GET/DELETE | `/api/invoices/{id}` | Get an invoice or delete a draft |
 | PATCH  | `/api/invoices/{id}/status` | Draft → sent → paid |
-| GET    | `/api/invoices/{id}/pdf` | The invoice as a PDF |
+| GET    | `/api/invoices/{id}/export/pdf` | Download the invoice as a PDF (`inline=1` opens it in the browser) |
+| GET    | `/api/invoices/{id}/export/html` | Download the invoice as a self-contained HTML file (`inline=1` opens it in the browser) |
 | GET    | `/api/invoices/export?format=csv\|json` | Invoices for accounting, one row per VAT rate |
 | GET    | `/api/customers/{id}/billable-requests` | A customer's requests that can be invoiced |
 | GET    | `/api/requests/export?format=csv\|json` | Export the requests matching the filters, or `ids=1,2` |
@@ -135,8 +136,8 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
 | GET/POST | `/api/requests/{id}/items` | A request's work and materials with totals, or add a row |
 | PUT/DELETE | `/api/requests/{id}/items/{item}` | Update or delete a row |
-| GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF |
-| GET    | `/api/requests/{id}/export/html` | Download the request as a self-contained HTML file |
+| GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF (`inline=1` opens it in the browser) |
+| GET    | `/api/requests/{id}/export/html` | Download the request as a self-contained HTML file (`inline=1` opens it in the browser) |
 | POST   | `/api/requests`      | Create a request            |
 | PUT    | `/api/requests/{id}` | Update a request            |
 | DELETE | `/api/requests/{id}` | Delete a request            |

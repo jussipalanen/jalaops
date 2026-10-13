@@ -27,14 +27,14 @@ Käyttäjä voi:
 
 - tarkastella, luoda, muokata ja poistaa pyyntöjä
 - vaihtaa pyynnön tilaa ja kuitata valmiin pyynnön nimellä ja piirretyllä allekirjoituksella
-- ladata pyynnön PDF- tai HTML-tiedostona
+- esikatsella pyyntöä PDF- tai HTML-tiedostona selaimen välilehdessä tai ladata sen
 - viedä pyyntöjä CSV- (Excel) tai JSON-tiedostoon ja tuoda niitä takaisin Työkalut-sivulla
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella koontinäkymää, jonka lukumäärät vievät vastaavaan listaan
 - pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
 - kirjata pyynnön työt ja tarvikkeet arvonlisäveroineen ja summineen (laskutuksen perusta)
-- laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku-PDF ja vienti kirjanpitoon
+- laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku PDF- ja HTML-muodossa JalaOps-logolla ja sivunumeroilla sekä vienti kirjanpitoon
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -126,7 +126,8 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET/POST | `/api/invoices`    | Listaa laskut (`status`, `customer`) tai luo lasku laskutettavista pyynnöistä |
 | GET/DELETE | `/api/invoices/{id}` | Hae lasku tai poista luonnos |
 | PATCH  | `/api/invoices/{id}/status` | Luonnos → lähetetty → maksettu |
-| GET    | `/api/invoices/{id}/pdf` | Lasku PDF-tiedostona |
+| GET    | `/api/invoices/{id}/export/pdf` | Lataa lasku PDF-tiedostona (`inline=1` avaa sen selaimessa) |
+| GET    | `/api/invoices/{id}/export/html` | Lataa lasku itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
 | GET    | `/api/invoices/export?format=csv\|json` | Laskut kirjanpitoon, rivi ALV-kantaa kohden |
 | GET    | `/api/customers/{id}/billable-requests` | Asiakkaan laskutettavat pyynnöt |
 | GET    | `/api/requests/export?format=csv\|json` | Vie suodattimia vastaavat pyynnöt, tai `ids=1,2` |
@@ -135,8 +136,8 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
 | GET/POST | `/api/requests/{id}/items` | Pyynnön työt ja tarvikkeet summineen, tai lisää rivi |
 | PUT/DELETE | `/api/requests/{id}/items/{item}` | Päivitä tai poista rivi |
-| GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona |
-| GET    | `/api/requests/{id}/export/html` | Lataa pyyntö itsenäisenä HTML-tiedostona |
+| GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona (`inline=1` avaa sen selaimessa) |
+| GET    | `/api/requests/{id}/export/html` | Lataa pyyntö itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
 | POST   | `/api/requests`      | Luo pyyntö                    |
 | PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
 | DELETE | `/api/requests/{id}` | Poista pyyntö                 |
