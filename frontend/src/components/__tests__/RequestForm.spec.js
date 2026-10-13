@@ -54,6 +54,7 @@ describe('RequestForm', () => {
     await wrapper.find('form').trigger('submit')
 
     expect(wrapper.emitted('submit')[0][0]).toEqual({
+      customer_id: null,
       title: 'Korjaa vuotava hana',
       description: null,
       priority: 'high',
@@ -273,5 +274,25 @@ describe('RequestForm', () => {
 
     expect(wrapper.emitted('submit')[0][0]).not.toHaveProperty('signed_by')
     expect(wrapper.emitted('submit')[0][0]).not.toHaveProperty('completion_signature')
+  })
+
+  it('chooses the customer from the list', async () => {
+    const customers = [
+      { id: 3, name: 'Esimerkki Kiinteistöt Oy' },
+      { id: 5, name: 'Pirkan Demohalli Oy' },
+    ]
+    const wrapper = mount(RequestForm, { props: { customers, request: { title: 'Huolla trukki', customer: { id: 3, name: 'Esimerkki Kiinteistöt Oy' } } } })
+
+    const select = wrapper.find('#customer_id')
+    expect(select.findAll('option').map((option) => option.text())).toEqual(['Ei asiakasta', 'Esimerkki Kiinteistöt Oy', 'Pirkan Demohalli Oy'])
+    expect(select.element.value).toBe('3')
+
+    await select.setValue('5')
+    await wrapper.find('form').trigger('submit')
+    expect(wrapper.emitted('submit')[0][0].customer_id).toBe(5)
+
+    await select.setValue('')
+    await wrapper.find('form').trigger('submit')
+    expect(wrapper.emitted('submit')[1][0].customer_id).toBeNull()
   })
 })

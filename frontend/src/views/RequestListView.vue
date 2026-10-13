@@ -5,12 +5,14 @@ import { apiDelete, apiGet } from '@/api/client'
 import ExportMenu from '@/components/ExportMenu.vue'
 import RequestDownloads from '@/components/RequestDownloads.vue'
 import RequestSearch from '@/components/RequestSearch.vue'
+import { useCustomerOptions } from '@/composables/useCustomerOptions'
 import { useRequestFilters } from '@/composables/useRequestFilters'
 import { duePeriodLabels, formatAddress, formatDate, hasLocation, isNew, priorityLabels, statusLabels } from '@/labels'
 
 const route = useRoute()
 const router = useRouter()
 const { filters, hasFilters, apiPath, setFilter, setSearch, clearFilters } = useRequestFilters()
+const customers = useCustomerOptions()
 
 const requests = ref([])
 // Pagination details from the API: current_page, last_page, from, to, total.
@@ -176,6 +178,19 @@ watch(listPath, loadRequests, { immediate: true })
         :model-value="filters.search"
         @search="setSearch"
       />
+
+      <div class="grid flex-[1_1_10rem] gap-1 sm:max-w-64">
+        <label for="filter-customer" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Asiakas</label>
+        <select
+          id="filter-customer"
+          class="form-control lg:min-h-9 lg:py-1.5"
+          :value="filters.customer"
+          @change="setFilter('customer', $event.target.value)"
+        >
+          <option value="">Kaikki</option>
+          <option v-for="customer in customers" :key="customer.id" :value="String(customer.id)">{{ customer.name }}</option>
+        </select>
+      </div>
 
       <div class="grid flex-[1_1_10rem] gap-1 sm:max-w-64">
         <label for="filter-status" class="text-[0.8125rem] font-semibold text-slate-500 dark:text-slate-400">Tila</label>

@@ -566,6 +566,11 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Android app (Google Play testing) | Steps 1–5 done in 0.24.0; Google Play submission is next. |
 | Lähellä minua: nearest requests first on the map and the list ([#61](https://github.com/jussipalanen/jalaops/issues/61)) | Planned |
 | Statistics and charts on the dashboard | Planned |
+| Invoicing (laskutus) of the maintenance work: 1. Asiakkaat ([#63](https://github.com/jussipalanen/jalaops/issues/63)) | Done in 1.1.0 |
+| Invoicing: 2. Työt ja tarvikkeet, work hours and materials on requests ([#64](https://github.com/jussipalanen/jalaops/issues/64)) | Planned |
+| Invoicing: 3. Laskut, invoices from completed requests, with a PDF and export to accounting software ([#65](https://github.com/jussipalanen/jalaops/issues/65)) | Planned |
+
+Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).
 
 **Ideas, not scheduled yet:** a daily route through the open requests, pin clustering on the map, bulk editing of selected requests, Excel (.xlsx) import, calendar (.ics) export, photos on requests, activity history, recurring maintenance, email reminders.
 

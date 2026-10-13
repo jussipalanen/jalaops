@@ -1,7 +1,13 @@
+import { ref } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import RequestListView from '../RequestListView.vue'
+
+// The "Asiakas" selects load customers separately; mocked so these tests' queued
+// fetch responses stay as they were.
+const customerOptions = ref([])
+vi.mock('@/composables/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptions }))
 
 const requests = [
   {
@@ -375,5 +381,20 @@ describe('RequestListView', () => {
     await flushPromises()
     expect(wrapper.text()).toContain('Vie kaikki')
     expect(wrapper.find('a[href="/tools#tuo"]').text()).toBe('Tuo')
+  })
+
+  it('filters by customer', async () => {
+    customerOptions.value = [{ id: 3, name: 'Esimerkki Kiinteistöt Oy' }]
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: [] })))
+
+    const { wrapper, router } = await mountView('/requests?customer=3')
+
+    expect(fetch).toHaveBeenCalledWith('/api/requests?customer=3&per_page=10', expect.anything())
+    expect(wrapper.find('#filter-customer').element.value).toBe('3')
+
+    await wrapper.find('#filter-customer').setValue('')
+    await flushPromises()
+    expect(router.currentRoute.value.query).toEqual({})
+    customerOptions.value = []
   })
 })

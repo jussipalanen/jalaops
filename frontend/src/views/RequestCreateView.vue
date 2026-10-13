@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiPost } from '@/api/client'
 import RequestForm from '@/components/RequestForm.vue'
+import { useCustomerOptions } from '@/composables/useCustomerOptions'
 
 const router = useRouter()
+const customers = useCustomerOptions()
 
 const errors = ref({})
 const error = ref('')
@@ -41,6 +43,7 @@ async function create(data) {
 
     <div class="card card-body">
       <RequestForm
+        :customers="customers"
         :errors="errors"
         :saving="saving"
         submit-label="Luo pyyntö"

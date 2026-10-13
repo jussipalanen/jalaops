@@ -21,6 +21,7 @@ const navLinks = [
   { to: '/', label: 'Etusivu', exact: true },
   { to: '/requests', label: 'Pyynnöt' },
   { to: '/map', label: 'Kartta' },
+  { to: '/customers', label: 'Asiakkaat' },
   { to: '/tools', label: 'Työkalut' },
 ]
 

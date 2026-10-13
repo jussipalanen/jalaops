@@ -29,6 +29,8 @@ class ListServiceRequestsRequest extends FormRequest
             'status' => ['nullable', Rule::enum(RequestStatus::class)],
             /** Only requests with this priority. */
             'priority' => ['nullable', Rule::enum(RequestPriority::class)],
+            /** Only the requests of this customer (id). */
+            'customer' => ['nullable', 'integer', 'exists:customers,id'],
             /** Only requests whose title, street address, postal code or city contains this text. */
             'search' => ['nullable', 'string', 'max:100'],
             /**
@@ -67,7 +69,11 @@ class ListServiceRequestsRequest extends FormRequest
         $dueFrom = $this->validated('due_from');
         $dueTo = $this->validated('due_to');
 
+        $customer = $this->validated('customer');
+
         return ServiceRequest::query()
+            ->with('customer')
+            ->when($customer, fn ($query) => $query->where('customer_id', $customer))
             ->when($status, fn ($query) => $query->withStatus($status))
             ->when($priority, fn ($query) => $query->withPriority($priority))
             ->when($search !== '', fn ($query) => $query->matching($search))

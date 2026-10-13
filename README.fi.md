@@ -32,6 +32,7 @@ Käyttäjä voi:
 - suodattaa pyyntöjä tilan, prioriteetin ja määräpäivän mukaan ja hakea niitä otsikolla tai osoitteella
 - antaa pyynnölle osoitteen ja nähdä pyynnöt koko näytön kartalla
 - tarkastella koontinäkymää, jonka lukumäärät vievät vastaavaan listaan
+- pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -117,6 +118,9 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | GET    | `/api/health`        | API:n ja tietokannan tila     |
 | GET    | `/api/system`        | Sovelluksen tiedot ja tila Tietoja-sivulle (palvelimen versiot vain asetuksella `SHOW_SYSTEM_DETAILS=true`) |
 | GET    | `/api/requests`      | Listaa pyynnöt                |
+| GET    | `/api/customers`     | Listaa asiakkaat (`search`) pyyntöjen määrineen |
+| POST   | `/api/customers`     | Luo asiakas                   |
+| GET/PUT/DELETE | `/api/customers/{id}` | Hae, päivitä tai poista asiakas (vain ilman pyyntöjä) |
 | GET    | `/api/requests/export?format=csv\|json` | Vie suodattimia vastaavat pyynnöt, tai `ids=1,2` |
 | POST   | `/api/requests/import` | Tuo pyyntöjä CSV- tai JSON-tiedostosta (`dry_run` tarkistaa ensin) |
 | GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |

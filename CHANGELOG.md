@@ -6,6 +6,17 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-13
+
+### Added
+- Asiakkaat, a customer register (#63), linked from the main menu: name, business ID (y-tunnus, with its check digit validated), contact person, email, phone, billing address, payment terms and notes. Search by name, business ID, contact person or city; each customer links to its requests. A customer with requests can't be deleted. The first step of invoicing.
+- An "Asiakas" field on the request form, the customer on the details page, and an Asiakas filter on the request list (`?customer=3`).
+- `GET/POST /api/customers`, `GET/PUT/DELETE /api/customers/{id}`; requests have `customer` (id and name) and accept `customer_id`; `GET /api/requests?customer=…`.
+- Four made-up demo customers (example.com addresses, placeholder names) that the demo requests belong to by region.
+
+### Fixed
+- The Finnish validation messages had a misplaced rule and a few duplicate lines from earlier edits.
+
 ## [1.0.0] - 2026-10-13
 
 The first complete release: every point of the Definition of Done in ROADMAP.md works.
@@ -295,7 +306,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/jussipalanen/jalaops/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/jussipalanen/jalaops/compare/v0.24.1...v1.0.0
 [0.24.1]: https://github.com/jussipalanen/jalaops/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/jussipalanen/jalaops/compare/v0.23.0...v0.24.0

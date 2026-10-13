@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AiOverviewController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
 use App\Http\Controllers\Api\RequestTransferController;
@@ -35,6 +36,9 @@ Route::get('/health', function () {
 
 // Application details and health for the "Tietoja" page.
 Route::get('/system', [SystemController::class, 'show']);
+
+// Customers whose maintenance work is billed.
+Route::apiResource('customers', CustomerController::class);
 
 // Bulk export and import. Registered before the resource routes, so "export"
 // and "import" aren't read as request ids.

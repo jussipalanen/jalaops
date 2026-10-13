@@ -102,6 +102,14 @@ async function deleteRequest() {
         </div>
 
         <dl class="grid gap-4 sm:grid-cols-2">
+          <div v-if="request.customer">
+            <dt class="text-sm font-semibold text-slate-500 dark:text-slate-400">Asiakas</dt>
+            <dd class="mt-1">
+              <RouterLink :to="`/requests?customer=${request.customer.id}`" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
+                {{ request.customer.name }}
+              </RouterLink>
+            </dd>
+          </div>
           <div>
             <dt class="text-sm font-semibold text-slate-500 dark:text-slate-400">Määräpäivä</dt>
             <dd class="mt-1 tabular-nums">{{ formatDate(request.due_date) }}</dd>

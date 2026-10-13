@@ -4,9 +4,11 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiGet, apiPut } from '@/api/client'
 import RequestDownloads from '@/components/RequestDownloads.vue'
 import RequestForm from '@/components/RequestForm.vue'
+import { useCustomerOptions } from '@/composables/useCustomerOptions'
 
 const route = useRoute()
 const router = useRouter()
+const customers = useCustomerOptions()
 
 const request = ref(null)
 const loading = ref(true)
@@ -70,6 +72,7 @@ async function update(data) {
 
     <div v-else-if="request" class="card card-body">
       <RequestForm
+        :customers="customers"
         :request="request"
         :errors="errors"
         :saving="saving"

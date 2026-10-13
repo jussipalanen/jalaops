@@ -48,7 +48,7 @@ class ServiceRequestController extends Controller
         $serviceRequest->saveWithSignOff($request->validated());
 
         /** @status 201 */
-        return new ServiceRequestResource($serviceRequest);
+        return new ServiceRequestResource($serviceRequest->load('customer'));
     }
 
     /**
@@ -56,7 +56,7 @@ class ServiceRequestController extends Controller
      */
     public function show(ServiceRequest $serviceRequest): ServiceRequestResource
     {
-        return new ServiceRequestResource($serviceRequest);
+        return new ServiceRequestResource($serviceRequest->load('customer'));
     }
 
     /**
@@ -70,7 +70,7 @@ class ServiceRequestController extends Controller
     {
         $serviceRequest->saveWithSignOff($request->validated());
 
-        return new ServiceRequestResource($serviceRequest);
+        return new ServiceRequestResource($serviceRequest->load('customer'));
     }
 
     /**
