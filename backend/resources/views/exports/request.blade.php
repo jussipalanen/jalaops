@@ -11,6 +11,10 @@
     [$priorityBg, $priorityFg] = $priorityColours[$request->priority->value];
     [$statusBg, $statusFg] = $statusColours[$request->status->value];
     $signedOff = $request->completion_signature || $request->signed_by;
+    // Finnish number formats: "97,50 €", "1,5", "25,5 %".
+    $euros = fn (int $cents) => number_format($cents / 100, 2, ',', "\u{00A0}")."\u{00A0}€";
+    $number = fn ($value) => rtrim(rtrim(number_format((float) $value, 2, ',', "\u{00A0}"), '0'), ',');
+    $totals = $request->totalsCents();
 @endphp
 <!DOCTYPE html>
 <html lang="fi">
@@ -48,6 +52,12 @@
         table.signed td { vertical-align: top; padding: 0; }
         .signature { border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; }
         .signature img { display: block; width: 100%; height: auto; }
+        table.items { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+        table.items th, table.items td { padding: 6px 6px 6px 0; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+        table.items th { color: #475569; font-weight: normal; font-size: 0.85em; }
+        table.items .num { text-align: right; white-space: nowrap; }
+        table.items tfoot td { border-bottom: 0; padding-top: 4px; }
+        table.items tfoot tr.grand td { font-weight: bold; font-size: 1.05em; border-top: 2px solid #0f172a; padding-top: 6px; }
         table.sign-lines { width: 100%; border-collapse: collapse; margin-top: 18px; }
         table.sign-lines td { padding: 30px 12px 4px 0; vertical-align: bottom; }
         table.sign-lines .line { border-bottom: 1px solid #0f172a; height: 1px; }
@@ -101,6 +111,37 @@
             </tr>
         @endif
     </table>
+
+    @if ($request->items->isNotEmpty())
+        <h2>Työt ja tarvikkeet</h2>
+        <table class="items">
+            <thead>
+                <tr>
+                    <th>Kuvaus</th>
+                    <th class="num">Määrä</th>
+                    <th class="num">á-hinta (alv 0 %)</th>
+                    <th class="num">ALV</th>
+                    <th class="num">Yhteensä</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($request->items as $item)
+                    <tr>
+                        <td>{{ $item->description }} <span class="muted">· {{ $item->type->label() }}</span></td>
+                        <td class="num">{{ $number($item->quantity) }} {{ $item->unit }}</td>
+                        <td class="num">{{ $euros($item->unit_price_cents) }}</td>
+                        <td class="num">{{ $number($item->vat_rate_basis_points / 100) }} %</td>
+                        <td class="num">{{ $euros($item->totalCents()) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr><td colspan="4" class="num">Veroton yhteensä</td><td class="num">{{ $euros($totals['net']) }}</td></tr>
+                <tr><td colspan="4" class="num">ALV yhteensä</td><td class="num">{{ $euros($totals['vat']) }}</td></tr>
+                <tr class="grand"><td colspan="4" class="num">Yhteensä</td><td class="num">{{ $euros($totals['total']) }}</td></tr>
+            </tfoot>
+        </table>
+    @endif
 
     <div class="sign-off">
     <h2>Kuittaus</h2>

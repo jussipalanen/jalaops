@@ -57,6 +57,8 @@ class ServiceRequestApiTest extends TestCase
                 'has_signature' => false,
                 'signed_by' => null,
                 'signed_at' => null,
+                'items' => [],
+                'totals' => ['net' => 0, 'vat' => 0, 'total' => 0],
                 'created_at' => $request->created_at->toJSON(),
                 'updated_at' => $request->updated_at->toJSON(),
             ]]);

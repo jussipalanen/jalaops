@@ -56,7 +56,7 @@ class ServiceRequestController extends Controller
      */
     public function show(ServiceRequest $serviceRequest): ServiceRequestResource
     {
-        return new ServiceRequestResource($serviceRequest->load('customer'));
+        return new ServiceRequestResource($serviceRequest->load('customer', 'items'));
     }
 
     /**

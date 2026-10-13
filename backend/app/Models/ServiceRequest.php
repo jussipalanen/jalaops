@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -67,6 +68,29 @@ class ServiceRequest extends Model
             'longitude' => 'float',
             'signed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Work and materials, in the order they were added.
+     *
+     * @return HasMany<RequestItem, $this>
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(RequestItem::class)->orderBy('id');
+    }
+
+    /**
+     * The sums of the rows, in cents.
+     *
+     * @return array{net: int, vat: int, total: int}
+     */
+    public function totalsCents(): array
+    {
+        $net = $this->items->sum(fn (RequestItem $item) => $item->netCents());
+        $vat = $this->items->sum(fn (RequestItem $item) => $item->vatCents());
+
+        return ['net' => $net, 'vat' => $vat, 'total' => $net + $vat];
     }
 
     /**

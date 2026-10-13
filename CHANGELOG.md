@@ -6,6 +6,16 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-13
+
+### Added
+- Työt ja tarvikkeet (#64): rows of work and materials on a request's details page, the second step of invoicing. Each row has a type (Työ or Tarvike), description, quantity and unit, unit price without VAT and VAT rate; the request shows the totals without VAT, the VAT and the total. A new work row starts at the default hourly rate and unit h, a material row with unit kpl; decimals can be typed with a comma.
+- Amounts are stored as whole cents and VAT is rounded per row, as on a Finnish invoice, so totals never drift by a cent.
+- The PDF and HTML download of a request lists the work and materials with their totals.
+- `GET/POST /api/requests/{id}/items` and `PUT/DELETE /api/requests/{id}/items/{item}`; a request's details include `items` and `totals`.
+- `DEFAULT_VAT_RATE` (25.5 %, Finland's general rate) and `DEFAULT_HOURLY_RATE` (65 €) settings for new rows.
+- Work and materials on five completed or ongoing demo requests.
+
 ## [1.1.0] - 2026-10-13
 
 ### Added
@@ -306,7 +316,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/jussipalanen/jalaops/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/jussipalanen/jalaops/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/jussipalanen/jalaops/compare/v0.24.1...v1.0.0
 [0.24.1]: https://github.com/jussipalanen/jalaops/compare/v0.24.0...v0.24.1

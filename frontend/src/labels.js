@@ -59,3 +59,28 @@ export function isNew(request, now = Date.now()) {
 
   return now - new Date(request.created_at).getTime() < NEW_REQUEST_DAYS * 24 * 60 * 60 * 1000
 }
+
+// Work and material rows on a request.
+export const itemTypeLabels = {
+  work: 'Työ',
+  material: 'Tarvike',
+}
+
+const euroFormat = new Intl.NumberFormat('fi-FI', { style: 'currency', currency: 'EUR' })
+const numberFormat = new Intl.NumberFormat('fi-FI', { maximumFractionDigits: 2 })
+
+// 122.36 → "122,36 €"
+export function formatEuro(amount) {
+  return euroFormat.format(amount ?? 0)
+}
+
+// 1.5 → "1,5"
+export function formatNumber(value) {
+  return numberFormat.format(value ?? 0)
+}
+
+// "1,5" or "1.5" → 1.5 (Finnish users type a decimal comma); "" stays "".
+export function parseDecimal(text) {
+  const normalised = String(text ?? '').trim().replace(/\s/g, '').replace(',', '.')
+  return normalised === '' ? '' : Number(normalised)
+}
