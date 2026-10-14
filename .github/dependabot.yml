@@ -29,6 +29,6 @@ updates:
         patterns: ['*']
 
   - package-ecosystem: docker
-    directories: [/docker/backend, /docker/production]
+    directories: [/docker/backend, /backend]
     schedule:
       interval: monthly

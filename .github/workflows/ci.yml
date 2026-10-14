@@ -1,16 +1,20 @@
 # Code standards, tests and dependency audits for every pull request and push to main.
+# The deploy workflow (deploy.yml) also runs these checks before it deploys.
 name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # github.workflow is the caller's name when deploy.yml runs these checks,
+  # so its run doesn't cancel this workflow's own run for the same push.
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

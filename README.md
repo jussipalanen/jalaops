@@ -229,7 +229,7 @@ This builds `android/dist/jalaops.apk` (install on a phone) and `android/dist/ja
 
 ## Deployment
 
-The app can be hosted for free with the frontend on Vercel and the backend on Render. By default the hosted backend runs on demo data that resets on every restart (`DEMO_MODE=true`), so no database service is needed. Set `DEMO_MODE=false` and the `DB_*` variables to use a real database.
+The frontend runs on Vercel and the backend on Google Cloud Run (always on, a few euros a month) or Render (free, sleeps when idle). Pushes to `main` that change the backend deploy it to Cloud Run automatically after CI passes ([deploy workflow](.github/workflows/deploy.yml)), and `./dev deploy` deploys it by hand. By default the hosted backend runs on demo data that resets on every restart (`DEMO_MODE=true`), so no database service is needed. Set `DEMO_MODE=false` and the `DB_*` variables to use a real database.
 
 Both services ask search engines not to index them (`X-Robots-Tag: noindex` and a `noindex` meta tag), because the app is a demo. `index.html` still has a description, Open Graph and X card tags, so shared links show a preview card; set the frontend's public address in `VITE_SITE_URL` (`frontend/.env.production`).
 

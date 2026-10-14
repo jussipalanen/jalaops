@@ -6,6 +6,16 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-14
+
+### Added
+- The backend can run on Google Cloud Run (#69): the service `jalaops-backend` in `europe-north1`, always on with one instance and CPU billed only during requests, about 8–10 dollars a month. `docs/DEPLOYMENT.md` has the one-time setup, the first deploy, an image cleanup policy and a budget alert.
+- The [deploy workflow](.github/workflows/deploy.yml) deploys the backend to Cloud Run on every push to `main` that changes `backend/`, after the CI checks pass. It signs in with Workload Identity Federation, so no Google key is stored in GitHub, and is skipped until the repository variables `GCP_PROJECT_ID`, `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT` are set.
+- `./dev deploy` deploys the backend to Cloud Run by hand with `gcloud`.
+
+### Changed
+- The production image moved into the backend: `backend/Dockerfile` with `backend/docker/start.sh`, built from the `backend` directory alone (`docker build backend`). On Render, set **Dockerfile Path** to `./backend/Dockerfile` and **Docker Build Context Directory** to `backend`.
+
 ## [1.3.0] - 2026-10-14
 
 ### Added
@@ -341,7 +351,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/jussipalanen/jalaops/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/jussipalanen/jalaops/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jussipalanen/jalaops/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/jussipalanen/jalaops/compare/v1.0.0...v1.1.0

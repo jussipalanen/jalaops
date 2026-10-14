@@ -47,7 +47,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | In demo mode the app runs on demo data that is reset whenever the
-    | server restarts (see docker/production/start.sh). The frontend shows
+    | server restarts (see backend/docker/start.sh). The frontend shows
     | a notice so visitors know their changes are not kept.
     |
     */
