@@ -9,7 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Generates the AI status overview ahead of time, so the first visitor after a
-// deploy doesn't wait for the AI. docker/production/start.sh runs it at startup.
+// deploy doesn't wait for the AI. backend/docker/start.sh runs it at startup.
 Artisan::command('ai-overview:warm', function (AiStatusOverview $overview) {
     if (! $overview->isEnabled()) {
         $this->info('AI status overview is off; nothing to do.');

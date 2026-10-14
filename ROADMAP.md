@@ -569,6 +569,7 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Invoicing (laskutus) of the maintenance work: 1. Asiakkaat ([#63](https://github.com/jussipalanen/jalaops/issues/63)) | Done in 1.1.0 |
 | Invoicing: 2. Työt ja tarvikkeet, work hours and materials on requests ([#64](https://github.com/jussipalanen/jalaops/issues/64)) | Done in 1.2.0 |
 | Invoicing: 3. Laskut, invoices from completed requests, with a PDF and export to accounting software ([#65](https://github.com/jussipalanen/jalaops/issues/65)) | Done in 1.3.0 |
+| Backend on Google Cloud Run: always on at a low cost, deployed automatically from `main` ([#69](https://github.com/jussipalanen/jalaops/issues/69)) | Done in 1.4.0 |
 
 Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).
 

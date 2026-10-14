@@ -229,7 +229,7 @@ Komento rakentaa Dockerissa tiedostot `android/dist/jalaops.apk` (asennus puheli
 
 ## Julkaisu
 
-Sovelluksen voi julkaista ilmaiseksi: frontend Verceliin ja backend Renderiin. Oletuksena julkaistu backend käyttää demodataa, joka palautuu jokaisella uudelleenkäynnistyksellä (`DEMO_MODE=true`), joten erillistä tietokantapalvelua ei tarvita. Asettamalla `DEMO_MODE=false` ja `DB_*`-muuttujat käyttöön tulee oikea tietokanta.
+Frontend toimii Vercelissä ja backend Google Cloud Runissa (aina päällä, muutama euro kuukaudessa) tai Renderissä (ilmainen, nukahtaa käyttämättömänä). Kun `main`-haaraan tulee backendin muutos, se julkaistaan Cloud Runiin automaattisesti CI-tarkistusten jälkeen ([deploy-työnkulku](.github/workflows/deploy.yml)), ja `./dev deploy` julkaisee sen käsin. Oletuksena julkaistu backend käyttää demodataa, joka palautuu jokaisella uudelleenkäynnistyksellä (`DEMO_MODE=true`), joten erillistä tietokantapalvelua ei tarvita. Asettamalla `DEMO_MODE=false` ja `DB_*`-muuttujat käyttöön tulee oikea tietokanta.
 
 Molemmat palvelut pyytävät hakukoneita olemaan indeksoimatta niitä (`X-Robots-Tag: noindex` ja `noindex`-metatagi), koska sovellus on demo. `index.html` sisältää silti kuvauksen sekä Open Graph- ja X-korttitagit, joten jaetuista linkeistä näkyy esikatselukortti; aseta frontendin julkinen osoite muuttujaan `VITE_SITE_URL` (`frontend/.env.production`).
 

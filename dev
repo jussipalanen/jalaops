@@ -37,6 +37,9 @@ Android app:
   android            Build android/dist/jalaops.apk and jalaops.aab (needs only Docker)
   android-secrets    Store the upload key in GitHub secrets for the release workflow
 
+Deployment:
+  deploy [args]      Deploy the backend to Google Cloud Run (needs gcloud; see docs/DEPLOYMENT.md)
+
 Tests:
   test               Run the backend and frontend tests
   test:backend       Run the backend tests
@@ -86,6 +89,17 @@ case "$command" in
         sed -n 's/^ANDROID_KEYSTORE_PASSWORD=//p' "$keys/signing.env" | gh secret set ANDROID_KEYSTORE_PASSWORD
         sed -n 's/^ANDROID_KEY_PASSWORD=//p' "$keys/signing.env" | gh secret set ANDROID_KEY_PASSWORD
         echo "Stored ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_PASSWORD in GitHub secrets."
+        ;;
+    deploy)
+        # Builds backend/Dockerfile with Cloud Build and deploys a new revision to
+        # Cloud Run in gcloud's active project. The service keeps its other settings;
+        # extra arguments go to gcloud run deploy.
+        service="${CLOUD_RUN_SERVICE:-jalaops-backend}"
+        region="${CLOUD_RUN_REGION:-europe-north1}"
+        project="$(gcloud config get-value project 2>/dev/null)"
+        [ -n "$project" ] || { echo "No gcloud project; run: gcloud config set project <project-id>"; exit 1; }
+        echo "Deploying $service to Cloud Run (project $project, region $region)."
+        gcloud run deploy "$service" --source backend --region "$region" "$@"
         ;;
     test)
         $COMPOSE exec backend php artisan test

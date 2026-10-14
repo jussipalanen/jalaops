@@ -1,5 +1,5 @@
-# Production image for the Laravel backend (used by Render).
-# Build from the repository root: docker build -f docker/production/Dockerfile .
+# Production image for the Laravel backend (used by Cloud Run and Render).
+# Build from the backend directory: docker build backend
 FROM php:8.3-cli
 
 RUN apt-get update \
@@ -13,14 +13,14 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/backend
 
 # Install dependencies first so this layer is cached between code changes.
-COPY backend/composer.json backend/composer.lock ./
+COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --prefer-dist
 
-COPY backend/ ./
+COPY . ./
 RUN composer dump-autoload --optimize --no-dev \
     && chown -R www-data:www-data storage bootstrap/cache database
 
-COPY docker/production/start.sh /usr/local/bin/start.sh
+COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
 ENV APP_ENV=production \
@@ -31,6 +31,7 @@ ENV APP_ENV=production \
 
 USER www-data
 
+# Cloud Run and Render set PORT; start.sh falls back to 10000.
 EXPOSE 10000
 
 CMD ["start.sh"]
