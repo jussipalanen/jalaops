@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-14
+
+### Changed
+- The Vercel frontend uses the backend on Cloud Run (`https://jalaops-backend-1097769575593.europe-north1.run.app`) instead of Render (#69): `/api/*` is forwarded there, and "API-dokumentaatio" links to its `/docs`.
+
 ## [1.4.0] - 2026-10-14
 
 ### Added
@@ -351,7 +356,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/jussipalanen/jalaops/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jussipalanen/jalaops/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/jussipalanen/jalaops/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jussipalanen/jalaops/compare/v1.1.0...v1.2.0
