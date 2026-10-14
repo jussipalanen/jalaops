@@ -14,6 +14,7 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - `./dev deploy` deploys the backend to Cloud Run by hand with `gcloud`.
 
 ### Changed
+- The Vercel frontend uses the backend on Cloud Run (`https://jalaops-backend-1097769575593.europe-north1.run.app`) instead of Render: `/api/*` is forwarded there, and "API-dokumentaatio" links to its `/docs`.
 - The production image moved into the backend: `backend/Dockerfile` with `backend/docker/start.sh`, built from the `backend` directory alone (`docker build backend`). On Render, set **Dockerfile Path** to `./backend/Dockerfile` and **Docker Build Context Directory** to `backend`.
 
 ## [1.3.0] - 2026-10-14
