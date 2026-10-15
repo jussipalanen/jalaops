@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, version as vueVersion } from 'vue'
 import { apiGet } from '@/api/client'
+import AppDownloads from '@/components/AppDownloads.vue'
 import { version as frontendVersion } from '../../package.json'
 
 // The API docs and the backend home page are served by the Laravel backend.
@@ -85,6 +86,8 @@ onMounted(load)
     </header>
 
     <div class="grid gap-4">
+      <AppDownloads />
+
       <div class="card card-body">
         <h2 class="text-lg font-bold">Tila</h2>
         <ul class="mt-3 grid gap-2 sm:grid-cols-3" aria-live="polite">

@@ -6,6 +6,13 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-15
+
+### Added
+- Mobiilisovellus on the About page: "Lataa Android-sovellus" downloads `jalaops.apk` from the newest GitHub release, and "Asenna iPhoneen tai iPadiin" opens the steps for adding JalaOps to an iPhone or iPad home screen in Safari. Both show the app's version and have the platform's icon.
+- "Android-sovellus" (download) and "iPhone-sovellus" (to the About page) links in the footer.
+- The links are hidden inside the installed app (the Android app or a home screen icon).
+
 ## [1.4.1] - 2026-10-14
 
 ### Changed
@@ -356,7 +363,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/jussipalanen/jalaops/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/jussipalanen/jalaops/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jussipalanen/jalaops/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/jussipalanen/jalaops/compare/v1.2.0...v1.3.0

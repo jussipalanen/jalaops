@@ -207,11 +207,15 @@ JalaOps is also an Android app: a [Trusted Web Activity](https://developer.chrom
 
 ### Install on Android
 
-1. Open the [latest release](https://github.com/jussipalanen/jalaops/releases/latest) on your phone and download **jalaops.apk**.
+1. On your phone, open the web app's "Tietoja" page and choose **Lataa Android-sovellus** (or the footer's "Android-sovellus" link). It downloads **jalaops.apk** from the [latest release](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Open the downloaded file. The first time, Android asks you to allow your browser to install apps; allow it and return.
 3. Choose **Install** and open JalaOps from the home screen. Long-press the icon for shortcuts to a new request, the list and the map.
 
 The app needs Chrome (or another browser that supports Trusted Web Activities) on the phone. Updates: install the newer `jalaops.apk` over the old one.
+
+### Install on iPhone and iPad
+
+There is no App Store app; JalaOps is added to the home screen as a web app instead. Open the site in Safari, tap **Share** (behind **•••** if needed) and choose **Add to Home Screen**. It then opens full screen from its icon, and web app updates reach it right away. The "Tietoja" page shows these steps in Finnish under **Asenna iPhoneen tai iPadiin**.
 
 ### Build the app
 

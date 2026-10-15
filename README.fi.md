@@ -207,11 +207,15 @@ JalaOps on myös Android-sovellus: [Trusted Web Activity](https://developer.chro
 
 ### Asennus Android-puhelimeen
 
-1. Avaa puhelimella [uusin julkaisu](https://github.com/jussipalanen/jalaops/releases/latest) ja lataa **jalaops.apk**.
+1. Avaa puhelimella verkkosovelluksen Tietoja-sivu ja valitse **Lataa Android-sovellus** (tai alatunnisteen Android-sovellus-linkki). Se lataa **jalaops.apk**-tiedoston [uusimmasta julkaisusta](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Avaa ladattu tiedosto. Ensimmäisellä kerralla Android pyytää sallimaan sovellusten asentamisen selaimesta; salli se ja palaa takaisin.
 3. Valitse **Asenna** ja avaa JalaOps aloitusnäytöltä. Kuvaketta pitkään painamalla saat pikalinkit uuteen pyyntöön, listaan ja karttaan.
 
 Puhelimessa tarvitaan Chrome (tai muu Trusted Web Activityä tukeva selain). Päivitys: asenna uudempi `jalaops.apk` vanhan päälle.
+
+### Asennus iPhoneen ja iPadiin
+
+App Storessa ei ole sovellusta, vaan JalaOps lisätään Koti-valikkoon verkkosovelluksena. Avaa sivu Safarissa, napauta **Jaa** (tarvittaessa ensin **•••**-valikosta) ja valitse **Lisää Koti-valikkoon**. Sovellus avautuu kuvakkeesta koko näytölle, ja verkkosovelluksen päivitykset näkyvät siinä heti. Tietoja-sivulla nämä ohjeet ovat kohdassa **Asenna iPhoneen tai iPadiin**.
 
 ### Sovelluksen rakentaminen
 
