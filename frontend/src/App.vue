@@ -134,6 +134,9 @@ watch(() => route.fullPath, closeMenu)
         >
           API-etusivu
         </a>
+        <RouterLink to="/mobile-apps" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
+          Mobiilisovellukset
+        </RouterLink>
         <span>Versio {{ version }}</span>
         <span>© {{ year }}</span>
       </nav>

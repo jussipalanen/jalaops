@@ -1,5 +1,7 @@
-# Builds the Android app and attaches jalaops.apk (install on a phone) and
-# jalaops.aab (upload to Google Play) to each GitHub release. It can also be
+# Builds the Android app and attaches jalaops.apk (install on a phone),
+# jalaops.aab (upload to Google Play) and their SHA256SUMS to each GitHub
+# release, with a build provenance attestation that anyone can check with
+# `gh attestation verify jalaops.apk -R jussipalanen/jalaops`. It can also be
 # started by hand from the Actions tab; the files are then under the run's
 # artifacts. Needs the upload key in secrets (./dev android-secrets).
 name: Android
@@ -11,6 +13,9 @@ on:
 
 permissions:
   contents: write
+  # For the build provenance attestation.
+  id-token: write
+  attestations: write
 
 jobs:
   build:
@@ -57,15 +62,29 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          # Remove the key even if the build fails.
+          trap 'rm -f "$RUNNER_TEMP/upload.jks"' EXIT
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
           ANDROID_KEYSTORE="$RUNNER_TEMP/upload.jks" JAVA_HOME="$JAVA_HOME_17_X64" scripts/android/build.sh
-          rm "$RUNNER_TEMP/upload.jks"
+
+      - name: Checksums
+        working-directory: android/dist
+        run: sha256sum jalaops.apk jalaops.aab | tee SHA256SUMS
+
+      # Signed proof that these files were built by this workflow from this
+      # repository's source.
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            android/dist/jalaops.apk
+            android/dist/jalaops.aab
 
       - name: Attach to the release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" android/dist/jalaops.apk android/dist/jalaops.aab --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" android/dist/jalaops.apk android/dist/jalaops.aab android/dist/SHA256SUMS --clobber
 
       - name: Upload as artifacts
         if: github.event_name == 'workflow_dispatch'

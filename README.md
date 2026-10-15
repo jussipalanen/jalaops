@@ -207,11 +207,22 @@ JalaOps is also an Android app: a [Trusted Web Activity](https://developer.chrom
 
 ### Install on Android
 
-1. Open the [latest release](https://github.com/jussipalanen/jalaops/releases/latest) on your phone and download **jalaops.apk**.
+1. On your phone, open the web app's **Mobiilisovellukset** page (linked from the footer) and choose **Lataa Android-sovellus (APK)**. It downloads **jalaops.apk** from the [latest release](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Open the downloaded file. The first time, Android asks you to allow your browser to install apps; allow it and return.
 3. Choose **Install** and open JalaOps from the home screen. Long-press the icon for shortcuts to a new request, the list and the map.
 
 The app needs Chrome (or another browser that supports Trusted Web Activities) on the phone. Updates: install the newer `jalaops.apk` over the old one.
+
+**Is the download safe?** The app asks for no Android permissions; it only opens the web app in Chrome. Each release has the APK's SHA-256 checksum (in `SHA256SUMS` and on the Mobiilisovellukset page) and a [build provenance attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations) proving it was built from this repository by the Android workflow. To check a downloaded file:
+
+```bash
+sha256sum jalaops.apk
+gh attestation verify jalaops.apk -R jussipalanen/jalaops
+```
+
+### Install on iPhone and iPad
+
+There is no App Store app; JalaOps is added to the home screen as a web app instead. Open the site in Safari, tap **Share** (behind **•••** if needed) and choose **Add to Home Screen**. It then opens full screen from its icon, and web app updates reach it right away. The **Mobiilisovellukset** page shows these steps in Finnish.
 
 ### Build the app
 
@@ -223,7 +234,7 @@ This builds `android/dist/jalaops.apk` (install on a phone) and `android/dist/ja
 
 **Signing key:** the first build creates an upload key in `~/.jalaops/android` (outside the repository). Back that folder up: Google Play only accepts updates signed with the same key. The key's SHA-256 fingerprint is listed in [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); without it the app opens with an address bar. A different key (for example on another machine) needs its fingerprint added there.
 
-**Release builds:** the [Android workflow](.github/workflows/android.yml) attaches `jalaops.apk` and `jalaops.aab` to every GitHub release, and can be started by hand from the Actions tab. It needs the key in GitHub secrets once: run `./dev android-secrets` (uses the `gh` CLI).
+**Release builds:** the [Android workflow](.github/workflows/android.yml) attaches `jalaops.apk`, `jalaops.aab` and `SHA256SUMS` to every GitHub release with a build provenance attestation, and can be started by hand from the Actions tab. It needs the key in GitHub secrets once: run `./dev android-secrets` (uses the `gh` CLI).
 
 **Google Play:** upload `jalaops.aab` to the internal testing track in the [Play Console](https://play.google.com/console). See the plan in [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
 

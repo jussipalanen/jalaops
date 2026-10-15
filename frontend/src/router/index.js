@@ -84,6 +84,12 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     {
+      path: '/mobile-apps',
+      name: 'mobile-apps',
+      meta: { title: 'Mobiilisovellukset' },
+      component: () => import('../views/MobileAppsView.vue'),
+    },
+    {
       path: '/map',
       name: 'map',
       component: () => import('../views/RequestMapView.vue'),
