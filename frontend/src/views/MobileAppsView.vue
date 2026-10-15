@@ -108,7 +108,9 @@ const linkClass = 'font-semibold text-primary-700 hover:underline dark:text-prim
             <li>Avaa JalaOps aloitusnäytöltä.</li>
           </ol>
           <p class="mt-3 mb-0 text-sm text-slate-500 dark:text-slate-400">
-            Tarvitaan Chrome-selain. Päivitä asentamalla uudempi tiedosto vanhan päälle.
+            Tarvitaan Chrome-selain. Koska sovellus ei tule Google Playsta, Android voi varoittaa tuntemattomasta
+            sovelluksesta; se on tavallista suoraan ladatuille sovelluksille. Päivitä asentamalla uudempi tiedosto
+            vanhan päälle.
           </p>
         </div>
 
@@ -185,20 +187,6 @@ const linkClass = 'font-semibold text-primary-700 hover:underline dark:text-prim
             </div>
           </li>
         </ul>
-
-        <details class="mt-4 rounded-xl border border-slate-200 dark:border-slate-800">
-          <summary class="cursor-pointer px-4 py-3 font-semibold">Tarkista tiedosto itse</summary>
-          <div class="grid gap-2 px-4 pb-4 text-sm text-slate-600 dark:text-slate-300">
-            <p class="m-0">Tarkistussumman pitää olla sama kuin yllä:</p>
-            <pre class="m-0 overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 text-xs dark:bg-slate-800"><code>sha256sum jalaops.apk</code></pre>
-            <p class="m-0">Alkuperän todistus (GitHub CLI) kertoo, että tiedosto on käännetty JalaOpsin lähdekoodista:</p>
-            <pre class="m-0 overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 text-xs dark:bg-slate-800"><code>gh attestation verify jalaops.apk -R jussipalanen/jalaops</code></pre>
-            <p class="m-0">
-              Koska sovellus ei tule Google Playsta, Android voi varoittaa tuntemattomasta sovelluksesta. Se on
-              tavallista suoraan ladatuille sovelluksille.
-            </p>
-          </div>
-        </details>
       </div>
     </div>
   </section>
