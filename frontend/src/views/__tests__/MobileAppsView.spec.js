@@ -33,7 +33,10 @@ async function mountView() {
 }
 
 describe('MobileAppsView', () => {
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
 
   it('downloads the newest Android app and shows its release details', async () => {
     const fetch = mockRelease(release)
@@ -68,7 +71,7 @@ describe('MobileAppsView', () => {
 
     expect(wrapper.find('[data-test="android"]').text()).toContain(`Versio ${version}`)
     expect(wrapper.find('[data-test="checksum"]').exists()).toBe(false)
-    expect(wrapper.find('[data-test="security"]').text()).toContain('näkyy julkaisusivulla')
+    expect(wrapper.find('[data-test="technical"]').text()).toContain('Näkyy julkaisusivulla')
   })
 
   it('ignores a checksum in an unexpected format', async () => {
@@ -78,6 +81,56 @@ describe('MobileAppsView', () => {
     })
 
     expect((await mountView()).find('[data-test="checksum"]').exists()).toBe(false)
+  })
+
+  it('keeps the checksum and fingerprint under Tekniset tiedot', async () => {
+    mockRelease(release)
+    const wrapper = await mountView()
+
+    const technical = wrapper.find('[data-test="technical"]')
+    expect(technical.element.tagName).toBe('DETAILS')
+    expect(technical.find('[data-test="checksum"]').exists()).toBe(true)
+    expect(technical.find('[data-test="fingerprint"]').exists()).toBe(true)
+  })
+
+  it('says the Android app updates itself', async () => {
+    mockRelease(release)
+    const android = (await mountView()).find('[data-test="android"]')
+
+    expect(android.text()).toContain('se päivittyy itsestään')
+    expect(android.text()).toContain('tästä lähteestä')
+  })
+
+  it("shows a QR code for opening the page on a phone when it's opened on a computer", async () => {
+    mockRelease(release)
+    const wrapper = await mountView()
+    await vi.waitFor(() => expect(wrapper.find('[data-test="qr"] img').exists()).toBe(true))
+
+    expect(wrapper.find('[data-test="qr"] img').attributes('src')).toMatch(/^data:image\/svg\+xml;charset=utf-8,/)
+    expect(wrapper.find('[data-test="qr"]').text()).toContain('Avaa puhelimella')
+    expect(wrapper.find('.badge').exists()).toBe(false)
+  })
+
+  it.each([
+    ['Android', 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/141.0 Mobile Safari/537.36', 'android'],
+    ['iPhone', 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1', 'ios'],
+  ])('highlights the %s card on that phone, without a QR code', async (name, userAgent, card) => {
+    vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue(userAgent)
+    mockRelease(release)
+    const wrapper = await mountView()
+
+    const own = wrapper.find(`[data-test="${card}"]`)
+    expect(own.find('.badge').text()).toBe('Tämä laite')
+    expect(own.classes()).toContain('ring-2')
+    expect(wrapper.findAll('.badge')).toHaveLength(1)
+    expect(wrapper.find('[data-test="qr"]').exists()).toBe(false)
+  })
+
+  it('puts the iPhone card first on an iPhone', async () => {
+    vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)')
+    mockRelease(release)
+
+    expect((await mountView()).find('[data-test="ios"]').classes()).toContain('order-first')
   })
 
   it('hides the download inside the installed app', async () => {
