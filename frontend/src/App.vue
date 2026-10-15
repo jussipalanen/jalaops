@@ -2,7 +2,6 @@
 import { computed, useTemplateRef, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useDropdown } from '@/composables/useDropdown'
-import AppDownloads from '@/components/AppDownloads.vue'
 import AppLogo from '@/components/AppLogo.vue'
 import DemoBanner from '@/components/DemoBanner.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
@@ -135,7 +134,9 @@ watch(() => route.fullPath, closeMenu)
         >
           API-etusivu
         </a>
-        <AppDownloads variant="links" />
+        <RouterLink to="/mobile-apps" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
+          Mobiilisovellukset
+        </RouterLink>
         <span>Versio {{ version }}</span>
         <span>© {{ year }}</span>
       </nav>

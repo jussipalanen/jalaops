@@ -9,9 +9,12 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 ## [1.5.0] - 2026-10-15
 
 ### Added
-- Mobiilisovellus on the About page: "Lataa Android-sovellus" downloads `jalaops.apk` from the newest GitHub release, and "Asenna iPhoneen tai iPadiin" opens the steps for adding JalaOps to an iPhone or iPad home screen in Safari. Both show the app's version and have the platform's icon.
-- "Android-sovellus" (download) and "iPhone-sovellus" (to the About page) links in the footer.
-- The links are hidden inside the installed app (the Android app or a home screen icon).
+- Mobiilisovellukset page (`/mobile-apps`), linked from the footer and the About page. "Lataa Android-sovellus (APK)" downloads `jalaops.apk` from the newest GitHub release, with its version, size and date, and the iPhone and iPad section has the steps for adding JalaOps to the home screen in Safari. Both have the platform's icon; inside the installed app the download is hidden.
+- Turvallisuus on the same page: where the file comes from, the signing key's SHA-256 fingerprint (from `assetlinks.json`), the APK's SHA-256 checksum from GitHub, that the app asks for no permissions, and how to check the file with `sha256sum` and `gh attestation verify`.
+- The [Android workflow](.github/workflows/android.yml) attaches a `SHA256SUMS` file to each release and creates a build provenance attestation for `jalaops.apk` and `jalaops.aab`, proving they were built from this repository.
+
+### Changed
+- The Android workflow removes the signing key from the runner even when the build fails.
 
 ## [1.4.1] - 2026-10-14
 
