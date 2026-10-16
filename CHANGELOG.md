@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-16
+
+### Changed
+- The Mobiilisovellukset page is switched off for now, while Google Play Protect warns about the APK downloaded from GitHub: its links in the footer and on the About page are hidden, and `/mobile-apps` opens the home page. `VITE_MOBILE_APPS_PAGE=true` at build time turns it back on. The APK is still attached to each GitHub release.
+
 ## [1.6.0] - 2026-10-16
 
 ### Added
@@ -383,7 +388,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/jussipalanen/jalaops/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/jussipalanen/jalaops/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/jussipalanen/jalaops/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/jussipalanen/jalaops/compare/v1.4.0...v1.4.1

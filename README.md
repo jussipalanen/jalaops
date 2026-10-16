@@ -328,13 +328,15 @@ JalaOps is also an Android app: a [Trusted Web Activity](https://developer.chrom
 <details>
 <summary><strong>🤖 Install on Android</strong></summary>
 
-1. On your phone, open the web app's **Mobiilisovellukset** page (linked from the footer) and choose **Lataa Android-sovellus (APK)**. It downloads **jalaops.apk** from the [latest release](https://github.com/jussipalanen/jalaops/releases/latest).
+1. On your phone, download **jalaops.apk** from the [latest release](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Open the downloaded file. The first time, Android asks you to allow your browser to install apps; allow it and return.
 3. Choose **Install** and open JalaOps from the home screen. Long-press the icon for shortcuts to a new request, the list and the map.
 
-The app needs Chrome (or another browser that supports Trusted Web Activities) on the phone. Updates: install the newer `jalaops.apk` over the old one.
+The app needs Chrome (or another browser that supports Trusted Web Activities) on the phone. Updates: install the newer `jalaops.apk` over the old one. Google Play Protect may warn about the app, because it isn't installed from Google Play.
 
-**Is the download safe?** The app asks for no Android permissions; it only opens the web app in Chrome. Each release has the APK's SHA-256 checksum (in `SHA256SUMS` and on the Mobiilisovellukset page) and a [build provenance attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations) proving it was built from this repository by the Android workflow. To check a downloaded file:
+The web app's **Mobiilisovellukset** page (`/mobile-apps`), with the download and the iPhone steps in Finnish, is switched off for now. Build the frontend with `VITE_MOBILE_APPS_PAGE=true` to show it.
+
+**Is the download safe?** The app asks for no Android permissions; it only opens the web app in Chrome. Each release has the APK's SHA-256 checksum (in `SHA256SUMS`) and a [build provenance attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations) proving it was built from this repository by the Android workflow. To check a downloaded file:
 
 ```bash
 sha256sum jalaops.apk
@@ -346,7 +348,7 @@ gh attestation verify jalaops.apk -R jussipalanen/jalaops
 <details>
 <summary><strong>🍎 Install on iPhone and iPad</strong></summary>
 
-There is no App Store app; JalaOps is added to the home screen as a web app instead. Open the site in Safari, tap **Share** (behind **•••** if needed) and choose **Add to Home Screen**. It then opens full screen from its icon, and web app updates reach it right away. The **Mobiilisovellukset** page shows these steps in Finnish.
+There is no App Store app; JalaOps is added to the home screen as a web app instead. Open the site in Safari, tap **Share** (behind **•••** if needed) and choose **Add to Home Screen**. It then opens full screen from its icon, and web app updates reach it right away.
 
 </details>
 

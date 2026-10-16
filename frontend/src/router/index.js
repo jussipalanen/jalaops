@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { mobileAppsPage } from '@/features'
 import { pageTitle, SITE_TITLE } from '@/pageTitle'
 import HomeView from '../views/HomeView.vue'
 
@@ -83,12 +84,15 @@ const router = createRouter({
       meta: { title: 'Tietoja' },
       component: () => import('../views/AboutView.vue'),
     },
-    {
-      path: '/mobile-apps',
-      name: 'mobile-apps',
-      meta: { title: 'Mobiilisovellukset' },
-      component: () => import('../views/MobileAppsView.vue'),
-    },
+    // While the page is switched off, old links and QR codes open the home page.
+    mobileAppsPage
+      ? {
+          path: '/mobile-apps',
+          name: 'mobile-apps',
+          meta: { title: 'Mobiilisovellukset' },
+          component: () => import('../views/MobileAppsView.vue'),
+        }
+      : { path: '/mobile-apps', redirect: '/' },
     {
       path: '/map',
       name: 'map',

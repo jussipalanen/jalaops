@@ -12,4 +12,11 @@ describe('router', () => {
     await router.push('/')
     expect(document.title).toBe('JalaOps – huoltopyyntöjen hallinta')
   })
+
+  // VITE_MOBILE_APPS_PAGE is not set in the tests, so the page is switched off.
+  it('opens the home page from the switched-off Mobiilisovellukset page', async () => {
+    await router.push('/map')
+    await router.push('/mobile-apps')
+    expect(router.currentRoute.value.path).toBe('/')
+  })
 })

@@ -328,13 +328,15 @@ JalaOps on myös Android-sovellus: [Trusted Web Activity](https://developer.chro
 <details>
 <summary><strong>🤖 Asennus Android-puhelimeen</strong></summary>
 
-1. Avaa puhelimella verkkosovelluksen **Mobiilisovellukset**-sivu (linkki alatunnisteessa) ja valitse **Lataa Android-sovellus (APK)**. Se lataa **jalaops.apk**-tiedoston [uusimmasta julkaisusta](https://github.com/jussipalanen/jalaops/releases/latest).
+1. Lataa puhelimella **jalaops.apk** [uusimmasta julkaisusta](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Avaa ladattu tiedosto. Ensimmäisellä kerralla Android pyytää sallimaan sovellusten asentamisen selaimesta; salli se ja palaa takaisin.
 3. Valitse **Asenna** ja avaa JalaOps aloitusnäytöltä. Kuvaketta pitkään painamalla saat pikalinkit uuteen pyyntöön, listaan ja karttaan.
 
-Puhelimessa tarvitaan Chrome (tai muu Trusted Web Activityä tukeva selain). Päivitys: asenna uudempi `jalaops.apk` vanhan päälle.
+Puhelimessa tarvitaan Chrome (tai muu Trusted Web Activityä tukeva selain). Päivitys: asenna uudempi `jalaops.apk` vanhan päälle. Google Play Protect saattaa varoittaa sovelluksesta, koska sitä ei asenneta Google Playsta.
 
-**Onko lataus turvallinen?** Sovellus ei pyydä Androidin käyttöoikeuksia, vaan avaa verkkosovelluksen Chromessa. Jokaisessa julkaisussa on APK:n SHA-256-tarkistussumma (`SHA256SUMS`-tiedostossa ja Mobiilisovellukset-sivulla) sekä [alkuperätodistus](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations) (build provenance), joka osoittaa, että Android-työnkulku on kääntänyt tiedoston tämän repositorion lähdekoodista. Ladatun tiedoston tarkistus:
+Verkkosovelluksen **Mobiilisovellukset**-sivu (`/mobile-apps`), jossa on lataus ja iPhonen ohjeet suomeksi, on toistaiseksi pois käytöstä. Sen saa näkyviin kääntämällä frontendin asetuksella `VITE_MOBILE_APPS_PAGE=true`.
+
+**Onko lataus turvallinen?** Sovellus ei pyydä Androidin käyttöoikeuksia, vaan avaa verkkosovelluksen Chromessa. Jokaisessa julkaisussa on APK:n SHA-256-tarkistussumma (`SHA256SUMS`-tiedostossa) sekä [alkuperätodistus](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations) (build provenance), joka osoittaa, että Android-työnkulku on kääntänyt tiedoston tämän repositorion lähdekoodista. Ladatun tiedoston tarkistus:
 
 ```bash
 sha256sum jalaops.apk
@@ -346,7 +348,7 @@ gh attestation verify jalaops.apk -R jussipalanen/jalaops
 <details>
 <summary><strong>🍎 Asennus iPhoneen ja iPadiin</strong></summary>
 
-App Storessa ei ole sovellusta, vaan JalaOps lisätään Koti-valikkoon verkkosovelluksena. Avaa sivu Safarissa, napauta **Jaa** (tarvittaessa ensin **•••**-valikosta) ja valitse **Lisää Koti-valikkoon**. Sovellus avautuu kuvakkeesta koko näytölle, ja verkkosovelluksen päivitykset näkyvät siinä heti. Ohjeet ovat myös **Mobiilisovellukset**-sivulla.
+App Storessa ei ole sovellusta, vaan JalaOps lisätään Koti-valikkoon verkkosovelluksena. Avaa sivu Safarissa, napauta **Jaa** (tarvittaessa ensin **•••**-valikosta) ja valitse **Lisää Koti-valikkoon**. Sovellus avautuu kuvakkeesta koko näytölle, ja verkkosovelluksen päivitykset näkyvät siinä heti.
 
 </details>
 
