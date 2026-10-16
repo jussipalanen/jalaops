@@ -22,6 +22,15 @@ describe('Android app files', () => {
     }
   })
 
+  // The Mobiilisovellukset page promises that the app asks for no permissions;
+  // notifications and location delegation would add them.
+  it('asks for no Android permissions and only opens the site over HTTPS', () => {
+    expect(twa.enableNotifications).toBe(false)
+    expect(twa.features).toEqual({})
+    expect(twa.additionalTrustedOrigins).toEqual([])
+    expect(twa.fullScopeUrl).toBe(`https://${twa.host}/`)
+  })
+
   it('has an installable web app manifest with a maskable icon and shortcuts', () => {
     expect(manifest.start_url).toBe('/')
     expect(manifest.display).toBe('standalone')

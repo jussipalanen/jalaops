@@ -207,11 +207,22 @@ JalaOps on myös Android-sovellus: [Trusted Web Activity](https://developer.chro
 
 ### Asennus Android-puhelimeen
 
-1. Avaa puhelimella [uusin julkaisu](https://github.com/jussipalanen/jalaops/releases/latest) ja lataa **jalaops.apk**.
+1. Avaa puhelimella verkkosovelluksen **Mobiilisovellukset**-sivu (linkki alatunnisteessa) ja valitse **Lataa Android-sovellus (APK)**. Se lataa **jalaops.apk**-tiedoston [uusimmasta julkaisusta](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Avaa ladattu tiedosto. Ensimmäisellä kerralla Android pyytää sallimaan sovellusten asentamisen selaimesta; salli se ja palaa takaisin.
 3. Valitse **Asenna** ja avaa JalaOps aloitusnäytöltä. Kuvaketta pitkään painamalla saat pikalinkit uuteen pyyntöön, listaan ja karttaan.
 
 Puhelimessa tarvitaan Chrome (tai muu Trusted Web Activityä tukeva selain). Päivitys: asenna uudempi `jalaops.apk` vanhan päälle.
+
+**Onko lataus turvallinen?** Sovellus ei pyydä Androidin käyttöoikeuksia, vaan avaa verkkosovelluksen Chromessa. Jokaisessa julkaisussa on APK:n SHA-256-tarkistussumma (`SHA256SUMS`-tiedostossa ja Mobiilisovellukset-sivulla) sekä [alkuperätodistus](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations) (build provenance), joka osoittaa, että Android-työnkulku on kääntänyt tiedoston tämän repositorion lähdekoodista. Ladatun tiedoston tarkistus:
+
+```bash
+sha256sum jalaops.apk
+gh attestation verify jalaops.apk -R jussipalanen/jalaops
+```
+
+### Asennus iPhoneen ja iPadiin
+
+App Storessa ei ole sovellusta, vaan JalaOps lisätään Koti-valikkoon verkkosovelluksena. Avaa sivu Safarissa, napauta **Jaa** (tarvittaessa ensin **•••**-valikosta) ja valitse **Lisää Koti-valikkoon**. Sovellus avautuu kuvakkeesta koko näytölle, ja verkkosovelluksen päivitykset näkyvät siinä heti. Ohjeet ovat myös **Mobiilisovellukset**-sivulla.
 
 ### Sovelluksen rakentaminen
 
@@ -223,7 +234,7 @@ Komento rakentaa Dockerissa tiedostot `android/dist/jalaops.apk` (asennus puheli
 
 **Allekirjoitusavain:** ensimmäinen rakennus luo latausavaimen kansioon `~/.jalaops/android` (repositorion ulkopuolelle). Varmuuskopioi kansio: Google Play hyväksyy päivitykset vain samalla avaimella allekirjoitettuina. Avaimen SHA-256-sormenjälki on tiedostossa [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); ilman sitä sovellus avautuu osoiterivin kanssa. Eri avaimen (esimerkiksi toisella koneella) sormenjälki pitää lisätä sinne.
 
-**Julkaisut:** [Android-työnkulku](.github/workflows/android.yml) liittää `jalaops.apk`- ja `jalaops.aab`-tiedostot jokaiseen GitHub-julkaisuun, ja sen voi käynnistää myös käsin Actions-välilehdeltä. Avain tallennetaan kerran GitHubin salaisuuksiin komennolla `./dev android-secrets` (käyttää `gh`-työkalua).
+**Julkaisut:** [Android-työnkulku](.github/workflows/android.yml) liittää `jalaops.apk`-, `jalaops.aab`- ja `SHA256SUMS`-tiedostot jokaiseen GitHub-julkaisuun alkuperätodistuksen kanssa, ja sen voi käynnistää myös käsin Actions-välilehdeltä. Avain tallennetaan kerran GitHubin salaisuuksiin komennolla `./dev android-secrets` (käyttää `gh`-työkalua).
 
 **Google Play:** lataa `jalaops.aab` sisäiseen testaukseen [Play Consolessa](https://play.google.com/console). Suunnitelma on tiedostossa [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
 
