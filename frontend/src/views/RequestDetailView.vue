@@ -4,8 +4,13 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
 import { apiDelete, apiGet } from '@/api/client'
 import { formatAddress, formatDate, hasLocation, invoiceStatusLabels, isNew, priorityLabels, statusLabels, streetViewUrl } from '@/labels'
+import CopyButton from '@/components/CopyButton.vue'
 import DocumentLinks from '@/components/DocumentLinks.vue'
+import QrCode from '@/components/QrCode.vue'
+import QrDialog from '@/components/QrDialog.vue'
 import RequestItems from '@/components/RequestItems.vue'
+import ShareLink from '@/components/ShareLink.vue'
+import { useDevice } from '@/composables/useDevice'
 import { createMap, requestPin, STREET_ZOOM } from '@/map'
 import { pageTitle } from '@/pageTitle'
 
@@ -18,6 +23,13 @@ const notFound = ref(false)
 const error = ref('')
 
 const address = computed(() => (request.value ? formatAddress(request.value) : ''))
+
+// The request's own address, for opening it on another device: a QR code on a
+// computer; on a phone or tablet the share menu, or the code on the whole
+// screen for a colleague to scan.
+const { handheld } = useDevice()
+const appUrl = computed(() => (request.value ? `${window.location.origin}/requests/${request.value.id}` : ''))
+const qrOpen = ref(false)
 
 // A completed request of a customer, with rows and not invoiced yet, can be invoiced.
 const billable = computed(
@@ -109,6 +121,10 @@ async function deleteRequest() {
         >
           Luo lasku
         </RouterLink>
+        <template v-if="handheld">
+          <ShareLink :url="appUrl" :title="request.title" class="max-sm:flex-1" />
+          <button type="button" class="btn btn-secondary max-sm:flex-1" @click="qrOpen = true">Näytä QR-koodi</button>
+        </template>
         <RouterLink
           v-if="request.invoice"
           :to="`/invoices/${request.invoice.id}`"
@@ -183,6 +199,20 @@ async function deleteRequest() {
       </div>
 
       <RequestItems :request-id="request.id" class="mt-5" />
+
+      <div v-if="!handheld" class="card card-body mt-5 flex items-center gap-5" data-test="open-on-phone">
+        <QrCode :value="appUrl" alt="QR-koodi: avaa pyyntö puhelimella" class="size-28 shrink-0" />
+        <div>
+          <h2 class="text-lg font-bold">Avaa puhelimella</h2>
+          <p class="mt-1 text-slate-600 dark:text-slate-300">Skannaa koodi puhelimen kameralla, niin pyyntö aukeaa siellä.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <CopyButton :value="appUrl" label="Kopioi linkki" text="Kopioi linkki" copied-text="Linkki kopioitu" />
+            <button type="button" class="btn btn-secondary" @click="qrOpen = true">Näytä suurena</button>
+          </div>
+        </div>
+      </div>
+
+      <QrDialog v-model:open="qrOpen" :value="appUrl" :title="request.title" alt="QR-koodi: avaa pyyntö puhelimella" :details="[['Pyyntö', `#${request.id}`]]" />
 
       <RouterLink to="/requests" class="mt-5 inline-block font-semibold text-primary-700 hover:underline dark:text-primary-400">
         ← Takaisin pyyntöihin

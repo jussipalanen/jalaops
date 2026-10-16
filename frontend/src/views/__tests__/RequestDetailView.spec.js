@@ -11,6 +11,11 @@ vi.mock('vue-router', async (importOriginal) => ({
   useRoute: () => ({ params: { id: '1' } }),
 }))
 
+// The QR code's image shows the text it was made from, so tests can read it.
+vi.mock('qrcode', () => ({ default: { toString: (text) => Promise.resolve(`<svg>${text}</svg>`) } }))
+
+const qrText = (image) => decodeURIComponent(image.attributes('src')).replace(/^.*<svg>|<\/svg>$/g, '')
+
 const request = {
   id: 1,
   title: 'Vaihda ilmansuodatin',
@@ -38,7 +43,11 @@ async function mountView(data) {
 
 describe('RequestDetailView', () => {
   beforeEach(() => push.mockClear())
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    delete window.navigator.share
+  })
 
   it('shows the request with its address on a map', async () => {
     const wrapper = await mountView(request)
@@ -118,5 +127,34 @@ describe('RequestDetailView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Pyyntöä ei löytynyt.')
+  })
+
+  it('has a QR code for opening the request on a phone when opened on a computer', async () => {
+    const wrapper = await mountView(request)
+
+    const card = wrapper.find('[data-test="open-on-phone"]')
+    expect(card.text()).toContain('Avaa puhelimella')
+    await vi.waitFor(() => expect(card.find('img').exists()).toBe(true))
+    expect(qrText(card.find('img'))).toBe(`${window.location.origin}/requests/1`)
+    expect(wrapper.findAll('button').map((button) => button.text())).not.toContain('Jaa')
+  })
+
+  it('shares the request on a phone, or shows its QR code on the whole screen for a colleague', async () => {
+    vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/141.0 Mobile Safari/537.36')
+    const share = vi.fn().mockResolvedValue()
+    Object.defineProperty(window.navigator, 'share', { value: share, configurable: true })
+    const wrapper = await mountView(request)
+
+    expect(wrapper.find('[data-test="open-on-phone"]').exists()).toBe(false)
+    await wrapper.findAll('button').find((button) => button.text() === 'Jaa').trigger('click')
+    expect(share).toHaveBeenCalledWith({ title: 'Vaihda ilmansuodatin', url: `${window.location.origin}/requests/1` })
+
+    await wrapper.findAll('button').find((button) => button.text() === 'Näytä QR-koodi').trigger('click')
+    await flushPromises()
+    const dialog = wrapper.find('dialog')
+    expect(dialog.attributes('open')).toBeDefined()
+    expect(dialog.find('h2').text()).toBe('Vaihda ilmansuodatin')
+    await vi.waitFor(() => expect(dialog.find('img').exists()).toBe(true))
+    expect(qrText(dialog.find('img'))).toBe(`${window.location.origin}/requests/1`)
   })
 })
