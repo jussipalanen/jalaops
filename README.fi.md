@@ -13,7 +13,7 @@
 
 [English](README.md) | **Suomi**
 
-[Yleiskuvaus](#yleiskuvaus) · [Teknologiat](#teknologiat) · [Käyttöönotto](#käyttöönotto) · [Arkkitehtuuri](#arkkitehtuuri) · [API](#api) · [Kartta](#kartta-ja-sijainnit) · [Android](#android-sovellus) · [Julkaisu](#julkaisu) · [Tiekartta](#tiekartta)
+📋 [Yleiskuvaus](#yleiskuvaus) · 🧱 [Teknologiat](#teknologiat) · 🚀 [Käyttöönotto](#käyttöönotto) · 🏛️ [Arkkitehtuuri](#arkkitehtuuri) · 🔌 [API](#api) · 🗺️ [Kartta](#kartta-ja-sijainnit) · 📱 [Android](#android-sovellus) · ☁️ [Julkaisu](#julkaisu) · 🛣️ [Tiekartta](#tiekartta)
 
 > **Tila:** kehitys on alkuvaiheessa. Katso [tiekartta](ROADMAP.md) ja [issuet](https://github.com/jussipalanen/jalaops/issues).
 
@@ -69,7 +69,8 @@ Ensimmäinen käynnistys asentaa riippuvuudet ja ajaa tietokantamigraatiot, jote
 
 Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./dev up`.
 
-### `dev`-apukomento
+<details>
+<summary><strong>🧰 <code>dev</code>-apukomento: oikotiet Docker-komentoihin</strong></summary>
 
 `./dev` on oikotie yleisimpiin Docker-komentoihin. Koko lista: `./dev help`.
 
@@ -90,6 +91,8 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 
 Windowsissa aja `./dev` Git Bashissa tai WSL:ssä, tai käytä `docker compose` -komentoja suoraan.
 
+</details>
+
 Testit käyttävät aina muistissa olevaa SQLite-tietokantaa, eivät koskaan MariaDB:n kehitysdataa.
 
 ## Arkkitehtuuri
@@ -102,6 +105,9 @@ Laravel REST API (backend)
 MariaDB
 ```
 
+<details>
+<summary><strong>📁 Hakemistorakenne</strong></summary>
+
 ```text
 jalaops/
 ├── backend/             Laravel API
@@ -111,47 +117,108 @@ jalaops/
 └── dev                  Docker-komentojen oikotiet
 ```
 
+</details>
+
 ## API
 
 Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/docs/api.json`).
+
+<details>
+<summary><strong>🩺 Järjestelmä</strong></summary>
 
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET    | `/api/health`        | API:n ja tietokannan tila     |
 | GET    | `/api/system`        | Sovelluksen tiedot ja tila Tietoja-sivulle (palvelimen versiot vain asetuksella `SHOW_SYSTEM_DETAILS=true`) |
+
+</details>
+
+<details>
+<summary><strong>🛠️ Pyynnöt</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                        |
+|--------|----------------------|-------------------------------|
 | GET    | `/api/requests`      | Listaa pyynnöt                |
+| GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
+| POST   | `/api/requests`      | Luo pyyntö                    |
+| PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
+| DELETE | `/api/requests/{id}` | Poista pyyntö                 |
+| GET    | `/api/requests/export?format=csv\|json` | Vie suodattimia vastaavat pyynnöt, tai `ids=1,2` |
+| POST   | `/api/requests/import` | Tuo pyyntöjä CSV- tai JSON-tiedostosta (`dry_run` tarkistaa ensin) |
+| GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
+| GET/POST | `/api/requests/{id}/items` | Pyynnön työt ja tarvikkeet summineen, tai lisää rivi |
+| PUT/DELETE | `/api/requests/{id}/items/{item}` | Päivitä tai poista rivi |
+| GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona (`inline=1` avaa sen selaimessa) |
+| GET    | `/api/requests/{id}/export/html` | Lataa pyyntö itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
+
+</details>
+
+<details>
+<summary><strong>👥 Asiakkaat</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                        |
+|--------|----------------------|-------------------------------|
 | GET    | `/api/customers`     | Listaa asiakkaat (`search`) pyyntöjen määrineen |
 | POST   | `/api/customers`     | Luo asiakas                   |
 | GET/PUT/DELETE | `/api/customers/{id}` | Hae, päivitä tai poista asiakas (vain ilman pyyntöjä) |
+| GET    | `/api/customers/{id}/billable-requests` | Asiakkaan laskutettavat pyynnöt |
+
+</details>
+
+<details>
+<summary><strong>🧾 Laskut</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                        |
+|--------|----------------------|-------------------------------|
 | GET/POST | `/api/invoices`    | Listaa laskut (`status`, `customer`) tai luo lasku laskutettavista pyynnöistä |
 | GET/DELETE | `/api/invoices/{id}` | Hae lasku tai poista luonnos |
 | PATCH  | `/api/invoices/{id}/status` | Luonnos → lähetetty → maksettu |
 | GET    | `/api/invoices/{id}/export/pdf` | Lataa lasku PDF-tiedostona (`inline=1` avaa sen selaimessa) |
 | GET    | `/api/invoices/{id}/export/html` | Lataa lasku itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
 | GET    | `/api/invoices/export?format=csv\|json` | Laskut kirjanpitoon, rivi ALV-kantaa kohden |
-| GET    | `/api/customers/{id}/billable-requests` | Asiakkaan laskutettavat pyynnöt |
-| GET    | `/api/requests/export?format=csv\|json` | Vie suodattimia vastaavat pyynnöt, tai `ids=1,2` |
-| POST   | `/api/requests/import` | Tuo pyyntöjä CSV- tai JSON-tiedostosta (`dry_run` tarkistaa ensin) |
-| GET    | `/api/requests/{id}` | Hae yksittäinen pyyntö        |
-| GET    | `/api/requests/{id}/signature` | Valmiin pyynnön allekirjoitus PNG-kuvana |
-| GET/POST | `/api/requests/{id}/items` | Pyynnön työt ja tarvikkeet summineen, tai lisää rivi |
-| PUT/DELETE | `/api/requests/{id}/items/{item}` | Päivitä tai poista rivi |
-| GET    | `/api/requests/{id}/export/pdf` | Lataa pyyntö PDF-tiedostona (`inline=1` avaa sen selaimessa) |
-| GET    | `/api/requests/{id}/export/html` | Lataa pyyntö itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
-| POST   | `/api/requests`      | Luo pyyntö                    |
-| PUT    | `/api/requests/{id}` | Päivitä pyyntö                |
-| DELETE | `/api/requests/{id}` | Poista pyyntö                 |
+
+</details>
+
+<details>
+<summary><strong>📊 Koontinäkymä</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                        |
+|--------|----------------------|-------------------------------|
 | GET    | `/api/dashboard`     | Pyyntöjen määrät: avoimet, työn alla, valmiit, myöhässä ja yhteensä |
 | GET    | `/api/dashboard/ai-overview` | AI-tilannekatsaus (kun käytössä) |
 | POST   | `/api/dashboard/ai-overview/refresh` | Luo uusi AI-tilannekatsaus |
+
+</details>
+
+<details>
+<summary><strong>📍 Geokoodaus</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                        |
+|--------|----------------------|-------------------------------|
 | GET    | `/api/geocode?q=…`   | Osoitteen koordinaatit (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Osoite-ehdotukset kirjoitettaessa (Photon) |
 
-Suodattimet: `/api/requests?status=open`, `/api/requests?priority=high`, määräpäivä `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `/api/requests?due_from=2026-10-01&due_to=2026-10-31` sekä haku `/api/requests?search=tampere` (otsikko, katuosoite, postinumero tai kaupunki). Järjestys `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` laskevaan järjestykseen) ja sivutus `per_page=10|25|50|100&page=2`; ilman `per_page`-parametria palautetaan kaikki osumat.
+</details>
+
+<details>
+<summary><strong>🔎 Suodatus, järjestys ja sivutus</strong></summary>
+
+`GET /api/requests` -kutsun parametrit:
+
+- **Tila ja prioriteetti:** `status=open`, `priority=high`
+- **Määräpäivä:** `due=overdue` (`overdue`, `today`, `week`, `month`, `none`) tai `due_from=2026-10-01&due_to=2026-10-31`
+- **Haku:** `search=tampere` (otsikko, katuosoite, postinumero tai kaupunki)
+- **Järjestys:** `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` laskevaan järjestykseen)
+- **Sivutus:** `per_page=10|25|50|100&page=2`; ilman `per_page`-parametria palautetaan kaikki osumat
+
+</details>
 
 ## Kartta ja sijainnit
 
 Pyynnöllä voi olla katuosoite, postinumero, kaupunki ja karttakoordinaatit. **Kartta**-sivu (`/map`) näyttää sijainnilliset pyynnöt koko näytön kartalla: merkit on väritetty prioriteetin mukaan, uusien pyyntöjen (luotu 7 päivän sisällä eikä valmis) merkin ympärillä sykkii ympyrä, ja merkkiä napsauttamalla näkyy pyyntö ja linkki sen tietoihin. Pyyntölomake ehdottaa osoitteita kirjoitettaessa ja täyttää koordinaatit, ja merkin voi myös asettaa napsauttamalla karttaa. Ponnahdusikkunasta ja tietosivulta pääsee Google Street View'hun pyynnön sijainnissa (pelkkä linkki, ei API-avainta).
+
+<details>
+<summary><strong>🗺️ Karttapalvelut ja geokoodaus</strong></summary>
 
 Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://www.openstreetmap.org/copyright) aineistoon eivätkä vaadi API-avaimia:
 
@@ -163,9 +230,14 @@ Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://ww
 
 Backend kutsuu Nominatimia ja Photonia, tallentaa tulokset välimuistiin ja rajoittaa kutsuja kävijää kohden. Nominatimin käyttöehdot vaativat sovelluksen tunnistavan User-Agentin: aseta oma arvo muuttujaan `NOMINATIM_USER_AGENT`. Esimerkkiosoitteet ovat oikeita suomalaisia katuosoitteita OpenStreetMapin koordinaatein; itse pyynnöt ovat keksittyjä.
 
+</details>
+
 ## AI-tilannekatsaus
 
 Etusivulla voi näkyä **AI-tilannekatsaus**: lyhyt suomenkielinen yhteenveto pyynnöistä, suositellut toimet ja huomioitavat asiat. Laravel laskee tiedot (määrät, myöhässä olevat pyynnöt, seuraavan 7 päivän aikana erääntyvät ja avoimet korkean prioriteetin pyynnöt), ja tekoäly kirjoittaa vain tekstin, joten luvut tulevat tietokannasta.
+
+<details>
+<summary><strong>⚙️ Asetukset ja rajoitukset</strong></summary>
 
 Ominaisuus on oletuksena pois päältä. Ota se käyttöön tiedostossa `backend/.env` ja valitse palveluntarjoaja:
 
@@ -181,9 +253,14 @@ Ominaisuus on oletuksena pois päältä. Ota se käyttöön tiedostossa `backend
 
 Avain pysyy taustapalvelussa; selain kutsuu vain osoitetta `/api/dashboard/ai-overview`. Tekoälyltä voi kulua useita sekunteja, joten viimeisin katsaus näytetään aina heti: jos pyyntöjä on muutettu, se merkitään vanhentuneeksi ja uusi luodaan taustalla. Tuotantokuva kirjoittaa ensimmäisen katsauksen käynnistyksen yhteydessä (`php artisan ai-overview:warm`). Päivitys on rajattu kolmeen kertaan minuutissa kävijää kohden, ja kun tuntiraja täyttyy, näytetään edellinen katsaus. Pyyntöjen otsikot lähetetään tekoälypalveluun, joten ilmaisversioissa, joissa dataa voidaan käyttää mallien kehittämiseen, kannattaa käyttää vain demodataa.
 
+</details>
+
 ## Jatkuva integraatio
 
 GitHub Actions tarkistaa jokaisen pull requestin ja jokaisen `main`-haaraan tehdyn pushin. Pull requestia ei voi yhdistää, jos jokin tarkistus epäonnistuu.
+
+<details>
+<summary><strong>✅ Työnkulut ja tarkistukset</strong></summary>
 
 | Työnkulku | Työ | Tarkistukset |
 |---|---|---|
@@ -194,18 +271,24 @@ GitHub Actions tarkistaa jokaisen pull requestin ja jokaisen `main`-haaraan tehd
 
 Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) avaa kuukausittain ryhmitellyt päivitys-pull requestit Composer-, npm-, GitHub Actions- ja Docker-riippuvuuksille sekä tietoturvakorjaukset heti, kun haavoittuvuus julkaistaan. GitHubin salaisuuksien skannaus estää pushit, joissa on avaimia tai tunnuksia.
 
-Samat tarkistukset paikallisesti:
+</details>
+
+<details>
+<summary><strong>💻 Tarkistukset paikallisesti</strong></summary>
 
 ```bash
 cd backend && vendor/bin/pint --test && php artisan test && composer audit
 cd frontend && npm run lint:check && npm test && npm run build && npm audit --audit-level=high
 ```
 
+</details>
+
 ## Android-sovellus
 
 JalaOps on myös Android-sovellus: [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity), joka avaa verkkosovelluksen koko näytölle ilman selaimen osoiteriviä. Verkkosovelluksen päivitys päivittää myös Android-sovelluksen.
 
-### Asennus Android-puhelimeen
+<details>
+<summary><strong>🤖 Asennus Android-puhelimeen</strong></summary>
 
 1. Avaa puhelimella verkkosovelluksen **Mobiilisovellukset**-sivu (linkki alatunnisteessa) ja valitse **Lataa Android-sovellus (APK)**. Se lataa **jalaops.apk**-tiedoston [uusimmasta julkaisusta](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Avaa ladattu tiedosto. Ensimmäisellä kerralla Android pyytää sallimaan sovellusten asentamisen selaimesta; salli se ja palaa takaisin.
@@ -220,11 +303,17 @@ sha256sum jalaops.apk
 gh attestation verify jalaops.apk -R jussipalanen/jalaops
 ```
 
-### Asennus iPhoneen ja iPadiin
+</details>
+
+<details>
+<summary><strong>🍎 Asennus iPhoneen ja iPadiin</strong></summary>
 
 App Storessa ei ole sovellusta, vaan JalaOps lisätään Koti-valikkoon verkkosovelluksena. Avaa sivu Safarissa, napauta **Jaa** (tarvittaessa ensin **•••**-valikosta) ja valitse **Lisää Koti-valikkoon**. Sovellus avautuu kuvakkeesta koko näytölle, ja verkkosovelluksen päivitykset näkyvät siinä heti. Ohjeet ovat myös **Mobiilisovellukset**-sivulla.
 
-### Sovelluksen rakentaminen
+</details>
+
+<details>
+<summary><strong>🏗️ Android-sovelluksen rakentaminen ja julkaisu</strong></summary>
 
 ```bash
 ./dev android
@@ -237,6 +326,8 @@ Komento rakentaa Dockerissa tiedostot `android/dist/jalaops.apk` (asennus puheli
 **Julkaisut:** [Android-työnkulku](.github/workflows/android.yml) liittää `jalaops.apk`-, `jalaops.aab`- ja `SHA256SUMS`-tiedostot jokaiseen GitHub-julkaisuun alkuperätodistuksen kanssa, ja sen voi käynnistää myös käsin Actions-välilehdeltä. Avain tallennetaan kerran GitHubin salaisuuksiin komennolla `./dev android-secrets` (käyttää `gh`-työkalua).
 
 **Google Play:** lataa `jalaops.aab` sisäiseen testaukseen [Play Consolessa](https://play.google.com/console). Suunnitelma on tiedostossa [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
+
+</details>
 
 ## Julkaisu
 
