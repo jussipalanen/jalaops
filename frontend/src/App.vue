@@ -5,6 +5,7 @@ import { useDropdown } from '@/composables/useDropdown'
 import AppLogo from '@/components/AppLogo.vue'
 import DemoBanner from '@/components/DemoBanner.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import { mobileAppsPage } from '@/features'
 import { version } from '../package.json'
 
 // The API docs are served by the Laravel backend, not by this app.
@@ -134,7 +135,7 @@ watch(() => route.fullPath, closeMenu)
         >
           API-etusivu
         </a>
-        <RouterLink to="/mobile-apps" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
+        <RouterLink v-if="mobileAppsPage" to="/mobile-apps" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
           Mobiilisovellukset
         </RouterLink>
         <span>Versio {{ version }}</span>

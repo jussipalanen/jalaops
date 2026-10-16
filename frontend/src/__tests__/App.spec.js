@@ -37,6 +37,13 @@ describe('App navigation', () => {
     wrapper.unmount()
   })
 
+  it('hides the Mobiilisovellukset link while the page is switched off', async () => {
+    const { wrapper } = await mountApp()
+
+    expect(wrapper.find('a[href="/mobile-apps"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it('opens the phone and tablet menu, and closes it on navigation and on Escape', async () => {
     const { wrapper, router } = await mountApp()
     const button = wrapper.find('button[aria-label="Valikko"]')
