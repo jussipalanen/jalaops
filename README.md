@@ -13,7 +13,7 @@
 
 **English** | [Suomi](README.fi.md)
 
-[Overview](#overview) · [Tech stack](#tech-stack) · [Getting started](#getting-started) · [Architecture](#architecture) · [API](#api) · [Map](#map-and-locations) · [Android](#android-app) · [Deployment](#deployment) · [Roadmap](#roadmap)
+📋 [Overview](#overview) · 🧱 [Tech stack](#tech-stack) · 🚀 [Getting started](#getting-started) · 🏛️ [Architecture](#architecture) · 🔌 [API](#api) · 🗺️ [Map](#map-and-locations) · 🔳 [QR codes](#qr-codes) · 📱 [Android](#android-app) · ☁️ [Deployment](#deployment) · 🛣️ [Roadmap](#roadmap)
 
 > **Status:** in early development. See the [roadmap](ROADMAP.md) and [issues](https://github.com/jussipalanen/jalaops/issues).
 
@@ -70,7 +70,8 @@ The first start installs the dependencies and runs the database migrations, so i
 
 If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
 
-### The `dev` helper
+<details>
+<summary><strong>🧰 The <code>dev</code> helper: shortcuts for Docker commands</strong></summary>
 
 `./dev` is a shortcut for common Docker commands. Run `./dev help` for the full list.
 
@@ -91,6 +92,8 @@ If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
 
 On Windows, run `./dev` in Git Bash or WSL, or use the `docker compose` commands directly.
 
+</details>
+
 Tests always use an in-memory SQLite database, never the MariaDB development data.
 
 ## Architecture
@@ -103,6 +106,9 @@ Laravel REST API (backend)
 MariaDB
 ```
 
+<details>
+<summary><strong>📁 Project structure</strong></summary>
+
 ```text
 jalaops/
 ├── backend/             Laravel API
@@ -112,47 +118,108 @@ jalaops/
 └── dev                  Docker command shortcuts
 ```
 
+</details>
+
 ## API
 
 Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/api.json`).
+
+<details>
+<summary><strong>🩺 System</strong></summary>
 
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
 | GET    | `/api/health`        | API and database health     |
 | GET    | `/api/system`        | App details and health for the "Tietoja" page (server versions only with `SHOW_SYSTEM_DETAILS=true`) |
+
+</details>
+
+<details>
+<summary><strong>🛠️ Requests</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
 | GET    | `/api/requests`      | List requests               |
+| GET    | `/api/requests/{id}` | Get a single request        |
+| POST   | `/api/requests`      | Create a request            |
+| PUT    | `/api/requests/{id}` | Update a request            |
+| DELETE | `/api/requests/{id}` | Delete a request            |
+| GET    | `/api/requests/export?format=csv\|json` | Export the requests matching the filters, or `ids=1,2` |
+| POST   | `/api/requests/import` | Import requests from a CSV or JSON file (`dry_run` to check it first) |
+| GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
+| GET/POST | `/api/requests/{id}/items` | A request's work and materials with totals, or add a row |
+| PUT/DELETE | `/api/requests/{id}/items/{item}` | Update or delete a row |
+| GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF (`inline=1` opens it in the browser) |
+| GET    | `/api/requests/{id}/export/html` | Download the request as a self-contained HTML file (`inline=1` opens it in the browser) |
+
+</details>
+
+<details>
+<summary><strong>👥 Customers</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
 | GET    | `/api/customers`     | List customers (`search`), with their request counts |
 | POST   | `/api/customers`     | Create a customer           |
 | GET/PUT/DELETE | `/api/customers/{id}` | Get, update or delete a customer (only one without requests can be deleted) |
+| GET    | `/api/customers/{id}/billable-requests` | A customer's requests that can be invoiced |
+
+</details>
+
+<details>
+<summary><strong>🧾 Invoices</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
 | GET/POST | `/api/invoices`    | List invoices (`status`, `customer`) or create one from billable requests |
 | GET/DELETE | `/api/invoices/{id}` | Get an invoice (with its payment details and payment QR code) or delete a draft |
 | PATCH  | `/api/invoices/{id}/status` | Draft → sent → paid |
 | GET    | `/api/invoices/{id}/export/pdf` | Download the invoice as a PDF (`inline=1` opens it in the browser) |
 | GET    | `/api/invoices/{id}/export/html` | Download the invoice as a self-contained HTML file (`inline=1` opens it in the browser) |
 | GET    | `/api/invoices/export?format=csv\|json` | Invoices for accounting, one row per VAT rate |
-| GET    | `/api/customers/{id}/billable-requests` | A customer's requests that can be invoiced |
-| GET    | `/api/requests/export?format=csv\|json` | Export the requests matching the filters, or `ids=1,2` |
-| POST   | `/api/requests/import` | Import requests from a CSV or JSON file (`dry_run` to check it first) |
-| GET    | `/api/requests/{id}` | Get a single request        |
-| GET    | `/api/requests/{id}/signature` | The completion signature as a PNG |
-| GET/POST | `/api/requests/{id}/items` | A request's work and materials with totals, or add a row |
-| PUT/DELETE | `/api/requests/{id}/items/{item}` | Update or delete a row |
-| GET    | `/api/requests/{id}/export/pdf` | Download the request as a PDF (`inline=1` opens it in the browser) |
-| GET    | `/api/requests/{id}/export/html` | Download the request as a self-contained HTML file (`inline=1` opens it in the browser) |
-| POST   | `/api/requests`      | Create a request            |
-| PUT    | `/api/requests/{id}` | Update a request            |
-| DELETE | `/api/requests/{id}` | Delete a request            |
+
+</details>
+
+<details>
+<summary><strong>📊 Dashboard</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
 | GET    | `/api/dashboard`     | Request counts: open, in progress, completed, overdue and total |
 | GET    | `/api/dashboard/ai-overview` | AI status overview (when enabled) |
 | POST   | `/api/dashboard/ai-overview/refresh` | Generate a new AI status overview |
+
+</details>
+
+<details>
+<summary><strong>📍 Geocoding</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
 | GET    | `/api/geocode?q=…`   | Coordinates of an address (Nominatim) |
 | GET    | `/api/geocode/suggest?q=…` | Address suggestions while typing (Photon) |
 
-Filters: `/api/requests?status=open`, `/api/requests?priority=high`, due date `/api/requests?due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `/api/requests?due_from=2026-10-01&due_to=2026-10-31`, and the search `/api/requests?search=tampere` (title, street address, postal code or city). Sort with `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` for descending) and paginate with `per_page=10|25|50|100&page=2`; without `per_page` all matching requests are returned.
+</details>
+
+<details>
+<summary><strong>🔎 Filtering, sorting and pagination</strong></summary>
+
+Query parameters for `GET /api/requests`:
+
+- **Status and priority:** `status=open`, `priority=high`
+- **Due date:** `due=overdue` (`overdue`, `today`, `week`, `month`, `none`) or `due_from=2026-10-01&due_to=2026-10-31`
+- **Search:** `search=tampere` (title, street address, postal code or city)
+- **Sort:** `sort=-priority` (`due_date`, `title`, `priority`, `status`, `created_at`; `-` for descending)
+- **Pagination:** `per_page=10|25|50|100&page=2`; without `per_page` all matching requests are returned
+
+</details>
 
 ## Map and locations
 
 A request can have a street address, postal code, city and map coordinates. The **Kartta** page (`/map`) shows the requests with a location on a full-screen map: pins are coloured by priority, new requests (created in the last 7 days and not completed) have a pulsing circle, and clicking a pin shows the request with a link to its details. The request form suggests addresses while typing and fills in the coordinates, and the pin can also be placed by clicking the map. The popup and the details page link to Google Street View at the request's location (a plain link, no API key).
+
+<details>
+<summary><strong>🗺️ Map services and geocoding</strong></summary>
 
 Everything uses free services built on [OpenStreetMap](https://www.openstreetmap.org/copyright) data, with no API keys:
 
@@ -164,18 +231,49 @@ Everything uses free services built on [OpenStreetMap](https://www.openstreetmap
 
 The backend calls Nominatim and Photon, caches the results and limits calls per visitor. Nominatim's usage policy requires a User-Agent that identifies the app: set your own in `NOMINATIM_USER_AGENT`. The demo addresses are real Finnish street addresses with OpenStreetMap's coordinates; the requests themselves are made up.
 
+</details>
+
 ## QR codes
 
-Invoices and requests have QR codes that work on phones and tablets as well as computers:
+Invoices and requests have QR codes that work on phones and tablets as well as computers. On a computer the code is on the page; on a phone or tablet it opens on the whole screen, so another phone can scan it.
 
-- **Payment QR code (invoices).** An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, the amount and the reference as an RF creditor reference (ISO 11649), which banking apps read to fill in the payment. It's on the invoice PDF and HTML next to the payment details, and on the invoice page under **Maksutiedot**, where the IBAN, reference and amount also have **Kopioi** buttons for pasting into a banking app. On a phone or tablet, **Näytä maksukoodi** shows the code on the whole screen, so the customer can scan it with their own phone. It's shown only when `SELLER_IBAN` is set, the total is above zero and the invoice isn't paid.
-- **Request QR code.** On the request PDF and HTML, it opens the request in the app (`FRONTEND_URL/requests/{id}`; left out when `FRONTEND_URL` isn't set). On a computer the request page shows the code under **Avaa puhelimella**. On a phone or tablet, **Jaa** opens the device's share menu (or **Kopioi linkki** copies the link), and **Näytä QR-koodi** shows the code on the whole screen for a colleague to scan.
+<details>
+<summary><strong>💳 Payment QR code (invoices)</strong></summary>
 
-The QR code is always dark on white, also in the dark theme. The full-screen view fits portrait and landscape, keeps the screen on where the browser allows it, and closes with **Sulje**, Escape or a tap outside the code. The backend builds the payment code's text (`payment.qr` in `/api/invoices/{id}`), so the app and the documents show the same code; the app draws QR codes with the `qrcode` package and the documents with [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode).
+An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, the amount and the reference as an RF creditor reference (ISO 11649), which banking apps read to fill in the payment.
+
+- It's on the invoice PDF and HTML next to the payment details, and on the invoice page under **Maksutiedot**.
+- **Maksutiedot** also has **Kopioi** buttons for the IBAN, reference and amount, for pasting into a banking app.
+- On a phone or tablet, **Näytä maksukoodi** shows the code on the whole screen, so the customer can scan it with their own phone.
+- It's shown only when `SELLER_IBAN` is set, the total is above zero and the invoice isn't paid.
+
+</details>
+
+<details>
+<summary><strong>📱 Request QR code</strong></summary>
+
+- On the request PDF and HTML, it opens the request in the app (`FRONTEND_URL/requests/{id}`; left out when `FRONTEND_URL` isn't set).
+- On a computer the request page shows the code under **Avaa puhelimella**.
+- On a phone or tablet, **Jaa** opens the device's share menu (or **Kopioi linkki** copies the link), and **Näytä QR-koodi** shows the code on the whole screen for a colleague to scan.
+
+</details>
+
+<details>
+<summary><strong>⚙️ How the codes are made</strong></summary>
+
+- The QR code is always dark on white, also in the dark theme.
+- The full-screen view fits portrait and landscape, keeps the screen on where the browser allows it, and closes with **Sulje**, Escape or a tap outside the code.
+- The backend builds the payment code's text (`payment.qr` in `/api/invoices/{id}`), so the app and the documents show the same code.
+- The app draws QR codes with the `qrcode` package and the documents with [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode).
+
+</details>
 
 ## AI status overview
 
 The home page can show **AI-tilannekatsaus**, a short Finnish summary of the requests with suggested actions and things to watch. Laravel computes the facts (counts, overdue requests, requests due within 7 days, open high-priority requests) and the AI only writes the text, so the numbers come from the database.
+
+<details>
+<summary><strong>⚙️ Settings and limits</strong></summary>
 
 The feature is off by default. Turn it on in `backend/.env` and pick the provider:
 
@@ -191,9 +289,14 @@ The feature is off by default. Turn it on in `backend/.env` and pick the provide
 
 The key stays on the backend; the browser only talks to `/api/dashboard/ai-overview`. The AI can take several seconds, so the latest overview is always shown right away: when the requests have changed, it is marked as outdated and a new one is generated in the background. The production image writes the first overview at startup (`php artisan ai-overview:warm`). Refreshing is limited to three times per minute per visitor, and past the hourly limit the previous overview is shown. Request titles are sent to the AI provider, so use demo data only with free tiers that may use the data for training.
 
+</details>
+
 ## Continuous integration
 
 GitHub Actions checks every pull request and every push to `main`. A pull request can't be merged while a check fails.
+
+<details>
+<summary><strong>✅ Workflows and checks</strong></summary>
 
 | Workflow | Job | Checks |
 |---|---|---|
@@ -204,18 +307,24 @@ GitHub Actions checks every pull request and every push to `main`. A pull reques
 
 Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) opens monthly grouped update pull requests for Composer, npm, GitHub Actions and Docker images, and security fixes as soon as an advisory is published. GitHub secret scanning with push protection blocks pushes that contain keys or tokens.
 
-Run the same checks locally:
+</details>
+
+<details>
+<summary><strong>💻 Run the checks locally</strong></summary>
 
 ```bash
 cd backend && vendor/bin/pint --test && php artisan test && composer audit
 cd frontend && npm run lint:check && npm test && npm run build && npm audit --audit-level=high
 ```
 
+</details>
+
 ## Android app
 
 JalaOps is also an Android app: a [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity) that opens the live web app full screen, without the browser's address bar. Updating the web app updates the Android app too.
 
-### Install on Android
+<details>
+<summary><strong>🤖 Install on Android</strong></summary>
 
 1. On your phone, open the web app's **Mobiilisovellukset** page (linked from the footer) and choose **Lataa Android-sovellus (APK)**. It downloads **jalaops.apk** from the [latest release](https://github.com/jussipalanen/jalaops/releases/latest).
 2. Open the downloaded file. The first time, Android asks you to allow your browser to install apps; allow it and return.
@@ -230,11 +339,17 @@ sha256sum jalaops.apk
 gh attestation verify jalaops.apk -R jussipalanen/jalaops
 ```
 
-### Install on iPhone and iPad
+</details>
+
+<details>
+<summary><strong>🍎 Install on iPhone and iPad</strong></summary>
 
 There is no App Store app; JalaOps is added to the home screen as a web app instead. Open the site in Safari, tap **Share** (behind **•••** if needed) and choose **Add to Home Screen**. It then opens full screen from its icon, and web app updates reach it right away. The **Mobiilisovellukset** page shows these steps in Finnish.
 
-### Build the app
+</details>
+
+<details>
+<summary><strong>🏗️ Build and release the Android app</strong></summary>
 
 ```bash
 ./dev android
@@ -247,6 +362,8 @@ This builds `android/dist/jalaops.apk` (install on a phone) and `android/dist/ja
 **Release builds:** the [Android workflow](.github/workflows/android.yml) attaches `jalaops.apk`, `jalaops.aab` and `SHA256SUMS` to every GitHub release with a build provenance attestation, and can be started by hand from the Actions tab. It needs the key in GitHub secrets once: run `./dev android-secrets` (uses the `gh` CLI).
 
 **Google Play:** upload `jalaops.aab` to the internal testing track in the [Play Console](https://play.google.com/console). See the plan in [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
+
+</details>
 
 ## Deployment
 
