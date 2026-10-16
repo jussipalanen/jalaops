@@ -6,6 +6,21 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-16
+
+### Added
+- QR codes for invoices and requests, easy to use on phones and tablets as well as computers (#77).
+- Payment QR code on invoices: an EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, the amount and the reference as an RF creditor reference, which banking apps read to fill in the payment. It's on the invoice PDF and HTML next to the payment details, and shown only when `SELLER_IBAN` is set, the total is above zero and the invoice isn't paid.
+- Maksutiedot on the invoice page: the recipient, IBAN, reference and amount, with **Kopioi** buttons for pasting into a banking app, and the payment QR code. On a phone or tablet, **Näytä maksukoodi** shows the code on the whole screen, so the customer can scan it with their own phone.
+- A QR code on the request PDF and HTML that opens the request in the app (`FRONTEND_URL/requests/{id}`).
+- On the request page, **Avaa puhelimella** with the request's QR code on a computer; on a phone or tablet, **Jaa** opens the device's share menu (or **Kopioi linkki** copies the link) and **Näytä QR-koodi** shows the code on the whole screen.
+- The full-screen QR code fits portrait and landscape, keeps the screen on where the browser allows it, and closes with **Sulje**, Escape or a tap outside the code. QR codes are always dark on white, also in the dark theme.
+- `payment` in the invoice API: `recipient`, `iban`, `bic` and `qr`, the payment QR code's text (null when it isn't shown).
+- `chillerlan/php-qrcode` backend dependency, which draws the QR codes in the PDF and HTML files.
+
+### Changed
+- The Mobiilisovellukset page uses the same QR code component and device check as the new QR codes.
+
 ## [1.5.0] - 2026-10-15
 
 ### Added
@@ -368,7 +383,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/jussipalanen/jalaops/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/jussipalanen/jalaops/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/jussipalanen/jalaops/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jussipalanen/jalaops/compare/v1.3.0...v1.4.0

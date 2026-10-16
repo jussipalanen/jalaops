@@ -35,6 +35,7 @@ Käyttäjä voi:
 - pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
 - kirjata pyynnön työt ja tarvikkeet arvonlisäveroineen ja summineen (laskutuksen perusta)
 - laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku PDF- ja HTML-muodossa JalaOps-logolla ja sivunumeroilla sekä vienti kirjanpitoon
+- maksaa laskun pankkisovelluksella sen maksun QR-koodista ja avata pyynnön puhelimella sen QR-koodista
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -124,7 +125,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | POST   | `/api/customers`     | Luo asiakas                   |
 | GET/PUT/DELETE | `/api/customers/{id}` | Hae, päivitä tai poista asiakas (vain ilman pyyntöjä) |
 | GET/POST | `/api/invoices`    | Listaa laskut (`status`, `customer`) tai luo lasku laskutettavista pyynnöistä |
-| GET/DELETE | `/api/invoices/{id}` | Hae lasku tai poista luonnos |
+| GET/DELETE | `/api/invoices/{id}` | Hae lasku (maksutietoineen ja maksun QR-koodeineen) tai poista luonnos |
 | PATCH  | `/api/invoices/{id}/status` | Luonnos → lähetetty → maksettu |
 | GET    | `/api/invoices/{id}/export/pdf` | Lataa lasku PDF-tiedostona (`inline=1` avaa sen selaimessa) |
 | GET    | `/api/invoices/{id}/export/html` | Lataa lasku itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
@@ -162,6 +163,15 @@ Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://ww
 | [Photon](https://photon.komoot.io) | Osoite-ehdotukset kirjoitettaessa (Nominatim ei salli automaattista täydennystä) |
 
 Backend kutsuu Nominatimia ja Photonia, tallentaa tulokset välimuistiin ja rajoittaa kutsuja kävijää kohden. Nominatimin käyttöehdot vaativat sovelluksen tunnistavan User-Agentin: aseta oma arvo muuttujaan `NOMINATIM_USER_AGENT`. Esimerkkiosoitteet ovat oikeita suomalaisia katuosoitteita OpenStreetMapin koordinaatein; itse pyynnöt ovat keksittyjä.
+
+## QR-koodit
+
+Laskuissa ja pyynnöissä on QR-koodit, jotka toimivat puhelimella ja tabletilla siinä missä tietokoneellakin:
+
+- **Maksun QR-koodi (laskut).** EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, summa ja viite RF-viitteenä (ISO 11649). Pankkisovellukset lukevat siitä maksun tiedot. Koodi on laskun PDF- ja HTML-tiedostossa maksutietojen vieressä ja laskun sivulla kohdassa **Maksutiedot**, jossa IBANilla, viitenumerolla ja summalla on myös **Kopioi**-painikkeet pankkisovellukseen liittämistä varten. Puhelimella ja tabletilla **Näytä maksukoodi** näyttää koodin koko näytöllä, jotta asiakas voi skannata sen omalla puhelimellaan. Koodi näytetään vain, kun `SELLER_IBAN` on asetettu, summa on yli nollan eikä laskua ole maksettu.
+- **Pyynnön QR-koodi.** Pyynnön PDF- ja HTML-tiedostossa koodi avaa pyynnön sovelluksessa (`FRONTEND_URL/requests/{id}`; jätetään pois, jos `FRONTEND_URL` ei ole asetettu). Tietokoneella pyynnön sivu näyttää koodin kohdassa **Avaa puhelimella**. Puhelimella ja tabletilla **Jaa** avaa laitteen jakovalikon (tai **Kopioi linkki** kopioi linkin), ja **Näytä QR-koodi** näyttää koodin koko näytöllä työkaverin skannattavaksi.
+
+QR-koodi on aina tumma valkoisella pohjalla, myös tummassa teemassa. Koko näytön näkymä sopii pysty- ja vaakasuuntaan, pitää näytön päällä, jos selain sallii, ja sulkeutuu **Sulje**-painikkeella, Esc-näppäimellä tai napauttamalla koodin ulkopuolelle. Backend muodostaa maksukoodin tekstin (`payment.qr` osoitteessa `/api/invoices/{id}`), joten sovellus ja tiedostot näyttävät saman koodin; sovellus piirtää QR-koodit `qrcode`-paketilla ja tiedostot [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode)-kirjastolla.
 
 ## AI-tilannekatsaus
 

@@ -571,6 +571,7 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Invoicing: 3. Laskut, invoices from completed requests, with a PDF and export to accounting software ([#65](https://github.com/jussipalanen/jalaops/issues/65)) | Done in 1.3.0 |
 | Backend on Google Cloud Run: always on at a low cost, deployed automatically from `main` ([#69](https://github.com/jussipalanen/jalaops/issues/69)) | Done in 1.4.0 |
 | Mobiilisovellukset page: Android download and iPhone install steps with icons and the version, checksums and build provenance for the APK | Done in 1.5.0 |
+| QR codes: a payment QR code (EPC QR) on invoices and a QR code that opens a request on a phone, with sharing, copy buttons and a full-screen code for phones and tablets ([#77](https://github.com/jussipalanen/jalaops/issues/77)) | Done in 1.6.0 |
 
 Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).
 
