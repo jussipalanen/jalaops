@@ -2,7 +2,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiGet, apiRequestMethod } from '@/api/client'
+import CopyButton from '@/components/CopyButton.vue'
 import DocumentLinks from '@/components/DocumentLinks.vue'
+import QrCode from '@/components/QrCode.vue'
+import QrDialog from '@/components/QrDialog.vue'
+import { useDevice } from '@/composables/useDevice'
 import { formatDate, formatEuro, formatNumber, invoiceStatusClass, invoiceStatusLabel, itemTypeLabels } from '@/labels'
 import { pageTitle } from '@/pageTitle'
 
@@ -31,6 +35,30 @@ const billingAddress = computed(() =>
     ? [invoice.value.billing_street_address, [invoice.value.billing_postal_code, invoice.value.billing_city].filter(Boolean).join(' ')].filter(Boolean).join(', ')
     : '',
 )
+
+// Paying the invoice: the bank details with copy buttons for a banking app, and
+// the payment QR code (EPC QR) that the backend builds. On a computer the code
+// is on the page; on a phone or tablet it opens on the whole screen, so the
+// customer can scan it with their own phone.
+const { handheld } = useDevice()
+const qrOpen = ref(false)
+const payment = computed(() => {
+  if (!invoice.value) return null
+  const amount = invoice.value.totals.total
+  // An older backend has no payment details: the card then shows the
+  // reference and amount only.
+  const details = invoice.value.payment ?? { recipient: null, iban: null, bic: null, qr: null }
+  return {
+    ...details,
+    // Banking apps take the amount with a decimal comma and no spaces: "1234,50".
+    amount: amount.toFixed(2).replace('.', ','),
+    details: [
+      ['Summa', formatEuro(amount)],
+      ['Viitenumero', invoice.value.reference_number],
+      ['Saaja', details.recipient],
+    ].filter(([, text]) => text),
+  }
+})
 
 onMounted(async () => {
   try {
@@ -144,6 +172,48 @@ async function remove() {
             <span>Maksettava yhteensä</span><span class="tabular-nums">{{ formatEuro(invoice.totals.total) }}</span>
           </p>
           <p v-if="invoice.notes" class="mt-3 text-sm"><span class="text-slate-500 dark:text-slate-400">Lisätiedot:</span> {{ invoice.notes }}</p>
+        </div>
+
+        <div class="card card-body" data-test="payment">
+          <h2 class="text-lg font-bold">Maksutiedot</h2>
+          <p v-if="invoice.status === 'paid'" class="mt-1 text-slate-600 dark:text-slate-300">Lasku on maksettu.</p>
+          <div class="mt-3 grid items-start gap-5 sm:grid-cols-[1fr_auto]">
+            <dl class="grid gap-3">
+              <div v-if="payment.recipient">
+                <dt class="text-sm text-slate-500 dark:text-slate-400">Saaja</dt>
+                <dd class="font-semibold">{{ payment.recipient }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm text-slate-500 dark:text-slate-400">Tilinumero (IBAN)<template v-if="payment.bic"> / BIC</template></dt>
+                <dd v-if="payment.iban" class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span class="font-semibold tabular-nums">{{ payment.iban }}<template v-if="payment.bic"> / {{ payment.bic }}</template></span>
+                  <CopyButton :value="payment.iban.replace(/\s/g, '')" label="Kopioi tilinumero" class="lg:min-h-8" />
+                </dd>
+                <dd v-else class="text-slate-500 dark:text-slate-400">Ei asetettu</dd>
+              </div>
+              <div>
+                <dt class="text-sm text-slate-500 dark:text-slate-400">Viitenumero</dt>
+                <dd class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span class="font-semibold tabular-nums">{{ invoice.reference_number }}</span>
+                  <CopyButton :value="invoice.reference_number.replace(/\s/g, '')" label="Kopioi viitenumero" class="lg:min-h-8" />
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm text-slate-500 dark:text-slate-400">Summa · eräpäivä {{ formatDate(invoice.due_date) }}</dt>
+                <dd class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span class="font-semibold tabular-nums">{{ formatEuro(invoice.totals.total) }}</span>
+                  <CopyButton :value="payment.amount" label="Kopioi summa" class="lg:min-h-8" />
+                </dd>
+              </div>
+            </dl>
+
+            <div v-if="payment.qr" class="flex flex-col items-center gap-2 sm:w-44">
+              <QrCode v-if="!handheld" :value="payment.qr" alt="Maksun QR-koodi" class="size-40 border border-slate-200 dark:border-transparent" />
+              <p v-if="!handheld" class="text-center text-sm text-slate-500 dark:text-slate-400">Maksa skannaamalla koodi pankkisovelluksella.</p>
+              <button type="button" class="btn btn-primary w-full" @click="qrOpen = true">{{ handheld ? 'Näytä maksukoodi' : 'Näytä suurena' }}</button>
+            </div>
+          </div>
+          <QrDialog v-if="payment.qr" v-model:open="qrOpen" :value="payment.qr" title="Maksa pankkisovelluksella" alt="Maksun QR-koodi" :details="payment.details" />
         </div>
       </div>
     </template>

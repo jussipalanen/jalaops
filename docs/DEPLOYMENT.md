@@ -203,7 +203,7 @@ gcloud run services update jalaops-backend --region $REGION \
    | Key | Value |
    |---|---|
    | `APP_URL` | `https://jalaops-api.onrender.com` (your service's address) |
-   | `FRONTEND_URL` | Your Vercel address, e.g. `https://jalaops.vercel.app` (optional: the backend home page links to it) |
+   | `FRONTEND_URL` | Your Vercel address, e.g. `https://jalaops.vercel.app` (optional: the backend home page links to it, and the QR code on a request's PDF and HTML opens the request there) |
 
    That is all demo mode needs. `DEMO_MODE=true` is the image's default, and an app key is generated on start if `APP_KEY` is not set.
 
@@ -297,7 +297,8 @@ The Android app opens the frontend's address (`host` in [`android/twa-manifest.j
 | `PORT` | set by Cloud Run and Render | The port the server listens on (`10000` if unset). |
 | `DEFAULT_VAT_RATE` / `DEFAULT_HOURLY_RATE` | `25.5` / `65` | Pre-filled VAT percent and hourly rate (euros, without VAT) for new rows of work and materials. Existing rows keep their own values. |
 | `SELLER_NAME`, `SELLER_BUSINESS_ID`, `SELLER_STREET_ADDRESS`, `SELLER_POSTAL_CODE`, `SELLER_CITY`, `SELLER_EMAIL` | made-up demo values | The seller shown on invoices. |
-| `SELLER_IBAN` / `SELLER_BIC` | (unset) | The bank account on invoices; without it the invoice says the account isn't set. |
+| `SELLER_IBAN` / `SELLER_BIC` | (unset) | The bank account on invoices and in their payment QR code; without it the invoice says the account isn't set and has no payment QR code. |
+| `INVOICE_PAYMENT_QR` | `false` | `true` shows the payment QR code (EPC QR) on invoices, in the app and on the PDF and HTML; it also needs `SELLER_IBAN`. Off for now. |
 | `FIRST_INVOICE_NUMBER` | `1001` | The number of the first invoice; later invoices continue from the highest number. |
 | `DISPLAY_TIMEZONE` | `Europe/Helsinki` | Time zone of the times in downloaded PDF and HTML files (the app stores UTC). |
 | `SHOW_SYSTEM_DETAILS` | `false` | `true` shows the PHP, Laravel and database versions on the "Tietoja" page (`/api/system`). Off on public servers so exact versions aren't advertised. |

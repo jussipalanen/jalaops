@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Invoice;
+use App\Support\PaymentQr;
 use App\Support\ReferenceNumber;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,6 +21,7 @@ class InvoiceResource extends JsonResource
     public function toArray(Request $request): array
     {
         $totals = $this->totalsCents();
+        $iban = preg_replace('/\s/', '', (string) config('billing.seller.iban'));
 
         return [
             'id' => $this->id,
@@ -44,6 +46,14 @@ class InvoiceResource extends JsonResource
                 'net' => $sums['net'] / 100,
                 'vat' => $sums['vat'] / 100,
             ])->values(),
+            // The seller's bank details for paying by hand, and the payment QR
+            // code's text (EPC QR), which is null when it isn't shown.
+            'payment' => [
+                'recipient' => config('billing.seller.name'),
+                'iban' => $iban !== '' ? trim(chunk_split(strtoupper($iban), 4, ' ')) : null,
+                'bic' => config('billing.seller.bic') ?: null,
+                'qr' => PaymentQr::forInvoice($this->resource),
+            ],
             'lines' => $this->whenLoaded('lines', fn () => $this->lines->map(fn ($line) => [
                 'id' => $line->id,
                 'service_request_id' => $line->service_request_id,

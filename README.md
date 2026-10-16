@@ -13,7 +13,7 @@
 
 **English** | [Suomi](README.fi.md)
 
-📋 [Overview](#overview) · 🧱 [Tech stack](#tech-stack) · 🚀 [Getting started](#getting-started) · 🏛️ [Architecture](#architecture) · 🔌 [API](#api) · 🗺️ [Map](#map-and-locations) · 📱 [Android](#android-app) · ☁️ [Deployment](#deployment) · 🛣️ [Roadmap](#roadmap)
+📋 [Overview](#overview) · 🧱 [Tech stack](#tech-stack) · 🚀 [Getting started](#getting-started) · 🏛️ [Architecture](#architecture) · 🔌 [API](#api) · 🗺️ [Map](#map-and-locations) · 🔳 [QR codes](#qr-codes) · 📱 [Android](#android-app) · ☁️ [Deployment](#deployment) · 🛣️ [Roadmap](#roadmap)
 
 > **Status:** in early development. See the [roadmap](ROADMAP.md) and [issues](https://github.com/jussipalanen/jalaops/issues).
 
@@ -35,6 +35,7 @@ A user can:
 - keep a register of customers (Asiakkaat) and choose the customer for each request
 - record the work and materials of a request, with VAT and totals (the basis for invoicing)
 - invoice completed requests: invoice numbers, Finnish reference numbers, due dates, statuses, an invoice PDF and HTML page with the JalaOps logo and page numbers, and an export for accounting software
+- open a request on a phone from its QR code, and copy an invoice's payment details for a banking app
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -171,7 +172,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
 | GET/POST | `/api/invoices`    | List invoices (`status`, `customer`) or create one from billable requests |
-| GET/DELETE | `/api/invoices/{id}` | Get an invoice or delete a draft |
+| GET/DELETE | `/api/invoices/{id}` | Get an invoice (with its payment details) or delete a draft |
 | PATCH  | `/api/invoices/{id}/status` | Draft → sent → paid |
 | GET    | `/api/invoices/{id}/export/pdf` | Download the invoice as a PDF (`inline=1` opens it in the browser) |
 | GET    | `/api/invoices/{id}/export/html` | Download the invoice as a self-contained HTML file (`inline=1` opens it in the browser) |
@@ -229,6 +230,43 @@ Everything uses free services built on [OpenStreetMap](https://www.openstreetmap
 | [Photon](https://photon.komoot.io) | Address suggestions while typing (Nominatim doesn't allow autocomplete) |
 
 The backend calls Nominatim and Photon, caches the results and limits calls per visitor. Nominatim's usage policy requires a User-Agent that identifies the app: set your own in `NOMINATIM_USER_AGENT`. The demo addresses are real Finnish street addresses with OpenStreetMap's coordinates; the requests themselves are made up.
+
+</details>
+
+## QR codes
+
+Requests have QR codes that work on phones and tablets as well as computers. On a computer the code is on the page; on a phone or tablet it opens on the whole screen, so another phone can scan it. Invoices have a payment QR code too, which is off for now.
+
+<details>
+<summary><strong>💳 Payment QR code (invoices, off for now)</strong></summary>
+
+The payment QR code is off for now: `INVOICE_PAYMENT_QR=true` turns it on. Without it, **Maksutiedot** on the invoice page still has the bank details with **Kopioi** buttons.
+
+An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, the amount and the reference as an RF creditor reference (ISO 11649), which banking apps read to fill in the payment.
+
+- It's on the invoice PDF and HTML next to the payment details, and on the invoice page under **Maksutiedot**.
+- **Maksutiedot** also has **Kopioi** buttons for the IBAN, reference and amount, for pasting into a banking app.
+- On a phone or tablet, **Näytä maksukoodi** shows the code on the whole screen, so the customer can scan it with their own phone.
+- When turned on, it's shown only when `SELLER_IBAN` is set, the total is above zero and the invoice isn't paid.
+
+</details>
+
+<details>
+<summary><strong>📱 Request QR code</strong></summary>
+
+- On the request PDF and HTML, it opens the request in the app (`FRONTEND_URL/requests/{id}`; left out when `FRONTEND_URL` isn't set).
+- On a computer the request page shows the code under **Avaa puhelimella**.
+- On a phone or tablet, **Jaa** opens the device's share menu (or **Kopioi linkki** copies the link), and **Näytä QR-koodi** shows the code on the whole screen for a colleague to scan.
+
+</details>
+
+<details>
+<summary><strong>⚙️ How the codes are made</strong></summary>
+
+- The QR code is always dark on white, also in the dark theme.
+- The full-screen view fits portrait and landscape, keeps the screen on where the browser allows it, and closes with **Sulje**, Escape or a tap outside the code.
+- The backend builds the payment code's text (`payment.qr` in `/api/invoices/{id}`), so the app and the documents show the same code.
+- The app draws QR codes with the `qrcode` package and the documents with [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode).
 
 </details>
 

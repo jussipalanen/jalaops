@@ -13,7 +13,7 @@
 
 [English](README.md) | **Suomi**
 
-📋 [Yleiskuvaus](#yleiskuvaus) · 🧱 [Teknologiat](#teknologiat) · 🚀 [Käyttöönotto](#käyttöönotto) · 🏛️ [Arkkitehtuuri](#arkkitehtuuri) · 🔌 [API](#api) · 🗺️ [Kartta](#kartta-ja-sijainnit) · 📱 [Android](#android-sovellus) · ☁️ [Julkaisu](#julkaisu) · 🛣️ [Tiekartta](#tiekartta)
+📋 [Yleiskuvaus](#yleiskuvaus) · 🧱 [Teknologiat](#teknologiat) · 🚀 [Käyttöönotto](#käyttöönotto) · 🏛️ [Arkkitehtuuri](#arkkitehtuuri) · 🔌 [API](#api) · 🗺️ [Kartta](#kartta-ja-sijainnit) · 🔳 [QR-koodit](#qr-koodit) · 📱 [Android](#android-sovellus) · ☁️ [Julkaisu](#julkaisu) · 🛣️ [Tiekartta](#tiekartta)
 
 > **Tila:** kehitys on alkuvaiheessa. Katso [tiekartta](ROADMAP.md) ja [issuet](https://github.com/jussipalanen/jalaops/issues).
 
@@ -35,6 +35,7 @@ Käyttäjä voi:
 - pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
 - kirjata pyynnön työt ja tarvikkeet arvonlisäveroineen ja summineen (laskutuksen perusta)
 - laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku PDF- ja HTML-muodossa JalaOps-logolla ja sivunumeroilla sekä vienti kirjanpitoon
+- avata pyynnön puhelimella sen QR-koodista ja kopioida laskun maksutiedot pankkisovellukseen
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -171,7 +172,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET/POST | `/api/invoices`    | Listaa laskut (`status`, `customer`) tai luo lasku laskutettavista pyynnöistä |
-| GET/DELETE | `/api/invoices/{id}` | Hae lasku tai poista luonnos |
+| GET/DELETE | `/api/invoices/{id}` | Hae lasku (maksutietoineen) tai poista luonnos |
 | PATCH  | `/api/invoices/{id}/status` | Luonnos → lähetetty → maksettu |
 | GET    | `/api/invoices/{id}/export/pdf` | Lataa lasku PDF-tiedostona (`inline=1` avaa sen selaimessa) |
 | GET    | `/api/invoices/{id}/export/html` | Lataa lasku itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
@@ -229,6 +230,43 @@ Kaikki käytetyt palvelut ovat ilmaisia, perustuvat [OpenStreetMapin](https://ww
 | [Photon](https://photon.komoot.io) | Osoite-ehdotukset kirjoitettaessa (Nominatim ei salli automaattista täydennystä) |
 
 Backend kutsuu Nominatimia ja Photonia, tallentaa tulokset välimuistiin ja rajoittaa kutsuja kävijää kohden. Nominatimin käyttöehdot vaativat sovelluksen tunnistavan User-Agentin: aseta oma arvo muuttujaan `NOMINATIM_USER_AGENT`. Esimerkkiosoitteet ovat oikeita suomalaisia katuosoitteita OpenStreetMapin koordinaatein; itse pyynnöt ovat keksittyjä.
+
+</details>
+
+## QR-koodit
+
+Pyynnöissä on QR-koodit, jotka toimivat puhelimella ja tabletilla siinä missä tietokoneellakin. Tietokoneella koodi on sivulla; puhelimella ja tabletilla se aukeaa koko näytölle, jotta toinen puhelin voi skannata sen. Laskuissa on myös maksun QR-koodi, joka on toistaiseksi pois päältä.
+
+<details>
+<summary><strong>💳 Maksun QR-koodi (laskut, toistaiseksi pois päältä)</strong></summary>
+
+Maksun QR-koodi on toistaiseksi pois päältä: `INVOICE_PAYMENT_QR=true` ottaa sen käyttöön. Ilman sitä laskun sivun **Maksutiedoissa** ovat silti pankkitiedot **Kopioi**-painikkeineen.
+
+EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, summa ja viite RF-viitteenä (ISO 11649). Pankkisovellukset lukevat siitä maksun tiedot.
+
+- Koodi on laskun PDF- ja HTML-tiedostossa maksutietojen vieressä ja laskun sivulla kohdassa **Maksutiedot**.
+- **Maksutiedoissa** on myös **Kopioi**-painikkeet IBANille, viitenumerolle ja summalle pankkisovellukseen liittämistä varten.
+- Puhelimella ja tabletilla **Näytä maksukoodi** näyttää koodin koko näytöllä, jotta asiakas voi skannata sen omalla puhelimellaan.
+- Käyttöön otettuna koodi näytetään vain, kun `SELLER_IBAN` on asetettu, summa on yli nollan eikä laskua ole maksettu.
+
+</details>
+
+<details>
+<summary><strong>📱 Pyynnön QR-koodi</strong></summary>
+
+- Pyynnön PDF- ja HTML-tiedostossa koodi avaa pyynnön sovelluksessa (`FRONTEND_URL/requests/{id}`; jätetään pois, jos `FRONTEND_URL` ei ole asetettu).
+- Tietokoneella pyynnön sivu näyttää koodin kohdassa **Avaa puhelimella**.
+- Puhelimella ja tabletilla **Jaa** avaa laitteen jakovalikon (tai **Kopioi linkki** kopioi linkin), ja **Näytä QR-koodi** näyttää koodin koko näytöllä työkaverin skannattavaksi.
+
+</details>
+
+<details>
+<summary><strong>⚙️ Miten koodit tehdään</strong></summary>
+
+- QR-koodi on aina tumma valkoisella pohjalla, myös tummassa teemassa.
+- Koko näytön näkymä sopii pysty- ja vaakasuuntaan, pitää näytön päällä, jos selain sallii, ja sulkeutuu **Sulje**-painikkeella, Esc-näppäimellä tai napauttamalla koodin ulkopuolelle.
+- Backend muodostaa maksukoodin tekstin (`payment.qr` osoitteessa `/api/invoices/{id}`), joten sovellus ja tiedostot näyttävät saman koodin.
+- Sovellus piirtää QR-koodit `qrcode`-paketilla ja tiedostot [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode)-kirjastolla.
 
 </details>
 

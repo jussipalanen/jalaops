@@ -30,7 +30,8 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          # gd: dompdf draws the signature PNGs in PDF exports.
+          # gd: dompdf draws the signature PNGs in PDF exports, and the QR codes
+          # in the PDF and HTML exports are drawn as PNGs.
           extensions: gd
           coverage: none
           tools: composer:v2

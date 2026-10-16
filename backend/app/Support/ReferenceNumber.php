@@ -46,6 +46,30 @@ class ReferenceNumber
         return trim(strrev(chunk_split(strrev($reference), 5, ' ')));
     }
 
+    /**
+     * The same reference as an international RF creditor reference (ISO 11649),
+     * e.g. "10016" → "RF0810016", as banking apps read it from a payment QR code.
+     * The check digits are 98 minus the remainder of the reference + "RF00",
+     * with R and F as 27 and 15, divided by 97.
+     */
+    public static function toRf(string $reference): string
+    {
+        $digits = preg_replace('/\s/', '', $reference);
+
+        if (! preg_match('/^\d{1,21}$/', $digits)) {
+            throw new \InvalidArgumentException('An RF reference needs 1–21 digits.');
+        }
+
+        // Long numbers don't fit in an integer, so the remainder is taken a few
+        // digits at a time.
+        $remainder = 0;
+        foreach (str_split($digits.'271500', 7) as $chunk) {
+            $remainder = (int) ($remainder.$chunk) % 97;
+        }
+
+        return sprintf('RF%02d%s', 98 - $remainder, $digits);
+    }
+
     private static function checkDigit(string $digits): int
     {
         $sum = 0;

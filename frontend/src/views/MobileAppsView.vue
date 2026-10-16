@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import QrCode from '@/components/QrCode.vue'
+import { useDevice } from '@/composables/useDevice'
 import { version as frontendVersion } from '../../package.json'
 import assetLinks from '../../public/.well-known/assetlinks.json'
 
@@ -14,32 +16,11 @@ const workflowUrl = `${repoUrl}/actions/workflows/android.yml`
 // an address bar only when the site lists this same fingerprint.
 const fingerprint = assetLinks[0].target.sha256_cert_fingerprints[0]
 
-// Inside the installed app (the Android app or an iPhone home screen icon)
-// there's nothing to install.
-const installed = Boolean(window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone)
-
-// The visitor's own platform comes first. iPads report themselves as Macs,
-// but unlike Macs they have a touch screen.
-const userAgent = window.navigator.userAgent
-const platform = /Android/i.test(userAgent)
-  ? 'android'
-  : /iPhone|iPad|iPod/.test(userAgent) || (/Macintosh/.test(userAgent) && window.navigator.maxTouchPoints > 1)
-    ? 'ios'
-    : null
-
-// On a computer, a QR code opens this page on the phone. The library is only
-// loaded there.
-const qrCode = ref(null)
-
-async function loadQrCode() {
-  try {
-    const { default: QRCode } = await import('qrcode')
-    const svg = await QRCode.toString(window.location.href, { type: 'svg', margin: 0, errorCorrectionLevel: 'M' })
-    qrCode.value = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-  } catch {
-    // The page works without the QR code.
-  }
-}
+// The visitor's own platform comes first. Inside the installed app (the
+// Android app or an iPhone home screen icon) there's nothing to install, and on
+// a computer a QR code opens this page on the phone.
+const { platform, installed, handheld } = useDevice()
+const pageUrl = window.location.href
 
 // The newest release's version, date, size and SHA-256 checksum from GitHub.
 // Without them (offline, rate limit) the page shows the web app's version,
@@ -71,10 +52,7 @@ const androidDetails = computed(() =>
   [`Versio ${version.value}`, release.value?.size, release.value && `julkaistu ${release.value.date}`].filter(Boolean).join(' · '),
 )
 
-onMounted(() => {
-  loadRelease()
-  if (!platform && !installed) loadQrCode()
-})
+onMounted(loadRelease)
 
 // The Android head and the Apple logo, drawn in a 24 × 24 box (the Android
 // head's viewBox crops it to the same visual size).
@@ -111,8 +89,8 @@ const safety = [
     </p>
 
     <div class="grid gap-4">
-      <div v-if="qrCode" class="card card-body flex flex-col items-center gap-4 sm:flex-row" data-test="qr">
-        <img :src="qrCode" alt="QR-koodi tälle sivulle" class="size-32 shrink-0 rounded-lg bg-white p-2" width="128" height="128">
+      <div v-if="!handheld" class="card card-body flex flex-col items-center gap-4 sm:flex-row" data-test="qr">
+        <QrCode :value="pageUrl" alt="QR-koodi tälle sivulle" class="size-32 shrink-0" />
         <div>
           <h2 class="text-lg font-bold">Avaa puhelimella</h2>
           <p class="mt-1 mb-0 text-slate-600 dark:text-slate-300">

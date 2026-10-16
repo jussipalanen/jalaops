@@ -30,6 +30,10 @@ return [
 
     'first_invoice_number' => (int) env('FIRST_INVOICE_NUMBER', 1001),
 
+    // The payment QR code (EPC QR) on invoices, in the app and on the PDF and
+    // HTML. Off for now; it also needs SELLER_IBAN.
+    'payment_qr' => (bool) env('INVOICE_PAYMENT_QR', false),
+
     'seller' => [
         'name' => env('SELLER_NAME', 'JalaOps Demo'),
         'business_id' => env('SELLER_BUSINESS_ID'),
