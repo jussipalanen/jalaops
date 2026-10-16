@@ -27,6 +27,7 @@ class QrCodeTest extends TestCase
             'billing.seller.iban' => 'FI21 1234 5600 0007 85',
             'billing.seller.bic' => 'NDEAFIHH',
             'app.frontend_url' => 'https://jalaops.example/',
+            'billing.payment_qr' => true,
         ]);
     }
 
@@ -88,6 +89,17 @@ class QrCodeTest extends TestCase
         config(['billing.seller.iban' => 'FI2112345600000785']);
         $this->patchJson("/api/invoices/{$id}/status", ['status' => 'sent'])->assertOk()->assertJsonPath('data.payment.qr', self::PAYMENT_QR);
         $this->patchJson("/api/invoices/{$id}/status", ['status' => 'paid'])->assertOk()->assertJsonPath('data.payment.qr', null);
+    }
+
+    public function test_the_payment_qr_code_is_off_unless_turned_on(): void
+    {
+        $id = $this->createInvoice();
+        config(['billing.payment_qr' => false]);
+
+        $this->getJson("/api/invoices/{$id}")
+            ->assertJsonPath('data.payment.iban', 'FI21 1234 5600 0007 85')
+            ->assertJsonPath('data.payment.qr', null);
+        $this->assertStringNotContainsString('Maksun QR-koodi', $this->get("/api/invoices/{$id}/export/html")->getContent());
     }
 
     public function test_a_bic_in_the_wrong_format_is_left_out(): void

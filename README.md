@@ -35,7 +35,7 @@ A user can:
 - keep a register of customers (Asiakkaat) and choose the customer for each request
 - record the work and materials of a request, with VAT and totals (the basis for invoicing)
 - invoice completed requests: invoice numbers, Finnish reference numbers, due dates, statuses, an invoice PDF and HTML page with the JalaOps logo and page numbers, and an export for accounting software
-- pay an invoice with a banking app from its payment QR code, and open a request on a phone from its QR code
+- open a request on a phone from its QR code, and copy an invoice's payment details for a banking app
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
 
 The application UI is in Finnish.
@@ -172,7 +172,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 | Method | Endpoint             | Description                 |
 |--------|----------------------|-----------------------------|
 | GET/POST | `/api/invoices`    | List invoices (`status`, `customer`) or create one from billable requests |
-| GET/DELETE | `/api/invoices/{id}` | Get an invoice (with its payment details and payment QR code) or delete a draft |
+| GET/DELETE | `/api/invoices/{id}` | Get an invoice (with its payment details) or delete a draft |
 | PATCH  | `/api/invoices/{id}/status` | Draft → sent → paid |
 | GET    | `/api/invoices/{id}/export/pdf` | Download the invoice as a PDF (`inline=1` opens it in the browser) |
 | GET    | `/api/invoices/{id}/export/html` | Download the invoice as a self-contained HTML file (`inline=1` opens it in the browser) |
@@ -235,17 +235,19 @@ The backend calls Nominatim and Photon, caches the results and limits calls per 
 
 ## QR codes
 
-Invoices and requests have QR codes that work on phones and tablets as well as computers. On a computer the code is on the page; on a phone or tablet it opens on the whole screen, so another phone can scan it.
+Requests have QR codes that work on phones and tablets as well as computers. On a computer the code is on the page; on a phone or tablet it opens on the whole screen, so another phone can scan it. Invoices have a payment QR code too, which is off for now.
 
 <details>
-<summary><strong>💳 Payment QR code (invoices)</strong></summary>
+<summary><strong>💳 Payment QR code (invoices, off for now)</strong></summary>
+
+The payment QR code is off for now: `INVOICE_PAYMENT_QR=true` turns it on. Without it, **Maksutiedot** on the invoice page still has the bank details with **Kopioi** buttons.
 
 An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, the amount and the reference as an RF creditor reference (ISO 11649), which banking apps read to fill in the payment.
 
 - It's on the invoice PDF and HTML next to the payment details, and on the invoice page under **Maksutiedot**.
 - **Maksutiedot** also has **Kopioi** buttons for the IBAN, reference and amount, for pasting into a banking app.
 - On a phone or tablet, **Näytä maksukoodi** shows the code on the whole screen, so the customer can scan it with their own phone.
-- It's shown only when `SELLER_IBAN` is set, the total is above zero and the invoice isn't paid.
+- When turned on, it's shown only when `SELLER_IBAN` is set, the total is above zero and the invoice isn't paid.
 
 </details>
 

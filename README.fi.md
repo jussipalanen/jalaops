@@ -35,7 +35,7 @@ Käyttäjä voi:
 - pitää asiakasrekisteriä (Asiakkaat) ja valita jokaiselle pyynnölle asiakas
 - kirjata pyynnön työt ja tarvikkeet arvonlisäveroineen ja summineen (laskutuksen perusta)
 - laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku PDF- ja HTML-muodossa JalaOps-logolla ja sivunumeroilla sekä vienti kirjanpitoon
-- maksaa laskun pankkisovelluksella sen maksun QR-koodista ja avata pyynnön puhelimella sen QR-koodista
+- avata pyynnön puhelimella sen QR-koodista ja kopioida laskun maksutiedot pankkisovellukseen
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
 
 Sovelluksen käyttöliittymä on suomeksi.
@@ -172,7 +172,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 | Metodi | Endpoint             | Kuvaus                        |
 |--------|----------------------|-------------------------------|
 | GET/POST | `/api/invoices`    | Listaa laskut (`status`, `customer`) tai luo lasku laskutettavista pyynnöistä |
-| GET/DELETE | `/api/invoices/{id}` | Hae lasku (maksutietoineen ja maksun QR-koodeineen) tai poista luonnos |
+| GET/DELETE | `/api/invoices/{id}` | Hae lasku (maksutietoineen) tai poista luonnos |
 | PATCH  | `/api/invoices/{id}/status` | Luonnos → lähetetty → maksettu |
 | GET    | `/api/invoices/{id}/export/pdf` | Lataa lasku PDF-tiedostona (`inline=1` avaa sen selaimessa) |
 | GET    | `/api/invoices/{id}/export/html` | Lataa lasku itsenäisenä HTML-tiedostona (`inline=1` avaa sen selaimessa) |
@@ -235,17 +235,19 @@ Backend kutsuu Nominatimia ja Photonia, tallentaa tulokset välimuistiin ja rajo
 
 ## QR-koodit
 
-Laskuissa ja pyynnöissä on QR-koodit, jotka toimivat puhelimella ja tabletilla siinä missä tietokoneellakin. Tietokoneella koodi on sivulla; puhelimella ja tabletilla se aukeaa koko näytölle, jotta toinen puhelin voi skannata sen.
+Pyynnöissä on QR-koodit, jotka toimivat puhelimella ja tabletilla siinä missä tietokoneellakin. Tietokoneella koodi on sivulla; puhelimella ja tabletilla se aukeaa koko näytölle, jotta toinen puhelin voi skannata sen. Laskuissa on myös maksun QR-koodi, joka on toistaiseksi pois päältä.
 
 <details>
-<summary><strong>💳 Maksun QR-koodi (laskut)</strong></summary>
+<summary><strong>💳 Maksun QR-koodi (laskut, toistaiseksi pois päältä)</strong></summary>
+
+Maksun QR-koodi on toistaiseksi pois päältä: `INVOICE_PAYMENT_QR=true` ottaa sen käyttöön. Ilman sitä laskun sivun **Maksutiedoissa** ovat silti pankkitiedot **Kopioi**-painikkeineen.
 
 EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, summa ja viite RF-viitteenä (ISO 11649). Pankkisovellukset lukevat siitä maksun tiedot.
 
 - Koodi on laskun PDF- ja HTML-tiedostossa maksutietojen vieressä ja laskun sivulla kohdassa **Maksutiedot**.
 - **Maksutiedoissa** on myös **Kopioi**-painikkeet IBANille, viitenumerolle ja summalle pankkisovellukseen liittämistä varten.
 - Puhelimella ja tabletilla **Näytä maksukoodi** näyttää koodin koko näytöllä, jotta asiakas voi skannata sen omalla puhelimellaan.
-- Koodi näytetään vain, kun `SELLER_IBAN` on asetettu, summa on yli nollan eikä laskua ole maksettu.
+- Käyttöön otettuna koodi näytetään vain, kun `SELLER_IBAN` on asetettu, summa on yli nollan eikä laskua ole maksettu.
 
 </details>
 

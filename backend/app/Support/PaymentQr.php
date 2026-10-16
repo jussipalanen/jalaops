@@ -16,11 +16,16 @@ class PaymentQr
     private const MAX_CENTS = 99_999_999_999;
 
     /**
-     * The QR code's text, or null when the invoice has nothing to pay this
-     * way: no valid seller IBAN, no amount, or already paid.
+     * The QR code's text, or null when it's turned off (INVOICE_PAYMENT_QR)
+     * or the invoice has nothing to pay this way: no valid seller IBAN, no
+     * amount, or already paid.
      */
     public static function forInvoice(Invoice $invoice): ?string
     {
+        if (! config('billing.payment_qr')) {
+            return null;
+        }
+
         $seller = config('billing.seller');
         $iban = self::compact($seller['iban'] ?? null);
         $bic = self::compact($seller['bic'] ?? null);
