@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Support\PaymentQr;
+use App\Support\QrImage;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -42,12 +44,15 @@ class InvoiceExport
 
     private function view(Invoice $invoice, bool $forPdf): string
     {
+        $paymentQr = PaymentQr::forInvoice($invoice->loadMissing('lines'));
+
         return view('exports.invoice', [
-            'invoice' => $invoice->loadMissing('lines'),
+            'invoice' => $invoice,
             'seller' => config('billing.seller'),
             // The logo is inline, so the HTML file works offline and dompdf
             // needs no remote files.
             'logo' => 'data:image/png;base64,'.base64_encode((string) file_get_contents(resource_path('images/logo.png'))),
+            'paymentQr' => $paymentQr !== null ? QrImage::dataUri($paymentQr) : null,
             'forPdf' => $forPdf,
         ])->render();
     }

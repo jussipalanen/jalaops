@@ -39,6 +39,11 @@
         .brand strong { color: #0f172a; font-size: 1.15em; }
         .brand .ops { color: #0284c7; }
         h1 { font-size: 1.75em; line-height: 1.25; margin: 0 0 10px; }
+        /* The title, and a QR code on the right that opens the request in the app. */
+        table.title-row { width: 100%; border-collapse: collapse; }
+        table.title-row td { vertical-align: top; padding: 0; }
+        table.title-row td.qr { width: 30mm; padding-left: 16px; text-align: center; font-size: 0.75em; color: #64748b; }
+        table.title-row td.qr img { display: block; width: 30mm; height: 30mm; margin: 0 auto 2px; }
         h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; margin: 24px 0 6px; }
         .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.85em; font-weight: bold; margin-right: 6px; }
         .description { margin: 0; white-space: pre-line; }
@@ -69,6 +74,8 @@
         @media (max-width: 560px) {
             table.signed td { display: block; width: 100% !important; padding: 0 0 10px !important; }
             table.facts th { width: 40%; }
+            table.title-row td.qr { width: 96px; padding-left: 12px; }
+            table.title-row td.qr img { width: 96px; height: 96px; }
         }
         @endif
         .footer { margin-top: 36px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 0.8em; color: #64748b; }
@@ -78,11 +85,23 @@
 <div class="page">
     <div class="brand"><strong>Jala<span class="ops">Ops</span></strong> &nbsp;·&nbsp; Huoltopyyntö #{{ $request->id }}</div>
 
-    <h1>{{ $request->title }}</h1>
-    <div>
-        <span class="badge" style="background: {{ $priorityBg }}; color: {{ $priorityFg }};">Prioriteetti: {{ $request->priority->label() }}</span>
-        <span class="badge" style="background: {{ $statusBg }}; color: {{ $statusFg }};">Tila: {{ $request->status->label() }}</span>
-    </div>
+    <table class="title-row">
+        <tr>
+            <td>
+                <h1>{{ $request->title }}</h1>
+                <div>
+                    <span class="badge" style="background: {{ $priorityBg }}; color: {{ $priorityFg }};">Prioriteetti: {{ $request->priority->label() }}</span>
+                    <span class="badge" style="background: {{ $statusBg }}; color: {{ $statusFg }};">Tila: {{ $request->status->label() }}</span>
+                </div>
+            </td>
+            @if ($appQr)
+                <td class="qr">
+                    <a href="{{ $appUrl }}"><img src="{{ $appQr }}" alt="QR-koodi: avaa pyyntö JalaOpsissa"></a>
+                    <span>Avaa puhelimella</span>
+                </td>
+            @endif
+        </tr>
+    </table>
 
     <h2>Kuvaus</h2>
     @if ($request->description)

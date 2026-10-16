@@ -54,6 +54,9 @@
         .payment td { padding: 6px 10px; border: 1px solid #cbd5e1; vertical-align: top; }
         .payment .label { display: block; font-size: 7.5pt; color: #475569; }
         .payment .value { font-size: 10.5pt; font-weight: bold; }
+        /* The payment QR code (EPC QR) on the right of the payment details. */
+        .payment td.qr { width: 27mm; padding: 6px; text-align: center; vertical-align: middle; font-size: 7pt; color: #475569; }
+        .payment td.qr img { display: block; width: 27mm; height: 27mm; margin: 0 auto 2px; }
         .notes { margin-top: 16px; }
         .footer { margin-top: 26px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 8pt; color: #64748b; }
         @if (! $forPdf)
@@ -69,6 +72,8 @@
             .payment, .payment tbody, .payment tr, .payment td { display: block; width: auto !important; }
             .payment td { border-width: 0 0 1px; }
             .payment tr:last-child td:last-child { border-bottom: 0; }
+            .payment td.qr { padding: 12px 10px; }
+            .payment td.qr img { width: 160px; height: 160px; }
         }
         @media print {
             html { background: none; }
@@ -167,6 +172,12 @@
                 @else<span class="muted">Ei asetettu (SELLER_IBAN)</span>@endif
             </td>
             <td><span class="label">Viitenumero</span><span class="value">{{ $reference }}</span></td>
+            @if ($paymentQr)
+                <td rowspan="2" class="qr">
+                    <img src="{{ $paymentQr }}" alt="Maksun QR-koodi">
+                    <span>Maksa pankkisovelluksella</span>
+                </td>
+            @endif
         </tr>
         <tr>
             <td><span class="label">Eräpäivä</span><span class="value">{{ $date($invoice->due_date) }}</span></td>

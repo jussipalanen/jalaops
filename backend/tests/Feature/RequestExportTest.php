@@ -93,7 +93,7 @@ class RequestExportTest extends TestCase
         $this->assertStringContainsString('Allekirjoitus', $html);
         $this->assertStringContainsString('Nimenselvennys', $html);
         $this->assertStringContainsString('Päiväys', $html);
-        $this->assertStringNotContainsString('<img', $html);
+        $this->assertStringNotContainsString('alt="Allekirjoitus"', $html);
     }
 
     public function test_user_text_is_escaped(): void
