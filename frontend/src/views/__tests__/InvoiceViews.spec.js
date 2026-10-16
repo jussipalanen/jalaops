@@ -244,4 +244,18 @@ describe('InvoiceDetailView', () => {
     expect(payment.findAll('button').map((button) => button.text())).not.toContain('Näytä suurena')
     expect(wrapper.find('dialog').exists()).toBe(false)
   })
+
+  it('works with a backend that has no payment details yet', async () => {
+    const older = { ...invoice }
+    delete older.payment
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: older })))
+    const wrapper = mount(InvoiceDetailView, stubs)
+    await flushPromises()
+
+    const payment = wrapper.find('[data-test="payment"]')
+    expect(payment.text()).toContain('Tilinumero (IBAN)Ei asetettu')
+    expect(payment.text()).toContain('Viitenumero10016')
+    expect(payment.text()).not.toContain('Saaja')
+    expect(wrapper.find('dialog').exists()).toBe(false)
+  })
 })

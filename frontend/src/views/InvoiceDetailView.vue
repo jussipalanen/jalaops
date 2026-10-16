@@ -45,15 +45,18 @@ const qrOpen = ref(false)
 const payment = computed(() => {
   if (!invoice.value) return null
   const amount = invoice.value.totals.total
+  // An older backend has no payment details: the card then shows the
+  // reference and amount only.
+  const details = invoice.value.payment ?? { recipient: null, iban: null, bic: null, qr: null }
   return {
-    ...invoice.value.payment,
+    ...details,
     // Banking apps take the amount with a decimal comma and no spaces: "1234,50".
     amount: amount.toFixed(2).replace('.', ','),
     details: [
       ['Summa', formatEuro(amount)],
       ['Viitenumero', invoice.value.reference_number],
-      ['Saaja', invoice.value.payment.recipient],
-    ],
+      ['Saaja', details.recipient],
+    ].filter(([, text]) => text),
   }
 })
 
@@ -176,7 +179,7 @@ async function remove() {
           <p v-if="invoice.status === 'paid'" class="mt-1 text-slate-600 dark:text-slate-300">Lasku on maksettu.</p>
           <div class="mt-3 grid items-start gap-5 sm:grid-cols-[1fr_auto]">
             <dl class="grid gap-3">
-              <div>
+              <div v-if="payment.recipient">
                 <dt class="text-sm text-slate-500 dark:text-slate-400">Saaja</dt>
                 <dd class="font-semibold">{{ payment.recipient }}</dd>
               </div>
