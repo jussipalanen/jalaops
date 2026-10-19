@@ -5,6 +5,7 @@ use App\Services\Modules\ModuleException;
 use App\Services\Modules\ModuleRegistry;
 use App\Services\Modules\ModuleRunner;
 use App\Services\Modules\PythonModule;
+use Composer\InstalledVersions;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -30,20 +31,32 @@ Artisan::command('ai-overview:warm', function (AiStatusOverview $overview) {
     }
 })->purpose('Generate the AI status overview ahead of time');
 
-// Python modules in backend/modules (see modules/README.md).
+// Python modules in backend/modules and in module packages (see modules/README.md).
 Artisan::command('modules:list', function (ModuleRegistry $modules) {
     $rows = array_map(
-        fn (PythonModule $module) => [$module->id, $module->name, $module->version, $module->enabled ? 'on' : 'off', $module->description],
+        fn (PythonModule $module) => [
+            $module->id,
+            $module->name,
+            $module->version,
+            $module->enabled ? 'on' : 'off',
+            // A package's installed version comes from Composer, e.g. its git tag.
+            match (true) {
+                $module->package === null => 'modules',
+                InstalledVersions::isInstalled($module->package) => $module->package.' '.InstalledVersions::getPrettyVersion($module->package),
+                default => $module->package,
+            },
+            $module->description,
+        ],
         array_values($modules->all()),
     );
 
     if ($rows === []) {
-        $this->info('No modules in '.config('modules.path').'.');
+        $this->info('No modules in '.config('modules.path').' or in packages.');
 
         return;
     }
 
-    $this->table(['Module', 'Name', 'Version', 'Status', 'Description'], $rows);
+    $this->table(['Module', 'Name', 'Version', 'Status', 'Source', 'Description'], $rows);
 })->purpose('List the Python modules');
 
 Artisan::command('modules:run {module} {input? : A JSON object for the module}', function (ModuleRegistry $modules, ModuleRunner $runner) {

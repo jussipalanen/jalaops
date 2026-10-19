@@ -1,0 +1,6 @@
+{
+    "name": "acme/toolbox",
+    "description": "A module package with several modules, one per folder.",
+    "type": "jalaops-module",
+    "license": "MIT"
+}

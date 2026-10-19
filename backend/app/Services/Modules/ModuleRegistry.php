@@ -3,16 +3,24 @@
 namespace App\Services\Modules;
 
 use App\Models\ModuleSetting;
+use Composer\InstalledVersions;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
- * Finds the Python modules in the modules folder (config/modules.php): each
- * subfolder with a module.json is a module, and the folder name is its id.
+ * Finds the Python modules in the modules folder (config/modules.php) and in
+ * the installed Composer packages of type "jalaops-module". In a folder, each
+ * subfolder with a module.json is a module, and the folder name is its id. A
+ * package with a module.json at its root is one module, named after the
+ * package (jalaops/weather is "weather"); otherwise it's a folder of modules.
  * Whether a module is on comes from modules:enable / modules:disable, or
  * else from the "enabled" in its module.json (off by default).
  */
 class ModuleRegistry
 {
+    // The Composer package type of module packages.
+    public const PACKAGE_TYPE = 'jalaops-module';
+
     // Folder names that can be module ids, so an id can't point outside the folder.
     private const ID_PATTERN = '/^[a-z0-9][a-z0-9-]*$/';
 
@@ -35,11 +43,44 @@ class ModuleRegistry
     // list of numbers, longer text, and a choice from options.
     private const FIELD_TYPES = ['text', 'number', 'numbers', 'textarea', 'select'];
 
-    public function __construct(private readonly string $path) {}
+    /**
+     * @param  string  $path  The app's own modules folder
+     * @param  array<string, string>  $packages  Module packages: name => install path
+     */
+    public function __construct(
+        private readonly string $path,
+        private readonly array $packages = [],
+    ) {}
 
     public static function fromConfig(): self
     {
-        return new self(config('modules.path'));
+        $packages = config('modules.packages') ? self::installedPackages(InstalledVersions::getAllRawData()) : [];
+
+        return new self(config('modules.path'), $packages);
+    }
+
+    /**
+     * The module packages in Composer's installed data (InstalledVersions::getAllRawData()).
+     *
+     * @param  list<array{versions?: array<string, array{type?: string, install_path?: string}>}>  $installed
+     * @return array<string, string> name => install path
+     */
+    public static function installedPackages(array $installed): array
+    {
+        $packages = [];
+
+        foreach ($installed as $dataset) {
+            foreach ($dataset['versions'] ?? [] as $name => $package) {
+                // Packages that are only provided or replaced have no install path.
+                if (($package['type'] ?? null) === self::PACKAGE_TYPE && isset($package['install_path'])) {
+                    $packages[$name] ??= $package['install_path'];
+                }
+            }
+        }
+
+        ksort($packages);
+
+        return $packages;
     }
 
     /**
@@ -52,11 +93,9 @@ class ModuleRegistry
         $settings = ModuleSetting::query()->pluck('enabled', 'module');
         $modules = [];
 
-        foreach (glob(rtrim($this->path, '/').'/*/module.json') ?: [] as $manifest) {
-            $id = basename(dirname($manifest));
-
+        foreach ($this->locations() as $id => $location) {
             try {
-                $modules[$id] = $this->load($id, $settings[$id] ?? null);
+                $modules[$id] = $this->load($id, $location, $settings[$id] ?? null);
             } catch (ModuleException $exception) {
                 Log::warning($exception->getMessage());
             }
@@ -72,7 +111,11 @@ class ModuleRegistry
      */
     public function find(string $id): PythonModule
     {
-        return $this->load($id, preg_match(self::ID_PATTERN, $id) ? ModuleSetting::find($id)?->enabled : null);
+        if (! preg_match(self::ID_PATTERN, $id)) {
+            return $this->load($id, null, null);
+        }
+
+        return $this->load($id, $this->locations()[$id] ?? null, ModuleSetting::find($id)?->enabled);
     }
 
     /**
@@ -90,14 +133,70 @@ class ModuleRegistry
     }
 
     /**
+     * Where each module is, by id: the modules folder first, then the
+     * packages. A module whose id is already taken is logged and skipped.
+     *
+     * @return array<string, array{directory: string, package: string|null}>
+     */
+    private function locations(): array
+    {
+        $found = [];
+
+        foreach ($this->folderOfModules($this->path) as $id => $directory) {
+            $found[] = [$id, $directory, null];
+        }
+
+        foreach ($this->packages as $package => $installPath) {
+            $modules = is_file("{$installPath}/module.json")
+                ? [Str::afterLast($package, '/') => $installPath]
+                : $this->folderOfModules($installPath);
+
+            foreach ($modules as $id => $directory) {
+                $found[] = [$id, $directory, $package];
+            }
+        }
+
+        $locations = [];
+
+        foreach ($found as [$id, $directory, $package]) {
+            if (isset($locations[$id])) {
+                Log::warning("Module '{$id}' in {$directory} was skipped: {$locations[$id]['directory']} already has that id.");
+
+                continue;
+            }
+
+            $locations[$id] = ['directory' => $directory, 'package' => $package];
+        }
+
+        return $locations;
+    }
+
+    /**
+     * The subfolders of a folder that have a module.json, by folder name.
+     *
+     * @return array<string, string>
+     */
+    private function folderOfModules(string $path): array
+    {
+        $modules = [];
+
+        foreach (glob(rtrim($path, '/').'/*/module.json') ?: [] as $manifest) {
+            $modules[basename(dirname($manifest))] = dirname($manifest);
+        }
+
+        return $modules;
+    }
+
+    /**
+     * @param  array{directory: string, package: string|null}|null  $location  Where the module is, or null when nowhere
      * @param  bool|null  $enabled  The stored setting, or null to use module.json's
      */
-    private function load(string $id, ?bool $enabled): PythonModule
+    private function load(string $id, ?array $location, ?bool $enabled): PythonModule
     {
-        $directory = realpath(rtrim($this->path, '/').'/'.$id);
+        $directory = $location === null ? false : realpath($location['directory']);
 
         if (! preg_match(self::ID_PATTERN, $id) || $directory === false || ! is_file("{$directory}/module.json")) {
-            throw new ModuleException("Module '{$id}' was not found in {$this->path}.", 'Moduulia ei löytynyt.');
+            throw new ModuleException("Module '{$id}' was not found.", 'Moduulia ei löytynyt.');
         }
 
         $manifest = json_decode((string) file_get_contents("{$directory}/module.json"), true);
@@ -134,6 +233,7 @@ class ModuleRegistry
             results: array_map(fn ($result) => $this->result($id, $result), $this->listOf($id, $manifest, 'results')),
             view: $view,
             assets: $this->assets($id, $directory, $this->listOf($id, $manifest, 'assets')),
+            package: $location['package'],
         );
     }
 

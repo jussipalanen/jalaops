@@ -4,7 +4,7 @@ namespace App\Services\Modules;
 
 /**
  * A Python module found by ModuleRegistry: its module.json, where its script
- * is, and whether it's on. The module's page in the app is either its own
+ * is, which package it comes from, and whether it's on. The module's page in the app is either its own
  * `view` (view.html in its folder, shown in a sandboxed frame) or a page the
  * frontend draws from `form` and `results`.
  */
@@ -14,6 +14,7 @@ final class PythonModule
      * @param  list<array{name: string, label: string, type: string, help?: string, default?: mixed, options?: list<string>, required?: bool}>  $form
      * @param  list<array{name: string, label: string, decimals?: int}>  $results
      * @param  list<array{path: string, type: 'script'|'style'}>  $assets  CSS and JS files for the view, in order
+     * @param  string|null  $package  The Composer package the module comes from, or null for the modules folder
      */
     public function __construct(
         public readonly string $id,
@@ -28,5 +29,6 @@ final class PythonModule
         public readonly array $results = [],
         public readonly ?string $view = null,
         public readonly array $assets = [],
+        public readonly ?string $package = null,
     ) {}
 }

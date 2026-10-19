@@ -1,0 +1,6 @@
+{
+    "name": "acme/weather",
+    "description": "A module package with one module at its root.",
+    "type": "jalaops-module",
+    "license": "MIT"
+}
