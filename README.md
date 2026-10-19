@@ -285,7 +285,7 @@ An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, th
 
 ## Python modules
 
-Modules add features in Python: small programs in [`backend/modules`](backend/modules) that Laravel runs as separate processes, JSON in and JSON out. **Työkalut → Moduulit** lists them and whether each is on, and each enabled module has a page in the app, drawn from its `module.json` or its own `view.html`. Two examples come with the app: **ALV-laskuri** (VAT) and **Hei maailma**, which has its own view with a bar chart.
+Modules add features in Python: small programs in [`backend/modules`](backend/modules) that Laravel runs as separate processes, JSON in and JSON out. **Työkalut → Moduulit** lists them and whether each is on, and each enabled module has a page in the app, drawn from its `module.json` or its own `view.html`. Two examples come with the app: **ALV-laskuri** (VAT) and **Hei maailma**, which has its own view with a bar chart. **Työaikalaskuri** (hours worked, overtime and labour cost) is installed as a package from its own repository, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime).
 
 Modules come from the code through pull requests, never from uploads. Each runs without the backend's API keys and is stopped after its timeout. The app's own view of a module runs in a sandboxed frame that can't reach the app or the network.
 

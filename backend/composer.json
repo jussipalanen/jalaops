@@ -11,6 +11,7 @@
         "chillerlan/php-qrcode": "^5.0",
         "dedoc/scramble": "^0.13.47",
         "dompdf/dompdf": "^3.1",
+        "jalaops/worktime": "^1.1",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0"
     },
@@ -84,5 +85,10 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [{
+        "name": "jalaops-module-worktime",
+        "type": "vcs",
+        "url": "https://github.com/jussipalanen/jalaops-module-worktime.git"
+    }]
 }

@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-19
+
+### Added
+- **Työaikalaskuri** (`worktime`), the first module from a package of its own: the hours worked, overtime past 8 hours and labour cost from a shift's start and end times and breaks, also over midnight. It's installed with Composer from [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime) at version 1.1.0.
+
 ## [1.8.0] - 2026-10-19
 
 ### Added
@@ -420,7 +425,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/jussipalanen/jalaops/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/jussipalanen/jalaops/compare/v1.6.1...v1.6.2
