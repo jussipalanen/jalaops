@@ -109,15 +109,35 @@ rm cleanup-policy.json
 
 Finally, set a budget alert in the Console under **Billing → Budgets & alerts** (for example 15 €). It emails you when costs go over the amount; it doesn't stop the service.
 
-### Manual deploys
+### Manual deploys and `./dev` commands
 
-Deploy the code in your working copy:
+`./dev` has shortcuts for the Cloud Run backend (`gcloud:*` and `deploy`) and the Vercel frontend (`vercel:*`, see [below](#dev-commands-for-vercel)). They read these settings from the environment or from `~/.jalaops/deploy.env`, outside the repository (`JALAOPS_DEPLOY_ENV` points elsewhere). A variable already in the environment wins over the file. None of them is secret.
+
+| Variable | Value |
+|---|---|
+| `GCP_PROJECT_ID` | Required for `gcloud:*` and `deploy`: the project ID, not its name (`gcloud projects list`) |
+| `CLOUD_RUN_REGION` | Optional, default `europe-north1` |
+| `CLOUD_RUN_SERVICE` | Optional, default `jalaops-backend` |
+| `VERCEL_PROJECT` | Optional, default `jalaops` |
+| `VERCEL_SCOPE` | Optional: the Vercel team slug (`vercel teams ls`), if the project isn't in your default team |
+
+Set them up once:
 
 ```bash
-./dev deploy
+mkdir -p ~/.jalaops
+echo "GCP_PROJECT_ID=my-project-id" >> ~/.jalaops/deploy.env
+echo "VERCEL_SCOPE=my-team" >> ~/.jalaops/deploy.env
+./dev gcloud:login
+./dev vercel:login
 ```
 
-It runs `gcloud run deploy jalaops-backend --source backend --region europe-north1` in gcloud's active project and prints the project first, so you can check it's the right one. The service keeps its settings and environment variables. Extra arguments go to `gcloud run deploy`, for example `./dev deploy --quiet`.
+| Command | Does |
+|---|---|
+| `./dev gcloud:login` | Signs in to Google Cloud (`gcloud auth login`) and makes `GCP_PROJECT_ID` gcloud's active project |
+| `./dev deploy [args]` | Deploys the code in your working copy: `gcloud run deploy --source backend` to `GCP_PROJECT_ID`, whatever project gcloud has active. The service keeps its settings and environment variables. Extra arguments go to `gcloud run deploy`, for example `./dev deploy --quiet` |
+| `./dev gcloud:status` | Shows the account, the backend's address, its latest revision and the names of its environment variables (never their values) |
+| `./dev gcloud:logs [n]` | Shows the backend's latest `n` log entries (default 50) |
+| `./dev gcloud:set-env KEY=VALUE[,...]` | Sets or changes environment variables, which creates a new revision; for example `./dev gcloud:set-env ALLOWED_ORIGINS=https://jalaops.vercel.app`. Keep API keys in Secret Manager instead (see "Settings and secrets") |
 
 ### Automatic deploys from main
 
@@ -242,6 +262,18 @@ A Render service created before the image moved to `backend/` needs the new **Do
 
 5. Choose **Deploy**.
 6. Open the Vercel address. The home page should say "API-yhteys toimii." and show the demo notice.
+
+### `./dev` commands for Vercel
+
+With the Vercel CLI (`npm i -g vercel`) and the settings in `~/.jalaops/deploy.env` (see [Manual deploys and `./dev` commands](#manual-deploys-and-dev-commands)):
+
+| Command | Does |
+|---|---|
+| `./dev vercel:login` | Signs in to Vercel (`vercel login`) and links the repository folder to the project. Linking writes `.vercel/` and `.env.local` (a short-lived Vercel token); git ignores both |
+| `./dev vercel:deploy [args]` | Deploys the working copy as a preview and prints its address (only `frontend/` is uploaded, see `.vercelignore`); `./dev vercel:deploy --prod` deploys to production. Pushes to `main` deploy to production anyway |
+| `./dev vercel:status` | Lists the latest deployments and their status |
+| `./dev vercel:logs [args]` | Shows the request logs; extra arguments go to `vercel logs`, for example `--follow` or `--since 1h` |
+| `./dev vercel:env` | Lists the names of the project's environment variables and their environments, never the values |
 
 `frontend/vercel.json` also sends every other path to `index.html`, so addresses like `/requests/1/edit` work when opened directly or reloaded.
 

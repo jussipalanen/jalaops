@@ -89,6 +89,7 @@ If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
 | `./dev db`             | Open the MariaDB client                      |
 | `./dev test`           | Run the backend and frontend tests           |
 | `./dev reset`          | Remove the containers and the database data  |
+| `./dev deploy`, `./dev gcloud:*`, `./dev vercel:*` | Deploy and check the Cloud Run backend and the Vercel frontend ([more](docs/DEPLOYMENT.md#manual-deploys-and-dev-commands)) |
 
 On Windows, run `./dev` in Git Bash or WSL, or use the `docker compose` commands directly.
 

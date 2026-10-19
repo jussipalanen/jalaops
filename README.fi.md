@@ -89,6 +89,7 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 | `./dev db`             | Avaa MariaDB-asiakasohjelma                  |
 | `./dev test`           | Aja backendin ja frontendin testit           |
 | `./dev reset`          | Poista kontit ja tietokannan data            |
+| `./dev deploy`, `./dev gcloud:*`, `./dev vercel:*` | Julkaise ja tarkista Cloud Run -backend ja Vercelin frontend ([lisää](docs/DEPLOYMENT.md#manual-deploys-and-dev-commands)) |
 
 Windowsissa aja `./dev` Git Bashissa tai WSL:ssä, tai käytä `docker compose` -komentoja suoraan.
 

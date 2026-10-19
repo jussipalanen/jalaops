@@ -37,8 +37,21 @@ Android app:
   android            Build android/dist/jalaops.apk and jalaops.aab (needs only Docker)
   android-secrets    Store the upload key in GitHub secrets for the release workflow
 
-Deployment:
-  deploy [args]      Deploy the backend to Google Cloud Run (needs gcloud; see docs/DEPLOYMENT.md)
+Backend on Google Cloud Run (needs gcloud and GCP_PROJECT_ID; see docs/DEPLOYMENT.md):
+  gcloud:login       Sign in to Google Cloud and select the project
+  deploy [args]      Deploy the backend to Cloud Run
+  gcloud:status      Show the account, the backend's address and revision, and its setting names
+  gcloud:logs [n]    Show the backend's latest n log entries (default 50)
+  gcloud:set-env <KEY=VALUE,...>
+                     Set environment variables on the backend (keep keys in Secret Manager)
+
+Frontend on Vercel (needs the vercel CLI; see docs/DEPLOYMENT.md):
+  vercel:login       Sign in to Vercel and link this folder to the project
+  vercel:deploy [args]
+                     Deploy the working copy as a preview; --prod deploys to production
+  vercel:status      Show the latest deployments
+  vercel:logs [args] Show the frontend's request logs (e.g. --follow, --since 1h)
+  vercel:env         List the project's environment variable names
 
 Tests:
   test               Run the backend and frontend tests
@@ -47,6 +60,50 @@ Tests:
 
 Any other command is passed to docker compose, e.g. ./dev exec backend php -v
 EOF
+}
+
+# Deployment settings for the gcloud:* and vercel:* commands, from the
+# environment or ~/.jalaops/deploy.env (outside the repository). Variables
+# already in the environment win over the file.
+settings="${JALAOPS_DEPLOY_ENV:-$HOME/.jalaops/deploy.env}"
+deploy_settings() {
+    exported="$(export -p)"
+    # shellcheck disable=SC1090
+    [ -f "$settings" ] && . "$settings"
+    eval "$exported"
+}
+
+# GCP_PROJECT_ID is required, so a deploy never goes to whatever project
+# gcloud happens to have active.
+gcloud_settings() {
+    command -v gcloud > /dev/null || { echo "gcloud not found; install the Google Cloud CLI: https://cloud.google.com/sdk/docs/install"; exit 1; }
+    deploy_settings
+    project="${GCP_PROJECT_ID:-}"
+    region="${CLOUD_RUN_REGION:-europe-north1}"
+    service="${CLOUD_RUN_SERVICE:-jalaops-backend}"
+    if [ -z "$project" ]; then
+        echo "GCP_PROJECT_ID is not set. Add it to $settings, e.g.:"
+        echo "  mkdir -p \"$(dirname "$settings")\" && echo GCP_PROJECT_ID=my-project-id >> \"$settings\""
+        echo "Use the project ID, not its name (gcloud projects list)."
+        exit 1
+    fi
+}
+
+# VERCEL_PROJECT (default jalaops) and the optional VERCEL_SCOPE, the team
+# slug (vercel teams ls). The Vercel project's root directory is frontend/,
+# so the CLI runs and links in the repository root.
+vercel_settings() {
+    command -v vercel > /dev/null || { echo "vercel not found; install it with: npm i -g vercel"; exit 1; }
+    deploy_settings
+    vercel_project="${VERCEL_PROJECT:-jalaops}"
+    scope="${VERCEL_SCOPE:+--scope=$VERCEL_SCOPE}"
+}
+
+# Links this folder to the project if it isn't linked yet; deploy and env
+# need it. Linking writes .vercel/ and .env.local (a short-lived Vercel token),
+# both ignored by git.
+vercel_link() {
+    [ -f .vercel/project.json ] || vercel link --yes --project "$vercel_project" $scope
 }
 
 command="${1:-help}"
@@ -90,16 +147,67 @@ case "$command" in
         sed -n 's/^ANDROID_KEY_PASSWORD=//p' "$keys/signing.env" | gh secret set ANDROID_KEY_PASSWORD
         echo "Stored ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_PASSWORD in GitHub secrets."
         ;;
+    gcloud:login)
+        gcloud_settings
+        gcloud auth login "$@"
+        gcloud config set project "$project"
+        ;;
     deploy)
         # Builds backend/Dockerfile with Cloud Build and deploys a new revision to
-        # Cloud Run in gcloud's active project. The service keeps its other settings;
-        # extra arguments go to gcloud run deploy.
-        service="${CLOUD_RUN_SERVICE:-jalaops-backend}"
-        region="${CLOUD_RUN_REGION:-europe-north1}"
-        project="$(gcloud config get-value project 2>/dev/null)"
-        [ -n "$project" ] || { echo "No gcloud project; run: gcloud config set project <project-id>"; exit 1; }
+        # Cloud Run. The service keeps its other settings; extra arguments go to
+        # gcloud run deploy.
+        gcloud_settings
         echo "Deploying $service to Cloud Run (project $project, region $region)."
-        gcloud run deploy "$service" --source backend --region "$region" "$@"
+        gcloud run deploy "$service" --source backend --region "$region" --project "$project" "$@"
+        ;;
+    gcloud:status)
+        # Only the names of the environment variables, never their values.
+        gcloud_settings
+        echo "Account:  $(gcloud config get-value account 2>/dev/null)"
+        echo "Project:  $project ($region)"
+        gcloud run services describe "$service" --region "$region" --project "$project" \
+            --format='value[separator="
+"](format("Address:  {0}", status.url), format("Revision: {0}", status.latestReadyRevisionName), format("Settings: {0}", spec.template.spec.containers[0].env[].name.list()))'
+        ;;
+    gcloud:logs)
+        gcloud_settings
+        gcloud run services logs read "$service" --region "$region" --project "$project" --limit "${1:-50}"
+        ;;
+    gcloud:set-env)
+        # Creates a new revision with the changed variables; the others stay.
+        [ $# -gt 0 ] || { echo "Usage: ./dev gcloud:set-env KEY=VALUE[,KEY=VALUE...]"; exit 1; }
+        gcloud_settings
+        gcloud run services update "$service" --region "$region" --project "$project" --update-env-vars "$@"
+        ;;
+    vercel:login)
+        vercel_settings
+        vercel login "$@"
+        vercel link --yes --project "$vercel_project" $scope
+        ;;
+    vercel:deploy)
+        # Pushes to main deploy to production automatically; this is for trying
+        # out the working copy, or a production deploy by hand with --prod.
+        vercel_settings
+        vercel_link
+        vercel deploy $scope "$@"
+        ;;
+    vercel:status)
+        vercel_settings
+        vercel list "$vercel_project" $scope "$@"
+        ;;
+    vercel:logs)
+        vercel_settings
+        vercel logs --project "$vercel_project" $scope "$@"
+        ;;
+    vercel:env)
+        # Only the names and their environments, never the values.
+        vercel_settings
+        vercel_link
+        vercel env ls $scope --format=json | node -e '
+            let json = ""
+            process.stdin.on("data", (chunk) => (json += chunk)).on("end", () => {
+                for (const env of JSON.parse(json).envs) console.log(`${env.key}  (${[].concat(env.target).join(", ")})`)
+            })'
         ;;
     test)
         $COMPOSE exec backend php artisan test
