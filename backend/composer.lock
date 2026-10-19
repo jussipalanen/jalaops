@@ -1487,16 +1487,16 @@
         },
         {
             "name": "jalaops/news",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jussipalanen/jalaops-module-news.git",
-                "reference": "538bfe6034f802d81fcc1dc91ad9e161bc5dfbfc"
+                "reference": "290aa1c1feecd6fe467db110a989bcd8f019ebc9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-news/zipball/538bfe6034f802d81fcc1dc91ad9e161bc5dfbfc",
-                "reference": "538bfe6034f802d81fcc1dc91ad9e161bc5dfbfc",
+                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-news/zipball/290aa1c1feecd6fe467db110a989bcd8f019ebc9",
+                "reference": "290aa1c1feecd6fe467db110a989bcd8f019ebc9",
                 "shasum": ""
             },
             "type": "jalaops-module",
@@ -1505,10 +1505,10 @@
             ],
             "description": "JalaOps module: a news feed with tags and images, and the newest news on the dashboard.",
             "support": {
-                "source": "https://github.com/jussipalanen/jalaops-module-news/tree/v1.0.0",
+                "source": "https://github.com/jussipalanen/jalaops-module-news/tree/v1.0.1",
                 "issues": "https://github.com/jussipalanen/jalaops-module-news/issues"
             },
-            "time": "2026-10-19T14:01:42+00:00"
+            "time": "2026-10-19T15:16:03+00:00"
         },
         {
             "name": "jalaops/worktime",
