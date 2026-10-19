@@ -1,0 +1,8 @@
+# ./dev vercel:deploy runs in the repository root (the Vercel project's root
+# directory is frontend/). Upload only the frontend, so local files such as
+# backend/.env never leave this machine.
+/*
+!/frontend
+/frontend/node_modules
+/frontend/dist
+/frontend/.env*.local

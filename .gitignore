@@ -1,0 +1,4 @@
+# Written by the Vercel CLI when ./dev links the project: the link and a
+# short-lived token. Neither is committed.
+/.vercel
+/.env*.local

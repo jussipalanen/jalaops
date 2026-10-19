@@ -6,6 +6,14 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+### Added
+- `./dev` commands for the Cloud Run backend: `gcloud:login`, `gcloud:status` (address, revision and the names of the environment variables), `gcloud:logs` and `gcloud:set-env`.
+- `./dev` commands for the Vercel frontend: `vercel:login` (also links the folder), `vercel:deploy` (a preview, or production with `--prod`), `vercel:status`, `vercel:logs` and `vercel:env` (names only).
+- Their settings (`GCP_PROJECT_ID`, `CLOUD_RUN_REGION`, `CLOUD_RUN_SERVICE`, `VERCEL_PROJECT`, `VERCEL_SCOPE`) come from the environment or `~/.jalaops/deploy.env`, outside the repository.
+
+### Changed
+- `./dev deploy` deploys to `GCP_PROJECT_ID` (or `PROJECT_ID`), which is now required, instead of gcloud's active project, so it can't go to the wrong project by accident. The `./dev` gcloud commands also make it gcloud's active project when another one is active.
+
 ## [1.6.2] - 2026-10-19
 
 ### Fixed
