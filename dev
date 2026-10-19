@@ -25,6 +25,9 @@ Environment:
 Backend (Laravel):
   artisan <args>     Run an Artisan command, e.g. ./dev artisan route:list
   composer <args>    Run Composer in the backend container
+  modules:search [owner]
+                     List the GitHub repositories with the topic jalaops-module (Python
+                     module packages) and how to install each; default owner: your gh account
   migrate            Run database migrations
   fresh              Drop all tables, migrate and seed the database
   shell              Open a shell in the backend container
@@ -133,6 +136,26 @@ case "$command" in
     shell)         $COMPOSE exec backend bash ;;
     db)            $COMPOSE exec db mariadb -u jalaops -psecret jalaops ;;
     npm)           $COMPOSE exec frontend npm "$@" ;;
+    modules:search)
+        # Module packages (backend/modules/README.md) are found by their GitHub
+        # topic, and each one's package name is read from its composer.json.
+        command -v gh > /dev/null || { echo "gh not found; install the GitHub CLI: https://cli.github.com"; exit 1; }
+        owner="${1:-$(gh api user --jq .login)}"
+        repos="$(gh repo list "$owner" --topic jalaops-module --limit 200 --json nameWithOwner,url --jq '.[] | "\(.nameWithOwner) \(.url)"')"
+        [ -n "$repos" ] || { echo "No repositories of $owner have the topic jalaops-module."; exit 0; }
+        echo "$repos" | while read -r repo url; do
+            manifest="$(gh api "repos/$repo/contents/composer.json" --jq .content 2>/dev/null | base64 -d 2>/dev/null || true)"
+            package="$(echo "$manifest" | sed -n 's/^ *"name": *"\([^"]*\)".*/\1/p' | head -1)"
+            if [ -z "$package" ] || ! echo "$manifest" | grep -q '"type": *"jalaops-module"'; then
+                echo "$repo: not a module package (needs a composer.json with \"type\": \"jalaops-module\")"
+            elif grep -q "\"$package\"" backend/composer.json; then
+                echo "$repo: $package, installed"
+            else
+                echo "$repo: $package, install with"
+                echo "    ./dev composer config repositories.${repo#*/} vcs $url.git && ./dev composer require $package"
+            fi
+        done
+        ;;
     android)
         # Builds in the jalaops-android image (Node, Java 17, Android SDK, Bubblewrap).
         # The upload key stays outside the repository, in ~/.jalaops/android.

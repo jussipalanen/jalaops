@@ -6,6 +6,15 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-19
+
+### Added
+- Python modules from Composer packages: a module can live in a git repository of its own (on GitHub or your own server) as a package of type `jalaops-module`, required in `backend/composer.json`. Its git tags are its versions and `composer.lock` pins the commit, so installing or updating a module is still a reviewed pull request. A package holds one module at its root (named after the package, `jalaops/worktime` is `worktime`) or a folder of modules. How to make one is in [`backend/modules/README.md`](backend/modules/README.md#modules-from-composer-packages).
+- `MODULES_PACKAGES` setting (default `true`) to leave installed module packages out; the backend's tests leave them out.
+- `modules:list` shows where each module comes from: `modules`, or the package and its installed version.
+- `./dev modules:search` lists the GitHub repositories with the topic `jalaops-module` and how to install each.
+- `git` in the backend's production image, so Composer can install packages from plain git repositories.
+
 ## [1.7.0] - 2026-10-19
 
 ### Added
@@ -411,7 +420,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/jussipalanen/jalaops/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/jussipalanen/jalaops/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/jussipalanen/jalaops/compare/v1.6.0...v1.6.1

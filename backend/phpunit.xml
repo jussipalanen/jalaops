@@ -34,5 +34,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- The tests use the modules in modules/ and their own fixtures, not installed module packages. -->
+        <env name="MODULES_PACKAGES" value="false"/>
     </php>
 </phpunit>

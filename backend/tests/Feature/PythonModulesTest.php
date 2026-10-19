@@ -264,9 +264,9 @@ class PythonModulesTest extends TestCase
     public function test_the_list_command_shows_the_modules(): void
     {
         $this->artisan('modules:list')
-            ->expectsTable(['Module', 'Name', 'Version', 'Status', 'Description'], [
-                ['hello', 'Hei maailma', '1.0.0', 'on', 'Esimerkkimoduuli: tervehtii ja laskee lukujen summan, keskiarvon ja mediaanin.'],
-                ['vat-calculator', 'ALV-laskuri', '1.0.0', 'on', 'Laskee verottoman hinnan, arvonlisäveron ja verollisen hinnan.'],
+            ->expectsTable(['Module', 'Name', 'Version', 'Status', 'Source', 'Description'], [
+                ['hello', 'Hei maailma', '1.0.0', 'on', 'modules', 'Esimerkkimoduuli: tervehtii ja laskee lukujen summan, keskiarvon ja mediaanin.'],
+                ['vat-calculator', 'ALV-laskuri', '1.0.0', 'on', 'modules', 'Laskee verottoman hinnan, arvonlisäveron ja verollisen hinnan.'],
             ])
             ->assertSuccessful();
     }

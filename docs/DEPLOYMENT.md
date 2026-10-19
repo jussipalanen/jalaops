@@ -200,6 +200,14 @@ gcloud run services update jalaops-backend --region $REGION \
   --update-secrets GEMINI_API_KEY=gemini-api-key:latest
 ```
 
+### Module packages from git
+
+Python modules can come from git repositories of their own as Composer packages (see "Modules from Composer packages" in [backend/modules/README.md](../backend/modules/README.md#modules-from-composer-packages)). They're installed when the image is built, by the Dockerfile's `composer install` in Cloud Build (or on Render), and CI installs them for the tests. So:
+
+- **The repository must be readable without a login** from GitHub Actions and Cloud Build, for example a read-only HTTPS clone address on your own server (`https://git.example.com/jalaops/worktime.git`). An SSH address (`git@…`) needs a key, and the builds have none. Private repositories aren't supported yet: they would need a token passed to the Docker build as a build secret.
+- **The git server must be up when the image is built.** A running service doesn't need it: the module is inside the image.
+- **The version is the one in `composer.lock`.** A new tag in the module's repository changes nothing until `composer update` and a merged pull request deploy it.
+
 ## 2. Backend on Render (free, sleeps when idle)
 
 > On Render's free plan, a service that gets no traffic for 15 minutes is stopped and starts again on the next request. In demo mode this also resets the demo data, which keeps a public demo tidy.

@@ -83,6 +83,7 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 | `./dev logs [palvelu]` | Seuraa lokeja                                |
 | `./dev artisan <args>` | Aja Artisan-komento                          |
 | `./dev composer <args>`| Aja Composer backend-kontissa                |
+| `./dev modules:search` | Etsi Python-moduulipaketteja GitHubista ([lisää](#python-moduulit)) |
 | `./dev npm <args>`     | Aja npm frontend-kontissa                    |
 | `./dev migrate`        | Aja tietokantamigraatiot                     |
 | `./dev fresh`          | Luo tietokanta uudelleen ja lisää demodata   |
@@ -288,13 +289,22 @@ Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakem
 
 Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata sovellukseen. Jokainen ajetaan ilman taustapalvelun API-avaimia, ja se pysäytetään aikakatkaisun jälkeen. Moduulin oma näkymä toimii eristetyssä kehyksessä, josta ei pääse sovellukseen eikä verkkoon.
 
+Moduuli voi olla myös omassa git-repositoriossaan, esimerkiksi omalla palvelimella, `jalaops-module`-tyyppisenä Composer-pakettina. Sen git-tagit ovat sen versiot ja `composer.lock` lukitsee commitin, joten paketin asentaminen tai päivittäminen on sekin pull request tähän repositorioon:
+
+```bash
+./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git
+./dev composer require jalaops/worktime:^1.0
+```
+
+GitHubissa moduulipaketin repositoriolle annetaan aihe (topic) `jalaops-module`, ja `./dev modules:search` listaa ne ja niiden asennuskomennot.
+
 ```bash
 ./dev artisan modules:list
 ./dev artisan modules:run vat-calculator '{"amount": 100}'
 ./dev artisan modules:disable hello
 ```
 
-Ohje moduulin tekemiseen (englanniksi): [backend/modules/README.md](backend/modules/README.md).
+Ohje moduulin ja moduulipaketin tekemiseen (englanniksi): [backend/modules/README.md](backend/modules/README.md).
 
 ## AI-tilannekatsaus
 
