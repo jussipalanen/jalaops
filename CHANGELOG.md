@@ -6,6 +6,21 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-10-19
+
+### Added
+- `modules:add` and `modules:remove` ([#91](https://github.com/jussipalanen/jalaops/issues/91)):
+  - **Sources:** `modules:add` adds a Python module from a folder, an archive (`.zip`, `.tar`, `.tar.gz`, `.tgz` or `.gz`; a file or a URL) or a git URL.
+  - **Checks:** before anything changes, it checks the module as the app would load it, plus its id, its routes against the other modules, its files (no links, size limits, no archive paths outside its folder), that its Python compiles, and its own tests.
+  - **Install:** a git repository that is a module package is added with Composer at a version tag. Anything else is copied into `backend/modules/<id>`.
+  - **Options:** `--check` only checks, `--ref` picks a git tag or branch, `--id` names the module, `--force` replaces a module and `--skip-tests` skips its tests.
+  - **Removing:** `modules:remove` deletes a module's folder or removes its package; `--purge` also deletes its data and settings.
+  - **Production:** both commands ask first on a production server, where the change wouldn't last.
+- `./dev modules:add` and `./dev modules:remove`. `./dev modules:add` copies a folder or an archive on your machine into the backend container first.
+
+### Changed
+- `./dev modules:search` suggests `./dev modules:add <url>` to install a package.
+
 ## [1.12.0] - 2026-10-19
 
 ### Added
@@ -459,7 +474,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...HEAD
+[1.13.0]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...v1.10.0

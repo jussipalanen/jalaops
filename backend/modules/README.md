@@ -188,6 +188,44 @@ An external library is copied into the module's folder rather than loaded from a
 
 The copy is reviewed in the pull request like the rest of the module, and the app never loads code from elsewhere at runtime. Only `.css` and `.js` files are allowed, at most 1 MB together.
 
+## Add and remove modules
+
+`modules:add` checks a module and adds it, from a folder, an archive or a git repository. `modules:remove` takes one out.
+
+```bash
+./dev modules:add ~/code/jalaops-module-weather                        # a folder
+./dev modules:add ~/Downloads/weather.zip                              # an archive: .zip, .tar, .tar.gz, .tgz or .gz
+./dev modules:add https://example.com/releases/weather-1.2.0.tar.gz --id=weather
+./dev modules:add https://github.com/owner/jalaops-module-weather.git  # a git repository
+./dev modules:add https://github.com/owner/jalaops-module-weather.git --ref=v1.2.0
+./dev modules:add <source> --check                                     # only check it
+./dev modules:remove weather                                           # asks first; --purge also deletes its data
+```
+
+`./dev modules:add` copies a folder or an archive on your machine into the backend container first, because the container sees only `backend/`. `./dev artisan modules:add` works the same for sources inside `backend/` and for URLs.
+
+**What gets checked.** The module is fetched into a temporary folder and checked before anything changes:
+
+- its `module.json`, with the same rules as an installed module: the fields, the entry script, the view and assets inside its folder, widgets, routes
+- its id: lowercase letters, numbers and hyphens, and not taken (`--force` replaces a module in `backend/modules` with the same id)
+- its routes: not one of the app's addresses, and not another module's
+- its files: no symbolic links, at most 1000 files and 20 MB; an archive can't have paths outside its folder (`../`, `/…`) or links
+- that its Python compiles
+- its own tests, if it has a `tests/` folder (`python3 -m unittest`, without the backend's environment, like the module itself). They run the module's code, so check where it comes from; `--skip-tests` skips them.
+
+A `requirements.txt` gives a warning: its libraries go in the Docker images (see "main.py").
+
+**The id** comes from `--id`, from the package name in the module's `composer.json` (`jalaops/weather` is `weather`), or from the folder, repository or archive name without `jalaops-module-` (`jalaops-module-weather` is `weather`).
+
+**Where it goes.**
+
+- **A git repository that is a module package** (a `composer.json` of type `jalaops-module`, see "Modules from Composer packages") is added with Composer: `modules:add` adds the repository to `composer.json` and requires the package at the checked version, so `composer.lock` pins it. A package is installed at a version tag: its newest one, or `--ref=v1.2.0` (`^1.2`).
+- **Anything else** (a folder, an archive, a git repository without a package) is copied into `backend/modules/<id>`, without `.git` and Python's caches. The files belong to you, not to the container's root user.
+
+`modules:remove` deletes a module's folder in `backend/modules`, or removes a package with Composer (and its repository `jalaops-module-<id>` from `composer.json`). `--purge` also deletes its data folder and its settings: whether it's on, and its widgets' places.
+
+**Production.** Both commands change the code, so commit the changes and open a pull request: the module reaches production with the deploy, and is reviewed first. On Cloud Run, a module added on the server would be lost at the next restart or deploy (every instance has its own temporary files), so the commands ask before they change anything in production.
+
 ## Modules from Composer packages
 
 A module can also live in a git repository of its own, for example on your own server, and be installed with Composer like a PHP library. The package is versioned by its git tags, and the backend's `composer.lock` pins the exact commit, so updating a module is a pull request in this repository too.
@@ -208,11 +246,12 @@ Next to it, either:
 - **one module:** `module.json`, `main.py` and the rest at the repository's root. The module's id is the package name after the slash (`jalaops/worktime` is `worktime`), or
 - **several modules:** one folder per module, like in `backend/modules` (`counter/module.json`, `timer/module.json`, …).
 
-Release a version by tagging it (`git tag -a v1.0.0 -m 1.0.0 && git push --tags`), then install it in the backend:
+Release a version by tagging it (`git tag -a v1.0.0 -m 1.0.0 && git push --tags`), then install it in the backend. `modules:add` checks it first (see "Add and remove modules"); the two Composer commands do the same without the checks:
 
 ```bash
-./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git
-./dev composer require jalaops/worktime:^1.0
+./dev modules:add https://git.example.com/jalaops/worktime.git
+# or: ./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git
+#     ./dev composer require jalaops/worktime:^1.0
 ./dev artisan modules:list              # "Source" shows jalaops/worktime v1.0.0
 ```
 
