@@ -11,6 +11,7 @@
         "chillerlan/php-qrcode": "^5.0",
         "dedoc/scramble": "^0.13.47",
         "dompdf/dompdf": "^3.1",
+        "jalaops/module-installer": "^1.0",
         "jalaops/worktime": "^1.1",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0"
@@ -81,12 +82,20 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "jalaops/module-installer": true
         }
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "repositories": [{
+        "name": "module-installer",
+        "type": "path",
+        "url": "composer-plugins/module-installer",
+        "options": {
+            "symlink": false
+        }
+    },{
         "name": "jalaops-module-worktime",
         "type": "vcs",
         "url": "https://github.com/jussipalanen/jalaops-module-worktime.git"

@@ -575,6 +575,7 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Payment QR code (EPC QR) on invoices: built in 1.6.0 but off (`INVOICE_PAYMENT_QR`); turn on after testing with banking apps | Planned |
 | Python modules: programs in `backend/modules` run by Laravel (JSON in and out), on/off per module, a page for each in Työkalut drawn from `module.json` or the module's own sandboxed `view.html`; examples ALV-laskuri and Hei maailma | Done in 1.7.0 |
 | Module packages: Python modules from their own git repositories as Composer packages (`jalaops-module`), versioned by git tags and pinned in `composer.lock`; `./dev modules:search` finds them on GitHub by topic | Done in 1.8.0 |
+| Module packages installed into `backend/modules/packages` (ignored by git) instead of `vendor/` | Done in 1.10.0 |
 | Työaikalaskuri: hours worked, overtime and labour cost, the first module from its own repository ([jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) | Done in 1.9.0 |
 | Module options: an options page per module whose settings are saved and loaded and passed to the module. Needs an admin login first, so visitors can't change them | Planned |
 

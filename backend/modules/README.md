@@ -25,6 +25,7 @@ Two complete examples:
 
 ```text
 modules/
+  packages/            module packages installed by Composer (not in git)
   vat-calculator/
     module.json        name, settings, form and results
     main.py            the program: JSON in, JSON out
@@ -208,6 +209,8 @@ Release a version by tagging it (`git tag -a v1.0.0 -m 1.0.0 && git push --tags`
 Update to a newer tag with `./dev composer update jalaops/worktime`. Commit `composer.json` and `composer.lock` in a pull request, and read the module's changes first (`git diff v1.0.0 v1.1.0` in its repository): the module runs on the backend like the ones here, with the same rules and limits.
 
 On GitHub, give a module package's repository the topic `jalaops-module` (**About → ⚙ → Topics**), and `./dev modules:search` lists them all, with whether each is installed and the commands to install it. It searches your own `gh` account, or another owner: `./dev modules:search some-org`.
+
+Composer installs a module package into `backend/modules/packages/<name>/` (the package name after the slash), not `vendor/`, so you find it next to the other modules. The folder is ignored by git: only `composer.json` and `composer.lock` are committed, and `composer install` puts the locked version back. Don't edit the files there, because Composer replaces them; change the module in its own repository. A module of your own can't be called `packages`. The [`composer-plugins/module-installer`](../composer-plugins/module-installer) plugin in this repository does the installing.
 
 Ids are unique. The modules in `backend/modules` come first, then the packages by name; a module whose id is already taken is skipped and logged. A package module that needs Python libraries lists them in a `requirements.txt` like the others.
 

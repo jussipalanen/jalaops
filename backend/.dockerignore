@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 vendor
+modules/packages
 node_modules
 database/*.sqlite
 storage/logs/*

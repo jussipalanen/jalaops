@@ -21,6 +21,8 @@
 /storage/*.key
 /storage/pail
 /vendor
+# Module packages that Composer installs (composer-plugins/module-installer).
+/modules/packages/
 _ide_helper.php
 Homestead.json
 Homestead.yaml

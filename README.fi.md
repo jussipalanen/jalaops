@@ -289,7 +289,7 @@ Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakem
 
 Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata sovellukseen. Jokainen ajetaan ilman taustapalvelun API-avaimia, ja se pysäytetään aikakatkaisun jälkeen. Moduulin oma näkymä toimii eristetyssä kehyksessä, josta ei pääse sovellukseen eikä verkkoon.
 
-Moduuli voi olla myös omassa git-repositoriossaan, esimerkiksi omalla palvelimella, `jalaops-module`-tyyppisenä Composer-pakettina. Sen git-tagit ovat sen versiot ja `composer.lock` lukitsee commitin, joten paketin asentaminen tai päivittäminen on sekin pull request tähän repositorioon:
+Moduuli voi olla myös omassa git-repositoriossaan, esimerkiksi omalla palvelimella, `jalaops-module`-tyyppisenä Composer-pakettina. Sen git-tagit ovat sen versiot ja `composer.lock` lukitsee commitin, joten paketin asentaminen tai päivittäminen on sekin pull request tähän repositorioon. Composer asentaa sen hakemistoon `backend/modules/packages/<nimi>`, jota git ei seuraa:
 
 ```bash
 ./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git

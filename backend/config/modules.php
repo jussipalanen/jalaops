@@ -11,7 +11,8 @@
 | Modules come from this folder and from Composer packages of type
 | "jalaops-module" required in composer.json, so both are part of the code:
 | they are added and updated through pull requests (a package's version is
-| pinned in composer.lock), never uploaded from the app.
+| pinned in composer.lock), never uploaded from the app. Composer installs
+| packages into modules/packages, which git ignores.
 |
 */
 
