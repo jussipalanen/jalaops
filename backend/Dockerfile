@@ -1,6 +1,6 @@
 # Production image for the Laravel backend (used by Cloud Run and Render).
 # Build from the backend directory: docker build backend
-FROM php:8.3-cli
+FROM php:8.5-cli
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends unzip libzip-dev libpng-dev \
