@@ -84,6 +84,7 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 | `./dev artisan <args>` | Aja Artisan-komento                          |
 | `./dev composer <args>`| Aja Composer backend-kontissa                |
 | `./dev modules:search` | Etsi Python-moduulipaketteja GitHubista ([lisää](#python-moduulit)) |
+| `./dev modules:add <lähde>` | Tarkista ja lisää Python-moduuli hakemistosta, arkistosta tai git-osoitteesta ([lisää](#python-moduulit)) |
 | `./dev npm <args>`     | Aja npm frontend-kontissa                    |
 | `./dev migrate`        | Aja tietokantamigraatiot                     |
 | `./dev fresh`          | Luo tietokanta uudelleen ja lisää demodata   |
@@ -296,13 +297,14 @@ Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata s
 Moduuli voi olla myös omassa git-repositoriossaan, esimerkiksi omalla palvelimella, `jalaops-module`-tyyppisenä Composer-pakettina. Sen git-tagit ovat sen versiot ja `composer.lock` lukitsee commitin, joten paketin asentaminen tai päivittäminen on sekin pull request tähän repositorioon. Composer asentaa sen hakemistoon `backend/modules/packages/<nimi>`, jota git ei seuraa:
 
 ```bash
-./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git
-./dev composer require jalaops/worktime:^1.0
+./dev modules:add https://git.example.com/jalaops/worktime.git
 ```
 
-GitHubissa moduulipaketin repositoriolle annetaan aihe (topic) `jalaops-module`, ja `./dev modules:search` listaa ne ja niiden asennuskomennot.
+`modules:add` tarkistaa moduulin ennen sen lisäämistä: sen `module.json`-tiedoston, tiedostot, reitit, Python-koodin ja sen omat testit. Git-osoitteiden lisäksi se ottaa hakemiston tai arkiston (`.zip`, `.tar`, `.tar.gz`, `.tgz`, `.gz`; tiedosto tai osoite), jonka se kopioi hakemistoon `backend/modules/<id>`. `modules:remove` poistaa moduulin. Kummassakin tapauksessa muutos viedään tuotantoon pull requestilla ja julkaisulla. GitHubissa moduulipaketin repositoriolle annetaan aihe (topic) `jalaops-module`, ja `./dev modules:search` listaa ne ja niiden asennuskomennot.
 
 ```bash
+./dev modules:add ~/Downloads/weather.zip --check   # vain tarkistus
+./dev modules:remove weather                        # --purge poistaa myös sen tiedot
 ./dev artisan modules:list
 ./dev artisan modules:run vat-calculator '{"amount": 100}'
 ./dev artisan modules:disable hello

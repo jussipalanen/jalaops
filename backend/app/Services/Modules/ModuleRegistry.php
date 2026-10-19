@@ -144,6 +144,28 @@ class ModuleRegistry
     }
 
     /**
+     * Loads a module from any folder with the same checks as an installed
+     * one, e.g. to check a module before it's added (modules:add). Whether
+     * it's on is what it would be once added.
+     *
+     * @throws ModuleException when it's set up wrongly
+     */
+    public function inspect(string $directory, string $id): PythonModule
+    {
+        return $this->load($id, ['directory' => $directory, 'package' => null], ModuleSetting::find($id)?->enabled);
+    }
+
+    /**
+     * Where an installed module is, also when it's set up wrongly, or null.
+     *
+     * @return array{directory: string, package: string|null}|null
+     */
+    public function locate(string $id): ?array
+    {
+        return preg_match(self::ID_PATTERN, $id) ? ($this->locations()[$id] ?? null) : null;
+    }
+
+    /**
      * Turns a module on or off. The setting stays until it's changed again.
      *
      * @throws ModuleException when there's no such module or it's set up wrongly

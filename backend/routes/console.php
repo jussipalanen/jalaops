@@ -2,6 +2,7 @@
 
 use App\Services\AiStatusOverview;
 use App\Services\Modules\ModuleException;
+use App\Services\Modules\ModuleManager;
 use App\Services\Modules\ModuleRegistry;
 use App\Services\Modules\ModuleRunner;
 use App\Services\Modules\ModuleWidgets;
@@ -130,3 +131,98 @@ Artisan::command('modules:place {widget : e.g. news.latest} {hook : A hook, "hid
         ? "Widget '{$widget['id']}' is now hidden."
         : "Widget '{$widget['id']}' is now shown in {$widget['hook']}.");
 })->purpose('Move or hide a module widget for everyone');
+
+// Add a module from a folder, a git URL or an archive (a file or a URL), after
+// checking it like an installed one. A module package goes in with Composer;
+// anything else is copied into the modules folder. Either way it's a change
+// to the code, so production gets it through a pull request and the deploy.
+Artisan::command('modules:add
+    {source : A folder, an archive (.zip, .tar, .tar.gz, .tgz, .gz; a file or a URL) or a git URL}
+    {--ref= : A git tag or branch (a package needs a version tag; by default its newest)}
+    {--id= : The module id, when the source doesn\'t tell it}
+    {--copy : Copy a module package into the modules folder instead of adding it with Composer}
+    {--check : Only check the module, add nothing}
+    {--force : Replace a module in the modules folder that has the same id}
+    {--skip-tests : Don\'t run the module\'s own tests}', function (ModuleManager $manager) {
+    if (app()->isProduction() && ! $this->option('check') && ! $this->confirm(
+        'This is a production server. A module added here is lost when the server is redeployed or restarted (on Cloud Run, every instance has its own temporary files), and it skips code review. Add it through a pull request instead. Add it here anyway?',
+    )) {
+        return 1;
+    }
+
+    try {
+        $this->line("Fetching {$this->argument('source')}…");
+        $source = $manager->fetch($this->argument('source'), $this->option('ref'), $this->option('copy'));
+
+        try {
+            $this->line('Checking the module'.($this->option('skip-tests') ? '' : ' and running its tests').'…');
+            ['modules' => $modules, 'warnings' => $warnings] = $manager->check($source, $this->option('id'), $this->option('force'), ! $this->option('skip-tests'));
+
+            foreach ($modules as $module) {
+                $this->info("✓ {$module->id}: {$module->name}".($module->version !== '' ? " {$module->version}" : '').' is valid.');
+            }
+
+            foreach ($warnings as $warning) {
+                $this->warn($warning);
+            }
+
+            if ($this->option('check')) {
+                return 0;
+            }
+
+            foreach ($manager->install($source, $modules, $this->option('force')) as $change) {
+                $this->info($change);
+            }
+        } finally {
+            $manager->cleanup($source);
+        }
+    } catch (ModuleException $exception) {
+        $this->error($exception->getMessage());
+
+        return 1;
+    }
+
+    foreach ($modules as $module) {
+        $this->line($module->enabled
+            ? "Module '{$module->id}' is on (its module.json turns it on)."
+            : "Module '{$module->id}' is off until it's turned on in Työkalut → Moduulit or with modules:enable {$module->id}.");
+    }
+
+    $this->line('Commit the changes and open a pull request.');
+})->purpose('Add a Python module from a folder, an archive or a git URL, after checking it');
+
+Artisan::command('modules:remove
+    {module}
+    {--purge : Also delete its data folder and its settings}
+    {--force : Don\'t ask for confirmation}', function (ModuleManager $manager, ModuleRegistry $modules) {
+    $id = $this->argument('module');
+    $location = $modules->locate($id);
+
+    if ($location === null) {
+        $this->error("Module '{$id}' was not found. modules:list lists them.");
+
+        return 1;
+    }
+
+    $what = $location['package'] !== null ? "the package {$location['package']}" : 'its folder';
+    $question = "Remove module '{$id}' ({$what})".($this->option('purge') ? ' and delete its data and settings' : '').'?'
+        .(app()->isProduction() ? ' This is a production server: the next deploy brings it back unless it\'s removed from the code too.' : '');
+
+    if (! $this->option('force') && ! $this->confirm($question)) {
+        $this->line('Nothing was removed.');
+
+        return 1;
+    }
+
+    try {
+        foreach ($manager->remove($id, $this->option('purge')) as $change) {
+            $this->info($change);
+        }
+    } catch (ModuleException $exception) {
+        $this->error($exception->getMessage());
+
+        return 1;
+    }
+
+    $this->line('Commit the changes and open a pull request.');
+})->purpose('Remove a Python module');
