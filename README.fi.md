@@ -193,6 +193,17 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 </details>
 
 <details>
+<summary><strong>🧩 Moduulit</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                        |
+|--------|----------------------|-------------------------------|
+| GET    | `/api/modules`       | Python-moduulit ja onko kukin käytössä |
+| GET    | `/api/modules/{id}`  | Moduulin lomake, tulokset ja oma näkymä |
+| POST   | `/api/modules/{id}/run` | Suorita moduuli: runko on sen syöte (vain sovelluksen omilta sivuilta) |
+
+</details>
+
+<details>
 <summary><strong>📍 Geokoodaus</strong></summary>
 
 | Metodi | Endpoint             | Kuvaus                        |
@@ -270,6 +281,20 @@ EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, su
 - Sovellus piirtää QR-koodit `qrcode`-paketilla ja tiedostot [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode)-kirjastolla.
 
 </details>
+
+## Python-moduulit
+
+Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio.
+
+Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata sovellukseen. Jokainen ajetaan ilman taustapalvelun API-avaimia, ja se pysäytetään aikakatkaisun jälkeen. Moduulin oma näkymä toimii eristetyssä kehyksessä, josta ei pääse sovellukseen eikä verkkoon.
+
+```bash
+./dev artisan modules:list
+./dev artisan modules:run vat-calculator '{"amount": 100}'
+./dev artisan modules:disable hello
+```
+
+Ohje moduulin tekemiseen (englanniksi): [backend/modules/README.md](backend/modules/README.md).
 
 ## AI-tilannekatsaus
 

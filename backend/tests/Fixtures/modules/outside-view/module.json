@@ -1,0 +1,5 @@
+{
+    "name": "Outside view",
+    "enabled": true,
+    "view": "../environment/main.py"
+}

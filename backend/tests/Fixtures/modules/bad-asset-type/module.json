@@ -1,0 +1,5 @@
+{
+    "name": "Bad asset type",
+    "enabled": true,
+    "assets": ["main.py"]
+}

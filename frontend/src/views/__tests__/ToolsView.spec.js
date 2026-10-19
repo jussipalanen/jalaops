@@ -20,7 +20,8 @@ const validReport = {
 }
 
 function mountView() {
-  return mount(ToolsView, { global: { stubs: { RouterLink: RouterLinkStub } } })
+  // The module list has its own tests (ModuleList.spec.js).
+  return mount(ToolsView, { global: { stubs: { RouterLink: RouterLinkStub, ModuleList: true } } })
 }
 
 async function chooseFile(wrapper) {

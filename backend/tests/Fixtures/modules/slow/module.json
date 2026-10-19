@@ -1,0 +1,5 @@
+{
+    "name": "Slow",
+    "timeout": 1,
+    "enabled": true
+}

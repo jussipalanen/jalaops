@@ -6,7 +6,15 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-19
+
 ### Added
+- Python modules (`backend/modules`): small Python programs that Laravel runs as separate processes, JSON in on stdin and JSON out on stdout. Modules come from the code (pull requests), never from uploads; each gets only `PATH` and `LANG`, not the backend's API keys, and is stopped after its timeout (at most 30 s). A guide for writing them is in [`backend/modules/README.md`](backend/modules/README.md).
+- Two modules: **ALV-laskuri** (`vat-calculator`) calculates VAT and the gross price, rounded to cents, and **Hei maailma** (`hello`) greets and calculates the sum, average and median of numbers, with its own view and a bar chart.
+- **Moduulit** on the Työkalut page: the modules and whether each is on (**Käytössä** / **Pois käytöstä**), with a page for each enabled one at `/tools/modules/{id}`. The page is drawn from the form and results in the module's `module.json`, or is the module's own `view.html` in a sandboxed frame that can't reach the app or the network and runs the module through `jalaops.run(input)`. A view can use CSS and JS files from the module's folder (`assets`), such as copies of libraries.
+- Modules are on or off by `"enabled"` in `module.json`; `php artisan modules:enable` and `modules:disable` override it. `modules:list` and `modules:run` list and run them on the command line.
+- API: `GET /api/modules`, `GET /api/modules/{id}` and `POST /api/modules/{id}/run`. Running is allowed only from the app's own pages, at most ten times per minute per visitor, with an input of at most 10 kB.
+- `MODULES_PATH` and `PYTHON_BINARY` settings, and `python3` in the backend's Docker images.
 - `./dev` commands for the Cloud Run backend: `gcloud:login`, `gcloud:status` (address, revision and the names of the environment variables), `gcloud:logs` and `gcloud:set-env`.
 - `./dev` commands for the Vercel frontend: `vercel:login` (also links the folder), `vercel:deploy` (a preview, or production with `--prod`), `vercel:status`, `vercel:logs` and `vercel:env` (names only).
 - Their settings (`GCP_PROJECT_ID`, `CLOUD_RUN_REGION`, `CLOUD_RUN_SERVICE`, `VERCEL_PROJECT`, `VERCEL_SCOPE`) come from the environment or `~/.jalaops/deploy.env`, outside the repository.
@@ -403,7 +411,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/jussipalanen/jalaops/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/jussipalanen/jalaops/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/jussipalanen/jalaops/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/jussipalanen/jalaops/compare/v1.5.0...v1.6.0

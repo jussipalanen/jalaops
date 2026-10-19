@@ -79,6 +79,13 @@ const router = createRouter({
       component: () => import('../views/ToolsView.vue'),
     },
     {
+      // A Python module's page, drawn from its module.json.
+      path: '/tools/modules/:id',
+      name: 'module',
+      meta: { title: 'Moduuli' },
+      component: () => import('../views/ModuleView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       meta: { title: 'Tietoja' },

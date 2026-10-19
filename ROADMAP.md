@@ -573,6 +573,8 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Mobiilisovellukset page: Android download and iPhone install steps with icons and the version, checksums and build provenance for the APK | Done in 1.5.0; switched off in 1.6.1 (`VITE_MOBILE_APPS_PAGE`) while Google Play Protect warns about the APK from GitHub |
 | QR codes: a QR code that opens a request on a phone, with sharing and a full-screen code for phones and tablets, and copy buttons for an invoice's payment details ([#77](https://github.com/jussipalanen/jalaops/issues/77)) | Done in 1.6.0 |
 | Payment QR code (EPC QR) on invoices: built in 1.6.0 but off (`INVOICE_PAYMENT_QR`); turn on after testing with banking apps | Planned |
+| Python modules: programs in `backend/modules` run by Laravel (JSON in and out), on/off per module, a page for each in Työkalut drawn from `module.json` or the module's own sandboxed `view.html`; examples ALV-laskuri and Hei maailma | Done in 1.7.0 |
+| Module options: an options page per module whose settings are saved and loaded and passed to the module. Needs an admin login first, so visitors can't change them | Planned |
 
 Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).
 

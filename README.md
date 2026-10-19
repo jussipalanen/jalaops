@@ -193,6 +193,17 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 </details>
 
 <details>
+<summary><strong>🧩 Modules</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
+| GET    | `/api/modules`       | Python modules and whether each is on |
+| GET    | `/api/modules/{id}`  | A module's form, results and own view |
+| POST   | `/api/modules/{id}/run` | Run a module: the body is its input (app's own pages only) |
+
+</details>
+
+<details>
 <summary><strong>📍 Geocoding</strong></summary>
 
 | Method | Endpoint             | Description                 |
@@ -270,6 +281,20 @@ An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, th
 - The app draws QR codes with the `qrcode` package and the documents with [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode).
 
 </details>
+
+## Python modules
+
+Modules add features in Python: small programs in [`backend/modules`](backend/modules) that Laravel runs as separate processes, JSON in and JSON out. **Työkalut → Moduulit** lists them and whether each is on, and each enabled module has a page in the app, drawn from its `module.json` or its own `view.html`. Two examples come with the app: **ALV-laskuri** (VAT) and **Hei maailma**, which has its own view with a bar chart.
+
+Modules come from the code through pull requests, never from uploads. Each runs without the backend's API keys and is stopped after its timeout. The app's own view of a module runs in a sandboxed frame that can't reach the app or the network.
+
+```bash
+./dev artisan modules:list
+./dev artisan modules:run vat-calculator '{"amount": 100}'
+./dev artisan modules:disable hello
+```
+
+How to write a module: [backend/modules/README.md](backend/modules/README.md).
 
 ## AI status overview
 

@@ -3,7 +3,8 @@
 FROM php:8.5-cli
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends unzip libzip-dev libpng-dev \
+    && apt-get install -y --no-install-recommends unzip libzip-dev libpng-dev python3 \
+    # python3 runs the Python modules in backend/modules.
     # GD lets dompdf draw PNG images (request signatures) in PDF exports.
     && docker-php-ext-install pdo_mysql zip gd \
     && rm -rf /var/lib/apt/lists/*
