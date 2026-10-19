@@ -89,7 +89,7 @@ class ModuleWidgets
      * failed. Widgets of modules that are off, or hidden for everyone, are
      * left out.
      *
-     * @return list<array{id: string, module: string, module_name: string, title: string, type: string, hook: string, items: list<array<string, mixed>>, error: string|null}>
+     * @return list<array{id: string, module: string, module_name: string, routes: list<array{path: string, params: array<string, string>}>, title: string, type: string, hook: string, items: list<array<string, mixed>>, error: string|null}>
      */
     public function render(string $prefix): array
     {
@@ -112,6 +112,8 @@ class ModuleWidgets
                 'id' => $widget['id'],
                 'module' => $widget['module']->id,
                 'module_name' => $widget['module']->name,
+                // The module's addresses, for links to its pages.
+                'routes' => $widget['module']->routesForJson(),
                 'title' => $widget['title'],
                 'type' => $widget['type'],
                 'hook' => $widget['hook'],
@@ -159,7 +161,7 @@ class ModuleWidgets
                     fn ($tag) => mb_substr($tag, 0, 30),
                     array_slice(array_filter(is_array($item['tags'] ?? null) ? $item['tags'] : [], 'is_string'), 0, 10),
                 )),
-                // Parameters for the module's page address (?news=3).
+                // Parameters for the module's page address (/news/3 or ?news=3).
                 'params' => array_map(
                     fn ($value) => mb_substr((string) $value, 0, 200),
                     array_filter(

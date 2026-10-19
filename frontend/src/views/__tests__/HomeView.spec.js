@@ -42,6 +42,7 @@ describe('HomeView module widgets', () => {
     id: 'news.latest',
     module: 'news',
     module_name: 'Uutiset',
+    routes: [{ path: '/news', params: {} }, { path: '/news/:news', params: {} }],
     title: 'Uusimmat uutiset',
     type: 'feed',
     hook: 'dashboard.after_counts',
@@ -92,9 +93,9 @@ describe('HomeView module widgets', () => {
 
     const links = hook.findAllComponents(RouterLinkStub).map((link) => link.props('to'))
     expect(links).toEqual([
-      '/tools/modules/news',
-      { path: '/tools/modules/news', query: { news: '3' } },
-      { path: '/tools/modules/news', query: { news: '2' } },
+      { path: '/news', query: {} },
+      { path: '/news/3', query: {} },
+      { path: '/news/2', query: {} },
     ])
     expect(wrapper.find('[data-hook="dashboard.top"]').exists()).toBe(false)
   })

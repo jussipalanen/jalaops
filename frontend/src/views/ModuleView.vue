@@ -1,14 +1,18 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { computed, reactive, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { ApiError, apiGet } from '@/api/client'
 import ModuleFrame from '@/components/ModuleFrame.vue'
-import { moduleErrorMessage, runModule } from '@/modules'
+import { moduleErrorMessage, moduleLocation, moduleParams, runModule } from '@/modules'
+import { pageTitle } from '@/pageTitle'
 
 // A Python module's page: the module's own view (view.html, in a sandboxed
-// frame), or else a form and results drawn from its module.json.
+// frame), or else a form and results drawn from its module.json. It opens at
+// /tools/modules/<id>, or at the module's own routes (/news/3), where an
+// address under /tools/modules goes too.
 
 const route = useRoute()
+const router = useRouter()
 
 const module = ref(null)
 const loadError = ref('')
@@ -17,21 +21,45 @@ const running = ref(false)
 const output = ref(null)
 const error = ref('')
 
+// The module of the address: /tools/modules/<id>, or a module's own route.
+const moduleId = computed(() => route.meta.module ?? route.params.id)
 
-onMounted(async () => {
+// Another module's address can open in the same page, so the page loads
+// again when the module changes.
+watch(moduleId, (id) => id && load(id), { immediate: true })
+
+async function load(id) {
+  module.value = null
+  loadError.value = ''
+  output.value = null
+  error.value = ''
+
   try {
-    module.value = (await apiGet(`/modules/${encodeURIComponent(route.params.id)}`)).data
+    const found = (await apiGet(`/modules/${encodeURIComponent(id)}`)).data
 
-    for (const field of module.value.form) {
+    // An old address (/tools/modules/news?news=3) goes to the module's own (/news/3).
+    if (!route.meta.module && found.enabled && found.routes?.length) {
+      const location = moduleLocation(found, moduleParams(route.query))
+
+      if (!location.path.startsWith('/tools/modules/')) {
+        await router.replace(location)
+      }
+    }
+
+    for (const field of found.form) {
       values[field.name] = initialValue(field)
     }
+
+    module.value = found
+    // The tab says which module, also at /tools/modules/<id> ("Moduuli").
+    document.title = pageTitle(found.name)
   } catch (exception) {
     loadError.value =
       exception instanceof ApiError && exception.status === 404
         ? 'Moduulia ei löytynyt.'
         : 'Moduulin haku epäonnistui. Yritä hetken kuluttua uudelleen.'
   }
-})
+}
 
 function initialValue(field) {
   if (field.type === 'numbers') {

@@ -1,0 +1,8 @@
+{
+    "name": "Routes clash",
+    "enabled": true,
+    "routes": [
+        { "path": "/clash" },
+        { "path": "/notes/:id" }
+    ]
+}

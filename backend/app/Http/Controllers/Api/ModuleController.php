@@ -21,9 +21,12 @@ class ModuleController extends Controller
      *
      * Every module and whether it's on. Modules are optional: users turn them
      * on and off in the app (`PATCH /api/modules/{id}`), and the server with
-     * `php artisan modules:enable` and `modules:disable`.
+     * `php artisan modules:enable` and `modules:disable`. `routes` are the
+     * addresses of the module's pages in the app (`/news/:news`), with the
+     * fixed parameters each page gets; the app uses the routes of modules
+     * that are on.
      *
-     * @response array{data: list<array{id: string, name: string, description: string, version: string, enabled: bool}>}
+     * @response array{data: list<array{id: string, name: string, description: string, version: string, enabled: bool, routes: list<array{path: string, params: array<string, string>}>}>}
      */
     public function index(ModuleRegistry $modules): JsonResponse
     {
@@ -42,7 +45,7 @@ class ModuleController extends Controller
      * is off. The files are sent inside JSON, never as pages of their own, so
      * they can't run on the app's address.
      *
-     * @response array{data: array{id: string, name: string, description: string, version: string, enabled: bool, form: list<array{name: string, label: string, type: string, help?: string, default?: mixed, options?: list<string>, required?: bool}>, results: list<array{name: string, label: string, decimals?: int}>, view: string|null, assets: list<array{type: 'script'|'style', content: string}>}}
+     * @response array{data: array{id: string, name: string, description: string, version: string, enabled: bool, routes: list<array{path: string, params: array<string, string>}>, form: list<array{name: string, label: string, type: string, help?: string, default?: mixed, options?: list<string>, required?: bool}>, results: list<array{name: string, label: string, decimals?: int}>, view: string|null, assets: list<array{type: 'script'|'style', content: string}>}}
      */
     public function show(ModuleRegistry $modules, string $module): JsonResponse
     {
@@ -70,7 +73,7 @@ class ModuleController extends Controller
      * it overrides the `enabled` in the module's module.json. Only the app's
      * own pages may call this.
      *
-     * @response array{data: array{id: string, name: string, description: string, version: string, enabled: bool}}
+     * @response array{data: array{id: string, name: string, description: string, version: string, enabled: bool, routes: list<array{path: string, params: array<string, string>}>}}
      */
     public function update(Request $request, ModuleRegistry $modules, string $module): JsonResponse
     {
@@ -138,7 +141,7 @@ class ModuleController extends Controller
     }
 
     /**
-     * @return array{id: string, name: string, description: string, version: string, enabled: bool}
+     * @return array{id: string, name: string, description: string, version: string, enabled: bool, routes: list<array{path: string, params: array<string, string>}>}
      */
     private function summary(PythonModule $module): array
     {
@@ -148,6 +151,7 @@ class ModuleController extends Controller
             'description' => $module->description,
             'version' => $module->version,
             'enabled' => $module->enabled,
+            'routes' => $module->routesForJson(),
         ];
     }
 }

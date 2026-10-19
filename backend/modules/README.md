@@ -75,6 +75,7 @@ The `vat-calculator` module's:
 | `storage` | no | `true` gives the module a data folder of its own (see "Data folder") |
 | `max_input_kb` | no | The largest input the API sends the module, in kB (default 10, at most 4096), e.g. for images as data URLs |
 | `widgets` | no | What the module shows elsewhere in the app, such as the dashboard (see "Widgets and hooks") |
+| `routes` | no | Addresses of their own for the view's pages, such as `/news/:news` (see "Routes") |
 
 Form fields (`form`):
 
@@ -138,7 +139,8 @@ The view is the inside of a page's `<body>`: HTML, a `<style>` and a `<script>`.
 - **Base styles** for headings, labels, inputs, selects and buttons, `.stack` (a column with gaps), `.error` and `[hidden]`.
 - **The app's colours** as CSS variables that follow the light and dark theme: `--primary`, `--primary-text`, `--text`, `--muted`, `--border`, `--surface`, `--error`.
 - **A height that fits its content:** the frame grows and shrinks with the page.
-- **Pages with addresses of their own:** `jalaops.params` are the page address's parameters (`/tools/modules/news?news=3` gives `{ news: '3' }`), and `jalaops.navigate({ news: 4 })` changes them, so each page of the view has its own address and the back button works. When they change, the view gets a `jalaops:params` event (`addEventListener('jalaops:params', (event) => draw(event.detail))`). Names are lowercase letters, numbers and `_`; values are texts.
+- **Pages with addresses of their own:** `jalaops.params` are the page address's parameters (`/tools/modules/news?news=3` gives `{ news: '3' }`, and with routes `/news/3` too), and `jalaops.navigate({ news: 4 })` changes them, so each page of the view has its own address and the back button works. `jalaops.navigate(params, { replace: true })` changes the address without a new history entry, e.g. from an old address to the current one. When they change, the view gets a `jalaops:params` event (`addEventListener('jalaops:params', (event) => draw(event.detail))`). Names are lowercase letters, numbers and `_`; values are texts.
+- **A title and description for each page:** `jalaops.setPage({ title: 'Syyshuollot alkavat', description: '…' })` gives the page its browser tab title ("Syyshuollot alkavat – JalaOps") and description until the address changes. Without it, the tab has the module's name.
 - **Links:** a link with `target="_blank"` opens in a new tab, outside the sandbox.
 
 ```html
@@ -224,6 +226,28 @@ Ids are unique. The modules in `backend/modules` come first, then the packages b
 
 The repository must be readable wherever `composer install` runs: your machine, CI and the Docker build. See "Module packages" in [docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md#module-packages-from-git).
 
+## Routes
+
+A view's pages are at `/tools/modules/<id>`, with their parameters in the query. With `routes` in `module.json`, they get addresses of their own:
+
+```json
+"routes": [
+    { "path": "/news" },
+    { "path": "/news/new", "params": { "view": "new" } },
+    { "path": "/news/:news" },
+    { "path": "/news/:news/edit", "params": { "view": "edit" } }
+]
+```
+
+- **Paths:** parts of lowercase letters, numbers and hyphens, or `:name` for a parameter; the first part is fixed (`/news`, not `/:news`). At most 6 parts and 10 routes.
+- **Parameters:** the view gets the path's parameters, the route's fixed `params` and the query together in `jalaops.params`: `/news/3/edit?tab=kuvat` gives `{ news: '3', view: 'edit', tab: 'kuvat' }`. A view doesn't need to change to get routes.
+- **Addresses from parameters:** `jalaops.navigate(params)` and widget links go to the route whose fixed `params` match and whose path takes the most of the rest; what's left goes in the query (`{ tag: 'huolto' }` → `/news?tag=huolto`). If no route fits, the address is `/tools/modules/<id>`.
+- **The app's addresses win:** a route can't start with the app's own addresses (`reserved_paths` in `config/modules.php`: `api`, `assets`, `docs`, `requests`, `customers`, `invoices`, `tools`, `map`, `about`, `mobile-apps`); such a module is skipped as broken. The frontend also skips any route it already has.
+- **One module per first part:** if two modules use `/news`, the first by id keeps it, and the other works only at `/tools/modules/<id>` (logged as a warning).
+- **Only modules that are on:** the routes are added when the module is turned on and removed when it's turned off; then its addresses show "Sivua ei löytynyt". An old `/tools/modules/<id>?…` address goes to the module's own.
+
+The frontend adds the routes the first time an address matches no page of its own, so the app's pages don't wait for them.
+
 ## Data folder
 
 A module with `"storage": true` gets a folder of its own for its data, in `JALAOPS_DATA_DIR`: `backend/storage/app/modules/<id>/` (`MODULES_STORAGE_PATH` changes the parent folder). The app makes it on the module's first run. Keep data there, for example in an SQLite database (`sqlite3` is in the standard library), never in the module's own folder, which Composer replaces when a package is updated.
@@ -286,11 +310,11 @@ On Cloud Run, the demo data (and these settings) reset on every start, so produc
 
 | Method | Path | Does |
 |---|---|---|
-| GET | `/api/modules` | Lists the modules and whether each is on |
+| GET | `/api/modules` | Lists the modules, whether each is on and its `routes` |
 | GET | `/api/modules/{id}` | One module: its form, results and view (the view's HTML inside JSON) |
 | PATCH | `/api/modules/{id}` | Turns the module on or off: `{"enabled": true}` |
 | POST | `/api/modules/{id}/run` | Runs the module; the request body is the input, `output` the result |
-| GET | `/api/dashboard/widgets` | The dashboard's hooks and the widgets in them, each with its items |
+| GET | `/api/dashboard/widgets` | The dashboard's hooks and the widgets in them, each with its items and its module's `routes` |
 
 Running, switching and the widgets are allowed only from the app's own pages (`FRONTEND_URL`, `APP_URL` and `ALLOWED_ORIGINS`). Runs and widget loads are limited to 30 per minute per visitor each, switching to 20. The input can be at most 10 kB, or the module's `max_input_kb`. A module that is off answers 403; a failed run answers 422 with the reason in `reason`.
 

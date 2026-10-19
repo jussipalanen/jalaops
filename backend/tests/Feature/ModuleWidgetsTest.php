@@ -105,6 +105,7 @@ class ModuleWidgetsTest extends TestCase
             'id' => 'storage.latest',
             'module' => 'storage',
             'module_name' => 'Storage',
+            'routes' => [['path' => '/stored/:news', 'params' => []]],
             'title' => 'Viimeisimmät',
             'type' => 'feed',
             'hook' => 'dashboard.top',

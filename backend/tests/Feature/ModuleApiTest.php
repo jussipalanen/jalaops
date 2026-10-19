@@ -30,6 +30,7 @@ class ModuleApiTest extends TestCase
                 'description' => 'Esimerkkimoduuli: tervehtii ja laskee lukujen summan, keskiarvon ja mediaanin.',
                 'version' => '1.0.0',
                 'enabled' => true,
+                'routes' => [],
             ])
             ->assertJsonPath('data.1.id', 'vat-calculator');
 
