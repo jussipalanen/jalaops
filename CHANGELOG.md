@@ -6,6 +6,13 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-10-19
+
+### Fixed
+- The AI-tilannekatsaus answers only the app's own pages (`FRONTEND_URL`, `APP_URL` and the optional `ALLOWED_ORIGINS`), recognised by the browser's `Origin` or `Referer` header. Requests from other websites or without either header get 403, so they can't use up the hourly AI limit. Any page is allowed when `APP_ENV=local`.
+- CORS allows only the same addresses instead of every website.
+- The rate limits (AI refresh, address search, import) apply to each visitor again: behind Cloud Run's and Vercel's proxies, every visitor had the same address and shared one limit, so the AI overview's background refresh could fail with 429.
+
 ## [1.6.1] - 2026-10-16
 
 ### Changed
@@ -388,7 +395,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/jussipalanen/jalaops/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/jussipalanen/jalaops/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/jussipalanen/jalaops/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/jussipalanen/jalaops/compare/v1.4.1...v1.5.0
