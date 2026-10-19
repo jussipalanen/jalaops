@@ -15,7 +15,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/backend
 
 # Install dependencies first so this layer is cached between code changes.
+# The module installer plugin is needed then: it puts module packages into
+# modules/packages.
 COPY composer.json composer.lock ./
+COPY composer-plugins ./composer-plugins
 RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --prefer-dist
 
 COPY . ./

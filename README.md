@@ -289,7 +289,7 @@ Modules add features in Python: small programs in [`backend/modules`](backend/mo
 
 Modules come from the code through pull requests, never from uploads. Each runs without the backend's API keys and is stopped after its timeout. The app's own view of a module runs in a sandboxed frame that can't reach the app or the network.
 
-A module can also live in a git repository of its own, such as one on your own server, as a Composer package of type `jalaops-module`. Its git tags are its versions and `composer.lock` pins the commit, so installing or updating one is a pull request here too:
+A module can also live in a git repository of its own, such as one on your own server, as a Composer package of type `jalaops-module`. Its git tags are its versions and `composer.lock` pins the commit, so installing or updating one is a pull request here too. Composer installs it into `backend/modules/packages/<name>`, which git ignores:
 
 ```bash
 ./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git

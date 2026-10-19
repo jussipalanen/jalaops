@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aa0d0af1bec199559f3eaff3041e895b",
+    "content-hash": "b09fdf2fb602ac5dd1cb5f8771f80da6",
     "packages": [
         {
             "name": "brick/math",
@@ -1455,6 +1455,35 @@
                 }
             ],
             "time": "2026-08-24T17:13:02+00:00"
+        },
+        {
+            "name": "jalaops/module-installer",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "composer-plugins/module-installer",
+                "reference": "621d927574db6c317aa0213c51101c6028f2fcad"
+            },
+            "require": {
+                "composer-plugin-api": "^2.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "JalaOps\\ModuleInstaller\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "JalaOps\\ModuleInstaller\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Installs JalaOps module packages (type jalaops-module) into modules/packages instead of vendor.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
         },
         {
             "name": "jalaops/worktime",

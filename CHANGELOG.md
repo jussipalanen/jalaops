@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-10-19
+
+### Changed
+- Composer installs module packages into `backend/modules/packages/<name>/`, next to the app's own modules, instead of `vendor/`. Git ignores the folder, so only `composer.json` and `composer.lock` are committed. A small Composer plugin in this repository (`backend/composer-plugins/module-installer`) does it, with no third-party dependency. After pulling, run `./dev composer install` to move installed packages there.
+
 ## [1.9.0] - 2026-10-19
 
 ### Added
@@ -425,7 +430,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/jussipalanen/jalaops/compare/v1.6.2...v1.7.0

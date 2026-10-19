@@ -1,0 +1,18 @@
+{
+    "name": "jalaops/module-installer",
+    "description": "Installs JalaOps module packages (type jalaops-module) into modules/packages instead of vendor.",
+    "type": "composer-plugin",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "composer-plugin-api": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "JalaOps\\ModuleInstaller\\": "src/"
+        }
+    },
+    "extra": {
+        "class": "JalaOps\\ModuleInstaller\\Plugin"
+    }
+}
