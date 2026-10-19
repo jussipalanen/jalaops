@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e1acf64ed427f1090784638364301943",
+    "content-hash": "aa0d0af1bec199559f3eaff3041e895b",
     "packages": [
         {
             "name": "brick/math",
@@ -1455,6 +1455,31 @@
                 }
             ],
             "time": "2026-08-24T17:13:02+00:00"
+        },
+        {
+            "name": "jalaops/worktime",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jussipalanen/jalaops-module-worktime.git",
+                "reference": "05cafe07eb5c14664ed3dad3af1d293fb311c316"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-worktime/zipball/05cafe07eb5c14664ed3dad3af1d293fb311c316",
+                "reference": "05cafe07eb5c14664ed3dad3af1d293fb311c316",
+                "shasum": ""
+            },
+            "type": "jalaops-module",
+            "license": [
+                "MIT"
+            ],
+            "description": "JalaOps module: hours worked and labour cost from start and end times.",
+            "support": {
+                "source": "https://github.com/jussipalanen/jalaops-module-worktime/tree/v1.1.0",
+                "issues": "https://github.com/jussipalanen/jalaops-module-worktime/issues"
+            },
+            "time": "2026-10-19T11:46:40+00:00"
         },
         {
             "name": "laravel/framework",
@@ -9138,5 +9163,5 @@
         "ext-gd": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
