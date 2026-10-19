@@ -37,8 +37,9 @@ Android app:
   android            Build android/dist/jalaops.apk and jalaops.aab (needs only Docker)
   android-secrets    Store the upload key in GitHub secrets for the release workflow
 
-Backend on Google Cloud Run (needs gcloud and GCP_PROJECT_ID; see docs/DEPLOYMENT.md):
-  gcloud:login       Sign in to Google Cloud and select the project
+Backend on Google Cloud Run (needs gcloud and GCP_PROJECT_ID; see docs/DEPLOYMENT.md).
+Each command also makes GCP_PROJECT_ID gcloud's active project.
+  gcloud:login       Sign in to Google Cloud
   deploy [args]      Deploy the backend to Cloud Run
   gcloud:status      Show the account, the backend's address and revision, and its setting names
   gcloud:logs [n]    Show the backend's latest n log entries (default 50)
@@ -73,12 +74,14 @@ deploy_settings() {
     eval "$exported"
 }
 
-# GCP_PROJECT_ID is required, so a deploy never goes to whatever project
-# gcloud happens to have active.
+# GCP_PROJECT_ID (or PROJECT_ID, as in docs/DEPLOYMENT.md) is required, so a
+# deploy never goes to whatever project gcloud happens to have active. When
+# gcloud's active project is another one, it's switched to this one, so plain
+# gcloud commands use it too.
 gcloud_settings() {
     command -v gcloud > /dev/null || { echo "gcloud not found; install the Google Cloud CLI: https://cloud.google.com/sdk/docs/install"; exit 1; }
     deploy_settings
-    project="${GCP_PROJECT_ID:-}"
+    project="${GCP_PROJECT_ID:-${PROJECT_ID:-}}"
     region="${CLOUD_RUN_REGION:-europe-north1}"
     service="${CLOUD_RUN_SERVICE:-jalaops-backend}"
     if [ -z "$project" ]; then
@@ -86,6 +89,10 @@ gcloud_settings() {
         echo "  mkdir -p \"$(dirname "$settings")\" && echo GCP_PROJECT_ID=my-project-id >> \"$settings\""
         echo "Use the project ID, not its name (gcloud projects list)."
         exit 1
+    fi
+    if [ "$(gcloud config get-value project 2>/dev/null)" != "$project" ]; then
+        echo "Setting gcloud's active project to $project."
+        gcloud config set project "$project" --quiet
     fi
 }
 
@@ -150,7 +157,6 @@ case "$command" in
     gcloud:login)
         gcloud_settings
         gcloud auth login "$@"
-        gcloud config set project "$project"
         ;;
     deploy)
         # Builds backend/Dockerfile with Cloud Build and deploys a new revision to

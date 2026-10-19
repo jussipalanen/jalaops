@@ -115,7 +115,7 @@ Finally, set a budget alert in the Console under **Billing → Budgets & alerts*
 
 | Variable | Value |
 |---|---|
-| `GCP_PROJECT_ID` | Required for `gcloud:*` and `deploy`: the project ID, not its name (`gcloud projects list`) |
+| `GCP_PROJECT_ID` | Required for `gcloud:*` and `deploy`: the project ID, not its name (`gcloud projects list`). `PROJECT_ID`, as in the setup steps above, works too. Each command makes it gcloud's active project if another one is active, so plain `gcloud` commands use it as well |
 | `CLOUD_RUN_REGION` | Optional, default `europe-north1` |
 | `CLOUD_RUN_SERVICE` | Optional, default `jalaops-backend` |
 | `VERCEL_PROJECT` | Optional, default `jalaops` |
@@ -133,8 +133,8 @@ echo "VERCEL_SCOPE=my-team" >> ~/.jalaops/deploy.env
 
 | Command | Does |
 |---|---|
-| `./dev gcloud:login` | Signs in to Google Cloud (`gcloud auth login`) and makes `GCP_PROJECT_ID` gcloud's active project |
-| `./dev deploy [args]` | Deploys the code in your working copy: `gcloud run deploy --source backend` to `GCP_PROJECT_ID`, whatever project gcloud has active. The service keeps its settings and environment variables. Extra arguments go to `gcloud run deploy`, for example `./dev deploy --quiet` |
+| `./dev gcloud:login` | Signs in to Google Cloud (`gcloud auth login`) |
+| `./dev deploy [args]` | Deploys the code in your working copy: `gcloud run deploy --source backend` to `GCP_PROJECT_ID`. The service keeps its settings and environment variables. Extra arguments go to `gcloud run deploy`, for example `./dev deploy --quiet` |
 | `./dev gcloud:status` | Shows the account, the backend's address, its latest revision and the names of its environment variables (never their values) |
 | `./dev gcloud:logs [n]` | Shows the backend's latest `n` log entries (default 50) |
 | `./dev gcloud:set-env KEY=VALUE[,...]` | Sets or changes environment variables, which creates a new revision; for example `./dev gcloud:set-env ALLOWED_ORIGINS=https://jalaops.vercel.app`. Keep API keys in Secret Manager instead (see "Settings and secrets") |

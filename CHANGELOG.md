@@ -12,7 +12,7 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 - Their settings (`GCP_PROJECT_ID`, `CLOUD_RUN_REGION`, `CLOUD_RUN_SERVICE`, `VERCEL_PROJECT`, `VERCEL_SCOPE`) come from the environment or `~/.jalaops/deploy.env`, outside the repository.
 
 ### Changed
-- `./dev deploy` deploys to `GCP_PROJECT_ID`, which is now required, instead of gcloud's active project, so it can't go to the wrong project by accident.
+- `./dev deploy` deploys to `GCP_PROJECT_ID` (or `PROJECT_ID`), which is now required, instead of gcloud's active project, so it can't go to the wrong project by accident. The `./dev` gcloud commands also make it gcloud's active project when another one is active.
 
 ## [1.6.1] - 2026-10-16
 
