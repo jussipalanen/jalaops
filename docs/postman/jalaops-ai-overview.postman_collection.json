@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "JalaOps AI-tilannekatsaus",
+    "description": "Requests for the AI status overview (AI-tilannekatsaus) and its origin check.\n\n**Local (default):** `baseUrl` = `http://localhost:8000`, `origin` = `http://localhost:5173`. With `APP_ENV=local` the origin check is off, so the two \"rejected\" requests answer 200 and their tests are skipped. The backend's `.env` needs `AI_INSIGHTS_ENABLED=true` and the provider's key, otherwise the overview is `{\"enabled\": false}`.\n\n**Production:** set both `baseUrl` and `origin` to `https://jalaops-demo.jussialanen.com` under the collection's Variables. Use the Postman desktop app: the web version can't set the `Origin` header. Every refresh is an AI call from the app's shared hourly limit (`AI_INSIGHTS_MAX_PER_HOUR`), so refresh sparingly.\n\n**Rate limit:** run \"Refresh overview\" four times within a minute (Runner, 4 iterations): the fourth answers 429.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "origin",
+      "value": "http://localhost:5173"
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Checks every successful AI overview response.",
+          "if (pm.request.url.getPath().startsWith('/api/dashboard/ai-overview') && pm.response.code === 200) {",
+          "    const json = pm.response.json();",
+          "    pm.test('has enabled', () => pm.expect(json.enabled).to.be.a('boolean'));",
+          "    if (!json.enabled) {",
+          "        console.log('The AI overview is off: set AI_INSIGHTS_ENABLED=true and the provider key.');",
+          "    } else {",
+          "        pm.test('has a summary', () => pm.expect(json.summary).to.be.a('string').and.not.empty);",
+          "        pm.test('has at most three actions and risks', () => {",
+          "            pm.expect(json.actions).to.be.an('array').with.length.at.most(3);",
+          "            pm.expect(json.risks).to.be.an('array').with.length.at.most(3);",
+          "        });",
+          "        pm.test('has provider, model and time', () => {",
+          "            pm.expect(json.provider).to.be.a('string');",
+          "            pm.expect(json.model).to.be.a('string');",
+          "            pm.expect(Date.parse(json.generated_at)).to.not.be.NaN;",
+          "        });",
+          "        pm.test('has stale and outdated flags', () => {",
+          "            pm.expect(json.stale).to.be.a('boolean');",
+          "            pm.expect(json.outdated).to.be.a('boolean');",
+          "        });",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/health",
+        "description": "Checks that the API and its database answer."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('API answers 200', () => pm.response.to.have.status(200));",
+              "pm.test('status is ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get overview",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/dashboard/ai-overview",
+        "description": "Returns the cached overview right away; calls the AI only when there is none yet. `outdated: true` means the requests have changed since it was written: send \"Refresh overview\" to update it."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('answers 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refresh overview",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/dashboard/ai-overview/refresh",
+        "description": "Generates a new overview (an AI call). An overview generated for the same requests within the last minute is returned instead. Limited to three calls per minute per visitor (429 after that). `stale: true` means the hourly AI limit is used up and the previous overview was returned."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('answers 200, or 429 when rate limited', () => pm.expect(pm.response.code).to.be.oneOf([200, 429]));",
+              "if (pm.response.code === 429) {",
+              "    console.log('Rate limited: wait a minute, or the hourly AI limit is used up.');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejected: another website",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "https://evil.example"
+          }
+        ],
+        "url": "{{baseUrl}}/api/dashboard/ai-overview/refresh",
+        "description": "A request from another website's page is refused with 403, without calling the AI. Allowed everywhere when the backend runs with APP_ENV=local."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const local = /localhost|127\\.0\\.0\\.1/.test(pm.variables.replaceIn('{{baseUrl}}'));",
+              "(local ? pm.test.skip : pm.test)('another website gets 403', () => {",
+              "    pm.response.to.have.status(403);",
+              "    pm.expect(pm.response.json().message).to.eql('Tätä toimintoa voi käyttää vain JalaOpsin omalla sivustolla.');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejected: no Origin or Referer",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/dashboard/ai-overview",
+        "description": "A request that doesn't come from a web page (no Origin or Referer header), such as a plain script, is refused with 403. Allowed everywhere when the backend runs with APP_ENV=local."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const local = /localhost|127\\.0\\.0\\.1/.test(pm.variables.replaceIn('{{baseUrl}}'));",
+              "(local ? pm.test.skip : pm.test)('a request without a page gets 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
