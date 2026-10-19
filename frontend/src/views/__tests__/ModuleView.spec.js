@@ -1,10 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { reactive } from 'vue'
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
 import ModuleView from '../ModuleView.vue'
 
+// The page's address: navigating in a module's view changes its query.
+const route = reactive({ params: { id: 'hello' }, query: {} })
+const router = {
+  push: vi.fn(async ({ query }) => {
+    route.query = query
+  }),
+}
+
 vi.mock('vue-router', async (importOriginal) => ({
   ...(await importOriginal()),
-  useRoute: () => ({ params: { id: 'hello' } }),
+  useRoute: () => route,
+  useRouter: () => router,
 }))
 
 function jsonResponse(body, status = 200) {
@@ -48,6 +58,8 @@ describe('ModuleView', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     document.body.innerHTML = ''
+    route.query = {}
+    router.push.mockClear()
   })
 
   it('draws a form from the module and shows the results', async () => {
@@ -137,7 +149,8 @@ describe('ModuleView', () => {
       const wrapper = await mountView(withView)
 
       const frame = frameOf(wrapper)
-      expect(frame.getAttribute('sandbox')).toBe('allow-scripts allow-forms')
+      // Popups only for links, which open in a new tab outside the sandbox.
+      expect(frame.getAttribute('sandbox')).toBe('allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox')
       expect(frame.getAttribute('srcdoc')).toContain('<body><p>Oma näkymä</p></body>')
       expect(frame.getAttribute('srcdoc')).toContain("default-src 'none'")
       expect(frame.getAttribute('srcdoc')).toContain('window.jalaops')
@@ -199,6 +212,31 @@ describe('ModuleView', () => {
       expect(fetch).toHaveBeenCalledTimes(1)
     })
 
+    it("gives the view the page address's parameters, safely escaped", async () => {
+      route.query = { news: '3', tag: '</script><script>alert(1)', 'Bad-Key': 'x', list: ['a', 'b'] }
+      const wrapper = await mountView(withView)
+
+      const srcdoc = frameOf(wrapper).getAttribute('srcdoc')
+      expect(srcdoc).toContain(
+        '<script type="application/json" id="jalaops-params">{"news":"3","tag":"\\u003c/script>\\u003cscript>alert(1)"}</script>',
+      )
+      expect(srcdoc.indexOf('jalaops-params')).toBeLessThan(srcdoc.indexOf('window.jalaops'))
+    })
+
+    it('moves to another page of the view and tells the view', async () => {
+      const wrapper = await mountView(withView)
+      const postMessage = vi.spyOn(frameOf(wrapper).contentWindow, 'postMessage')
+      const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+
+      await fromFrame(wrapper, { type: 'jalaops:navigate', params: { news: 3, evil: { a: 1 } } })
+
+      expect(router.push).toHaveBeenCalledWith({ query: { news: '3' } })
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0 })
+      expect(postMessage).toHaveBeenLastCalledWith({ type: 'jalaops:params', params: { news: '3' } }, '*')
+      // The frame isn't drawn again.
+      expect(frameOf(wrapper).getAttribute('srcdoc')).toContain('{}</script>')
+    })
+
     it('fits its height to the content, within limits', async () => {
       const wrapper = await mountView(withView)
 
@@ -206,7 +244,7 @@ describe('ModuleView', () => {
       expect(frameOf(wrapper).style.height).toBe('513px')
 
       await fromFrame(wrapper, { type: 'jalaops:height', height: 99999 })
-      expect(frameOf(wrapper).style.height).toBe('4000px')
+      expect(frameOf(wrapper).style.height).toBe('20000px')
     })
   })
 })

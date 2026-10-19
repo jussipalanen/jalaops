@@ -6,6 +6,23 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-10-19
+
+### Added
+- **Uutiset** (`news`), a news feed module from its own package, [jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news) 1.0.0. Users write news with a title, a short description, HTML content (with a toolbar and a preview), tags and up to six images; read them as a list filtered by tag or one by one; and edit and delete them. The newest news show on the dashboard. The module comes off: turn it on in **Työkalut → Moduulit**. Its database gets six demo news.
+- Turning modules on and off in the app: a switch for each module in **Työkalut → Moduulit**, the same for everyone (`PATCH /api/modules/{id}`). Modules are optional; `modules:enable` and `modules:disable` still work on the server.
+- Module widgets and hooks: places on the dashboard (`dashboard.top`, `dashboard.after_counts`, `dashboard.after_overview`, `dashboard.bottom`) where modules show content, declared in `module.json` (`widgets`). The app draws a `feed` widget from the module's output. `php artisan modules:place` moves or hides a widget for everyone and `modules:widgets` lists them; each user can also move or hide widgets in their own browser with **Muokkaa etusivua**. API: `GET /api/dashboard/widgets`.
+- A data folder for modules with `"storage": true` (`storage/app/modules/<id>`, given in `JALAOPS_DATA_DIR`; `MODULES_STORAGE_PATH` changes it).
+- `max_input_kb` in `module.json` for modules that take more input, such as images (at most 4 MB).
+- Pages with addresses of their own in a module's view: `jalaops.params` and `jalaops.navigate(params)` use the page address's parameters (`?news=3`), so the back button works and items can be linked to. Links in a view can open in a new tab.
+
+### Changed
+- A module gets its input exactly as it was sent: strings are no longer trimmed or turned into null.
+- Module runs are limited to 30 per minute per visitor (was 10), as a view can now have several pages.
+
+### Fixed
+- A module's own view shrinks again when its content gets shorter; it used to keep its tallest height. A view can now be up to 20 000 px tall (was 4000 px).
+
 ## [1.10.0] - 2026-10-19
 
 ### Changed
@@ -430,7 +447,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...v1.8.0

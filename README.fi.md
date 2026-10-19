@@ -200,7 +200,9 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 |--------|----------------------|-------------------------------|
 | GET    | `/api/modules`       | Python-moduulit ja onko kukin käytössä |
 | GET    | `/api/modules/{id}`  | Moduulin lomake, tulokset ja oma näkymä |
+| PATCH  | `/api/modules/{id}`  | Ota moduuli käyttöön tai poista se käytöstä (vain sovelluksen omilta sivuilta) |
 | POST   | `/api/modules/{id}/run` | Suorita moduuli: runko on sen syöte (vain sovelluksen omilta sivuilta) |
+| GET    | `/api/dashboard/widgets` | Etusivun moduulien sisällöt ja niiden paikat (vain sovelluksen omilta sivuilta) |
 
 </details>
 
@@ -285,7 +287,9 @@ EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, su
 
 ## Python-moduulit
 
-Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio. **Työaikalaskuri** (tehdyt tunnit, ylityö ja työn hinta) asennetaan pakettina omasta repositoriostaan, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime).
+Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio. Kaksi asennetaan paketteina omista repositorioistaan: **Työaikalaskuri** (tehdyt tunnit, ylityö ja työn hinta, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) ja **Uutiset**, uutissyöte tunnisteineen ja kuvineen, jonka uusimmat uutiset näkyvät etusivulla ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)).
+
+Moduulit ovat valinnaisia: kunkin voi ottaa käyttöön tai poistaa käytöstä sen kytkimellä kohdassa **Työkalut → Moduulit**. Uutiset on aluksi pois käytöstä. Moduuli voi näyttää sisältöä etusivulla (widgetit, paikoissa eli hookeissa); etusivun alareunan **Muokkaa etusivua** siirtää tai piilottaa ne omassa selaimessa, ja `modules:place` kaikilta. Moduuli voi myös tallentaa tietoja omaan hakemistoonsa.
 
 Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata sovellukseen. Jokainen ajetaan ilman taustapalvelun API-avaimia, ja se pysäytetään aikakatkaisun jälkeen. Moduulin oma näkymä toimii eristetyssä kehyksessä, josta ei pääse sovellukseen eikä verkkoon.
 
@@ -302,6 +306,7 @@ GitHubissa moduulipaketin repositoriolle annetaan aihe (topic) `jalaops-module`,
 ./dev artisan modules:list
 ./dev artisan modules:run vat-calculator '{"amount": 100}'
 ./dev artisan modules:disable hello
+./dev artisan modules:place news.latest dashboard.bottom   # tai hidden tai default
 ```
 
 Ohje moduulin ja moduulipaketin tekemiseen (englanniksi): [backend/modules/README.md](backend/modules/README.md).

@@ -3,6 +3,7 @@
 namespace App\Services\Modules;
 
 use Illuminate\Process\Exceptions\ProcessTimedOutException;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use JsonException;
@@ -14,11 +15,14 @@ use stdClass;
  */
 class ModuleRunner
 {
-    public function __construct(private readonly string $python) {}
+    /**
+     * @param  string  $storage  The folder with each module's data folder
+     */
+    public function __construct(private readonly string $python, private readonly string $storage) {}
 
     public static function fromConfig(): self
     {
-        return new self(config('modules.python'));
+        return new self(config('modules.python'), config('modules.storage'));
     }
 
     /**
@@ -36,7 +40,7 @@ class ModuleRunner
         try {
             $result = Process::path($module->directory)
                 ->timeout($module->timeout)
-                ->env($this->environment())
+                ->env($this->environment($module))
                 ->input(json_encode((object) $input, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR))
                 // -E -s: ignore PYTHON* variables and the user's site-packages,
                 // -B: write no .pyc files, -X utf8: UTF-8 everywhere.
@@ -76,11 +80,12 @@ class ModuleRunner
     /**
      * The variables the module gets. Symfony Process would pass on the
      * backend's whole environment, API keys included, so every inherited
-     * variable is switched off (false) and only these few are set.
+     * variable is switched off (false) and only these few are set. A module
+     * with "storage": true also gets its own data folder.
      *
      * @return array<string, string|false>
      */
-    private function environment(): array
+    private function environment(PythonModule $module): array
     {
         $inherited = array_fill_keys(array_keys(getenv() + $_ENV), false);
 
@@ -88,6 +93,20 @@ class ModuleRunner
             ...$inherited,
             'PATH' => getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin',
             'LANG' => 'C.UTF-8',
+            ...($module->storage ? ['JALAOPS_DATA_DIR' => $this->dataDirectory($module)] : []),
         ];
+    }
+
+    /**
+     * The module's data folder, made when it's first needed. The id is a
+     * folder name (a-z, 0-9, -), so it can't point outside the storage folder.
+     */
+    public function dataDirectory(PythonModule $module): string
+    {
+        $directory = rtrim($this->storage, '/').'/'.$module->id;
+
+        File::ensureDirectoryExists($directory);
+
+        return $directory;
     }
 }

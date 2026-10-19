@@ -1,0 +1,5 @@
+{
+    "name": "Failing widget",
+    "enabled": true,
+    "widgets": [{ "name": "feed", "title": "Rikki", "hook": "dashboard.bottom" }]
+}

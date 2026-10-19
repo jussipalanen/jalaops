@@ -1,0 +1,5 @@
+{
+    "name": "Bad widget",
+    "enabled": true,
+    "widgets": [{ "name": "x", "title": "X", "hook": "sidebar" }]
+}

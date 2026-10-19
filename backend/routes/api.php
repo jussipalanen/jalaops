@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ModuleController;
+use App\Http\Controllers\Api\ModuleWidgetController;
 use App\Http\Controllers\Api\RequestItemController;
 use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
@@ -87,8 +88,15 @@ Route::middleware(AllowedOriginsOnly::class)->group(function () {
 });
 
 // Python modules (backend/modules). Anyone may list them; only the app's own
-// pages may run one, because each run starts a process on the server.
+// pages may run one, because each run starts a process on the server, or turn
+// one on or off.
 Route::get('/modules', [ModuleController::class, 'index']);
 Route::get('/modules/{module}', [ModuleController::class, 'show']);
+Route::patch('/modules/{module}', [ModuleController::class, 'update'])
+    ->middleware([AllowedOriginsOnly::class, 'throttle:module-settings']);
 Route::post('/modules/{module}/run', [ModuleController::class, 'run'])
     ->middleware([AllowedOriginsOnly::class, 'throttle:modules']);
+
+// Module widgets in the dashboard's hooks. Each widget runs its module.
+Route::get('/dashboard/widgets', [ModuleWidgetController::class, 'dashboard'])
+    ->middleware([AllowedOriginsOnly::class, 'throttle:module-widgets']);

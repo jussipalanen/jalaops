@@ -4,10 +4,13 @@ Modules add features to JalaOps in Python. A module is a folder here with a smal
 
 Modules are part of the code. They are added and changed through pull requests, reviewed and tested like the rest of the backend, and built into the Docker image. They are never uploaded or edited from the app. A module can also come from a git repository of its own as a Composer package (see "Modules from Composer packages").
 
-Two complete examples:
+Modules are optional: users turn them on and off in the app (**Työkalut → Moduulit**), see "Turn a module on and off".
+
+Complete examples:
 
 - **`vat-calculator` (ALV-laskuri):** a form and results drawn by the app from `module.json`.
 - **`hello` (Hei maailma):** a view of its own (`view.html`) with a bar chart, which runs the module when the page opens.
+- **[`jalaops/news`](https://github.com/jussipalanen/jalaops-module-news) (Uutiset), a package:** a news feed with a data folder (SQLite), several pages in its view (a list, one item, a form), images, and a widget on the dashboard.
 
 ## Create a module
 
@@ -69,6 +72,9 @@ The `vat-calculator` module's:
 | `results` | no | Which output values the drawn page shows: `name`, `label` and optionally `decimals` (0–6, e.g. 2 for euros). Without it, the page shows every value |
 | `view` | no | The module's own page, an HTML file in its folder (default `view.html` if there is one) |
 | `assets` | no | CSS and JS files the view uses, in the module's folder, loaded in this order before the view (see "CSS, JS and libraries") |
+| `storage` | no | `true` gives the module a data folder of its own (see "Data folder") |
+| `max_input_kb` | no | The largest input the API sends the module, in kB (default 10, at most 4096), e.g. for images as data URLs |
+| `widgets` | no | What the module shows elsewhere in the app, such as the dashboard (see "Widgets and hooks") |
 
 Form fields (`form`):
 
@@ -113,10 +119,10 @@ json.dump({"vat": vat, "total": round(amount + vat, 2)}, sys.stdout, ensure_asci
 
 The rules:
 
-- **Input:** one JSON object on stdin, `{}` when there's nothing to send. Check it before using it: anything in the input comes from the user.
+- **Input:** one JSON object on stdin, `{}` when there's nothing to send, exactly as the page sent it (strings aren't trimmed, and empty ones stay empty). Check it before using it: anything in the input comes from the user.
 - **Output:** one JSON object on stdout and nothing else. Use stderr for debugging output.
 - **Errors:** print a short Finnish message to stderr and exit with a non-zero code. The app shows the message's last line to the user, and the full error goes to the backend's log.
-- **Environment:** the program gets only `PATH` and `LANG`, not the backend's variables, so it never sees API keys or database passwords. It runs in its own folder as the working directory.
+- **Environment:** the program gets only `PATH` and `LANG` (and `JALAOPS_DATA_DIR` with `"storage": true`), not the backend's variables, so it never sees API keys or database passwords. It runs in its own folder as the working directory.
 - **Libraries:** the standard library works. A module that needs other libraries lists them with pinned versions in a `requirements.txt`, and they are installed when the Docker image is built (`backend/Dockerfile` and `docker/backend/Dockerfile`), never at runtime.
 - **Text:** everything users see (names, labels, messages) is in Finnish; code and comments in English.
 
@@ -132,6 +138,8 @@ The view is the inside of a page's `<body>`: HTML, a `<style>` and a `<script>`.
 - **Base styles** for headings, labels, inputs, selects and buttons, `.stack` (a column with gaps), `.error` and `[hidden]`.
 - **The app's colours** as CSS variables that follow the light and dark theme: `--primary`, `--primary-text`, `--text`, `--muted`, `--border`, `--surface`, `--error`.
 - **A height that fits its content:** the frame grows and shrinks with the page.
+- **Pages with addresses of their own:** `jalaops.params` are the page address's parameters (`/tools/modules/news?news=3` gives `{ news: '3' }`), and `jalaops.navigate({ news: 4 })` changes them, so each page of the view has its own address and the back button works. When they change, the view gets a `jalaops:params` event (`addEventListener('jalaops:params', (event) => draw(event.detail))`). Names are lowercase letters, numbers and `_`; values are texts.
+- **Links:** a link with `target="_blank"` opens in a new tab, outside the sandbox.
 
 ```html
 <form id="form" class="stack">
@@ -158,7 +166,7 @@ The view is the inside of a page's `<body>`: HTML, a `<style>` and a `<script>`.
 </script>
 ```
 
-The frame is isolated from the app: it can't call the API or other addresses, load scripts or images from the network, or read the app's storage. Everything goes through `jalaops.run`. Images can be `data:` URLs. Write user-supplied values with `textContent`, not `innerHTML`. The view can be at most 200 kB.
+The frame is isolated from the app: it can't call the API or other addresses, load scripts or images from the network, or read the app's storage. Everything goes through `jalaops.run`. Images can be `data:` URLs. Write user-supplied values with `textContent`, not `innerHTML`; HTML that users write (like a news item's content) must be sanitized to an allowlist by the module, because scripts run in the frame. The frame can't open the browser's `alert()` or `confirm()` dialogs, so ask for confirmation in the page itself. The view can be at most 200 kB.
 
 ### CSS, JS and libraries
 
@@ -216,9 +224,53 @@ Ids are unique. The modules in `backend/modules` come first, then the packages b
 
 The repository must be readable wherever `composer install` runs: your machine, CI and the Docker build. See "Module packages" in [docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md#module-packages-from-git).
 
+## Data folder
+
+A module with `"storage": true` gets a folder of its own for its data, in `JALAOPS_DATA_DIR`: `backend/storage/app/modules/<id>/` (`MODULES_STORAGE_PATH` changes the parent folder). The app makes it on the module's first run. Keep data there, for example in an SQLite database (`sqlite3` is in the standard library), never in the module's own folder, which Composer replaces when a package is updated.
+
+The folder is the module's own: the module manages its format and upgrades it (`news` keeps a schema version in SQLite's `PRAGMA user_version`). Two runs can happen at the same time, so take a lock when writing (SQLite does this). On Cloud Run the folder resets when the instance restarts, like the rest of the demo data, so a module can fill a new database with demo content.
+
+## Widgets and hooks
+
+A module can show content elsewhere in the app with widgets. The app has places for them, hooks, listed in `config/modules.php`:
+
+| Hook | Where |
+|---|---|
+| `dashboard.top` | Etusivun yläosa: after the welcome |
+| `dashboard.after_counts` | Tilanteen jälkeen: after the request and invoice counts |
+| `dashboard.after_overview` | Tilannekatsauksen jälkeen: after the AI overview |
+| `dashboard.bottom` | Etusivun alaosa |
+
+A widget in `module.json` names its default hook and the input the module gets for it:
+
+```json
+"widgets": [
+    { "name": "latest", "title": "Uusimmat uutiset", "type": "feed", "hook": "dashboard.after_counts", "input": { "action": "feed", "limit": 5 } }
+]
+```
+
+The widget's id is the module's id and its name: `news.latest`. Type `feed` is the only one so far: the app runs the module with `input` and draws a list from its output, so the module decides what is shown and the app how it looks:
+
+```json
+{ "items": [
+    { "title": "Syyshuollot alkavat", "text": "Suodattimet tarkistetaan.", "date": "2026-10-19T12:00:00Z",
+      "image": "data:image/jpeg;base64,…", "tags": ["huolto"], "params": { "news": "3" } }
+] }
+```
+
+Only `title` is required. At most 10 items are shown; `image` must be a JPEG, PNG, GIF or WebP data URL of at most 300 kB, and `params` opens the module's page at that address (`/tools/modules/news?news=3`). A widget whose module fails shows an error instead.
+
+Where a widget is shown, in order:
+
+1. Its `hook` in `module.json`.
+2. The server's choice for everyone: `./dev artisan modules:place news.latest dashboard.bottom` (or `hidden`, or `default` to go back). `./dev artisan modules:widgets` lists the widgets and where they are.
+3. Each user's own choice in their browser: **Muokkaa etusivua** at the bottom of the dashboard moves or hides widgets.
+
+Widgets of a module that is off aren't shown.
+
 ## Turn a module on and off
 
-A module is on when its `module.json` says `"enabled": true`. The commands below override that and store the setting in the database:
+Modules are optional. A module is on when its `module.json` says `"enabled": true`; a module that adds content to the app (like `news`) should ship with `"enabled": false` and let users decide. Users turn modules on and off in the app (**Työkalut → Moduulit**), and the setting is stored in the database and is the same for everyone. The commands do the same on the server:
 
 ```bash
 ./dev artisan modules:enable hello
@@ -226,9 +278,9 @@ A module is on when its `module.json` says `"enabled": true`. The commands below
 ./dev artisan modules:list              # shows each module's status
 ```
 
-A module that is off is listed in the app as **Pois käytöstä**. Its page and API don't run it. Modules are switched on the server, not in the app, because the app has no login.
+A module that is off is listed in the app as **Pois käytöstä**. Its page, API and widgets don't run it. The app has no login, so anyone using it can switch modules, as they can change requests.
 
-On Cloud Run, the demo data (and these settings) reset on every start, so production uses `"enabled"` from `module.json`.
+On Cloud Run, the demo data (and these settings) reset on every start, so production goes back to `"enabled"` from `module.json`.
 
 ## The API
 
@@ -236,13 +288,15 @@ On Cloud Run, the demo data (and these settings) reset on every start, so produc
 |---|---|---|
 | GET | `/api/modules` | Lists the modules and whether each is on |
 | GET | `/api/modules/{id}` | One module: its form, results and view (the view's HTML inside JSON) |
+| PATCH | `/api/modules/{id}` | Turns the module on or off: `{"enabled": true}` |
 | POST | `/api/modules/{id}/run` | Runs the module; the request body is the input, `output` the result |
+| GET | `/api/dashboard/widgets` | The dashboard's hooks and the widgets in them, each with its items |
 
-Running is allowed only from the app's own pages (`FRONTEND_URL`, `APP_URL` and `ALLOWED_ORIGINS`), at most ten times per minute per visitor. The input can be at most 10 kB. A module that is off answers 403; a failed run answers 422 with the reason in `reason`.
+Running, switching and the widgets are allowed only from the app's own pages (`FRONTEND_URL`, `APP_URL` and `ALLOWED_ORIGINS`). Runs and widget loads are limited to 30 per minute per visitor each, switching to 20. The input can be at most 10 kB, or the module's `max_input_kb`. A module that is off answers 403; a failed run answers 422 with the reason in `reason`.
 
 ## Test a module
 
-Feature tests live in `backend/tests/Feature`; `PythonModulesTest` and `ModuleApiTest` test `hello` and show how, and `ModulePackagesTest` tests modules from packages. A package module's own tests belong in its repository. A module's test runs the real program:
+Feature tests live in `backend/tests/Feature`; `PythonModulesTest` and `ModuleApiTest` test `hello` and show how, `ModulePackagesTest` tests modules from packages, and `ModuleWidgetsTest` tests data folders, widgets and switching modules. A package module's own tests belong in its repository. A module's test runs the real program:
 
 ```php
 $output = app(ModuleRunner::class)->run(app(ModuleRegistry::class)->find('vat-calculator'), ['amount' => 100]);

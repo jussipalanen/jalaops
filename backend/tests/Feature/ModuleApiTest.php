@@ -142,7 +142,7 @@ class ModuleApiTest extends TestCase
     {
         $this->withHeader('Origin', self::SITE);
 
-        foreach (range(1, 10) as $attempt) {
+        foreach (range(1, 30) as $attempt) {
             $this->postJson('/api/modules/hello/run')->assertOk();
         }
 

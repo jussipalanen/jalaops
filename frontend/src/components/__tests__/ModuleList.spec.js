@@ -61,4 +61,40 @@ describe('ModuleList', () => {
 
     expect(wrapper.find('[role="alert"]').text()).toContain('Moduulien haku epäonnistui.')
   })
+
+  it('turns a module on and off for everyone', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ data: modules.map((module) => ({ ...module })) }))
+      .mockResolvedValueOnce(jsonResponse({ data: { ...modules[1], enabled: true } }))
+    vi.stubGlobal('fetch', fetch)
+
+    const wrapper = mountList()
+    await flushPromises()
+
+    const toggle = wrapper.findAll('[role="switch"]')[1]
+    expect(toggle.attributes('aria-checked')).toBe('false')
+    await toggle.trigger('click')
+    await flushPromises()
+
+    expect(fetch).toHaveBeenLastCalledWith('/api/modules/route', expect.objectContaining({ method: 'PATCH' }))
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ enabled: true })
+    expect(toggle.attributes('aria-checked')).toBe('true')
+    expect(wrapper.findAllComponents(RouterLinkStub)).toHaveLength(2)
+  })
+
+  it('says when switching a module fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(jsonResponse({ data: modules.map((module) => ({ ...module })) })).mockResolvedValueOnce(jsonResponse({}, 500)),
+    )
+
+    const wrapper = mountList()
+    await flushPromises()
+    await wrapper.findAll('[role="switch"]')[0].trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('Moduulin Hei maailma poistaminen käytöstä epäonnistui.')
+    expect(wrapper.findAll('[role="switch"]')[0].attributes('aria-checked')).toBe('true')
+  })
 })

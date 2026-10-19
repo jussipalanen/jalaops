@@ -43,6 +43,17 @@ class ModuleRegistry
     // list of numbers, longer text, and a choice from options.
     private const FIELD_TYPES = ['text', 'number', 'numbers', 'textarea', 'select'];
 
+    // The input the API sends a module by default, and the most a module can
+    // ask for with "max_input_kb" (images as data URLs need more). Vercel
+    // forwards at most 4.5 MB to the backend.
+    private const DEFAULT_INPUT_KB = 10;
+
+    private const MAX_INPUT_KB = 4096;
+
+    // The kinds of widgets the app can draw: "feed" is a list of items with
+    // a title, text, date and image, each opening the module's page.
+    private const WIDGET_TYPES = ['feed'];
+
     /**
      * @param  string  $path  The app's own modules folder
      * @param  array<string, string>  $packages  Module packages: name => install path
@@ -234,6 +245,9 @@ class ModuleRegistry
             view: $view,
             assets: $this->assets($id, $directory, $this->listOf($id, $manifest, 'assets')),
             package: $location['package'],
+            storage: ($manifest['storage'] ?? false) === true,
+            maxInputBytes: $this->maxInputKb($id, $manifest) * 1000,
+            widgets: array_map(fn ($widget) => $this->widget($id, $widget), $this->listOf($id, $manifest, 'widgets')),
         );
     }
 
@@ -338,6 +352,50 @@ class ModuleRegistry
         }
 
         return array_filter(['name' => $result['name'], 'label' => $result['label'], 'decimals' => $decimals], fn ($value) => $value !== null);
+    }
+
+    /**
+     * @param  array<string, mixed>  $manifest
+     */
+    private function maxInputKb(string $id, array $manifest): int
+    {
+        $kb = $manifest['max_input_kb'] ?? self::DEFAULT_INPUT_KB;
+
+        if (! is_int($kb) || $kb < 1 || $kb > self::MAX_INPUT_KB) {
+            throw new ModuleException("Module '{$id}': max_input_kb must be a whole number from 1 to ".self::MAX_INPUT_KB.'.');
+        }
+
+        return $kb;
+    }
+
+    /**
+     * A widget the module shows in one of the app's hooks (config/modules.php).
+     *
+     * @return array{name: string, title: string, type: string, hook: string, input: array<string, mixed>}
+     */
+    private function widget(string $id, mixed $widget): array
+    {
+        $hooks = array_keys(config('modules.hooks'));
+        $input = $widget['input'] ?? [];
+
+        if (
+            ! is_array($widget)
+            || ! is_string($widget['name'] ?? null) || ! preg_match(self::ID_PATTERN, $widget['name'])
+            || ! is_string($widget['title'] ?? null) || trim($widget['title']) === ''
+            || ! in_array($widget['type'] ?? 'feed', self::WIDGET_TYPES, true)
+            || ! in_array($widget['hook'] ?? null, $hooks, true)
+            || ! is_array($input) || ($input !== [] && array_is_list($input))
+        ) {
+            throw new ModuleException("Module '{$id}': each widget needs a name (a-z, 0-9, -), a title, a type (".implode(', ', self::WIDGET_TYPES).'), a hook ('.implode(', ', $hooks).') and an input object.');
+        }
+
+        return [
+            'name' => $widget['name'],
+            'title' => $widget['title'],
+            'type' => $widget['type'] ?? 'feed',
+            'hook' => $widget['hook'],
+            'input' => $input,
+        ];
     }
 
     private function isNamed(mixed $item): bool

@@ -1,6 +1,7 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
-import { moduleErrorMessage, runModule } from '@/modules'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { moduleErrorMessage, moduleParams, runModule } from '@/modules'
 
 // A module's own page (view.html in its folder) in a sandboxed frame, with the
 // CSS and JS files the module lists in "assets" (its own, or copies of
@@ -8,13 +9,24 @@ import { moduleErrorMessage, runModule } from '@/modules'
 // network: the sandbox gives it an origin of its own, and the
 // Content-Security-Policy below blocks every request. It runs its module only
 // through the bridge, jalaops.run(input), which asks this component over postMessage.
+//
+// A view can have several pages with addresses of their own: jalaops.params
+// are the page address's parameters (?news=3), jalaops.navigate(params)
+// changes them, and a "jalaops:params" event tells the view when they change
+// (also with the back button). Links in the view may open in a new tab.
 
 const props = defineProps({
   module: { type: Object, required: true },
 })
 
+const route = useRoute()
+const router = useRouter()
 const frame = useTemplateRef('frame')
 const height = ref(240)
+
+// The parameters when the page opened. Later changes are sent as messages,
+// so the frame isn't drawn again.
+const initialParams = moduleParams(route.query)
 
 // The app's colours for the module's styles, in the light and the dark theme.
 const STYLE = `
@@ -36,27 +48,39 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
 [hidden] { display: none !important; }
 `
 
-// jalaops.run(input) for the module's script, and the frame's height for the app.
+// jalaops.run(input) and the page parameters for the module's script, and the
+// frame's height for the app.
 const BRIDGE = `
 (() => {
   const pending = new Map()
   let next = 0
   window.jalaops = {
+    params: JSON.parse(document.getElementById('jalaops-params').textContent),
     run(input = {}) {
       const id = ++next
       parent.postMessage({ type: 'jalaops:run', id, input }, '*')
       return new Promise((resolve, reject) => pending.set(id, { resolve, reject }))
     },
+    navigate(params = {}) {
+      parent.postMessage({ type: 'jalaops:navigate', params }, '*')
+    },
   }
   addEventListener('message', (event) => {
     if (event.source !== parent) return
-    const { type, id, output, message } = event.data || {}
+    const { type, id, output, message, params } = event.data || {}
+    if (type === 'jalaops:params') {
+      window.jalaops.params = params
+      dispatchEvent(new CustomEvent('jalaops:params', { detail: params }))
+      return
+    }
     const call = pending.get(id)
     if (!call) return
     pending.delete(id)
     type === 'jalaops:result' ? call.resolve(output) : call.reject(new Error(message))
   })
-  const report = () => parent.postMessage({ type: 'jalaops:height', height: document.documentElement.scrollHeight }, '*')
+  // The body's own height: the document's scrollHeight never gets smaller
+  // than the frame, so the frame couldn't shrink when the content does.
+  const report = () => parent.postMessage({ type: 'jalaops:height', height: document.body.getBoundingClientRect().height }, '*')
   addEventListener('load', () => {
     report()
     new ResizeObserver(report).observe(document.body)
@@ -81,6 +105,8 @@ const srcdoc = computed(() => {
   return [
     `<!doctype html><html lang="fi"${dark ? ' class="dark"' : ''}><head><meta charset="utf-8">`,
     `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">`,
+    // The parameters as JSON data, with "<" escaped so they can't end the element.
+    `<script type="application/json" id="jalaops-params">${JSON.stringify(initialParams).replace(/</g, '\\u003c')}</` + 'script>',
     // The closing script tag is split, so it doesn't end this component's own script block.
     `<style>${STYLE}</style><script>${BRIDGE}</` + 'script>',
     `${assets}</head>`,
@@ -98,10 +124,15 @@ async function onMessage(event) {
     return
   }
 
-  const { type, id, input, height: reported } = event.data ?? {}
+  const { type, id, input, params, height: reported } = event.data ?? {}
 
   if (type === 'jalaops:height') {
-    height.value = Math.min(Math.max(Math.ceil(Number(reported) || 0), 120), 4000)
+    height.value = Math.min(Math.max(Math.ceil(Number(reported) || 0), 120), 20000)
+    return
+  }
+
+  if (type === 'jalaops:navigate') {
+    navigate(params)
     return
   }
 
@@ -121,6 +152,19 @@ async function onMessage(event) {
   }
 }
 
+// A new page of the view: a new address in the browser's history, from the top.
+async function navigate(params) {
+  await router.push({ query: moduleParams(params) })
+  window.scrollTo({ top: 0 })
+}
+
+// The address changed (navigate, the back button or a link): the view draws
+// the page for the new parameters.
+watch(
+  () => route.query,
+  (query) => reply({ type: 'jalaops:params', params: moduleParams(query) }),
+)
+
 onMounted(() => window.addEventListener('message', onMessage))
 onBeforeUnmount(() => window.removeEventListener('message', onMessage))
 </script>
@@ -132,7 +176,7 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage))
       class="block w-full"
       :style="{ height: `${height}px` }"
       :title="module.name"
-      sandbox="allow-scripts allow-forms"
+      sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
       referrerpolicy="no-referrer"
       :srcdoc="srcdoc"
     ></iframe>

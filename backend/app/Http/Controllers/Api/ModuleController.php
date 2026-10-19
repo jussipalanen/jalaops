@@ -16,15 +16,12 @@ use Illuminate\Support\Facades\Log;
  */
 class ModuleController extends Controller
 {
-    // Upper limit for a module's input, in bytes of JSON.
-    private const MAX_INPUT_BYTES = 10_000;
-
     /**
      * List the Python modules.
      *
-     * Every module in the backend's modules folder and whether it's on. Modules
-     * are turned on and off on the server with `php artisan modules:enable` and
-     * `modules:disable`, not through the API.
+     * Every module and whether it's on. Modules are optional: users turn them
+     * on and off in the app (`PATCH /api/modules/{id}`), and the server with
+     * `php artisan modules:enable` and `modules:disable`.
      *
      * @response array{data: list<array{id: string, name: string, description: string, version: string, enabled: bool}>}
      */
@@ -67,13 +64,32 @@ class ModuleController extends Controller
     }
 
     /**
+     * Turn a Python module on or off.
+     *
+     * The setting is stored on the server, so it's the same for everyone, and
+     * it overrides the `enabled` in the module's module.json. Only the app's
+     * own pages may call this.
+     *
+     * @response array{data: array{id: string, name: string, description: string, version: string, enabled: bool}}
+     */
+    public function update(Request $request, ModuleRegistry $modules, string $module): JsonResponse
+    {
+        $validated = $request->validate(['enabled' => ['required', 'boolean']]);
+
+        $this->find($modules, $module);
+
+        return response()->json(['data' => $this->summary($modules->setEnabled($module, (bool) $validated['enabled']))]);
+    }
+
+    /**
      * Run a Python module.
      *
      * The request body, a JSON object, is the module's input, and `output` is
-     * what the module returned. Only the app's own pages may call this (see
-     * `ALLOWED_ORIGINS`), at most ten times per minute per visitor. A module
-     * that is off answers 403; a module that fails answers 422 with the reason
-     * in `reason`.
+     * what the module returned. The input can be at most 10 kB, or what the
+     * module's `max_input_kb` allows (at most 4 MB, e.g. for images). Only the
+     * app's own pages may call this (see `ALLOWED_ORIGINS`), at most 30 times
+     * per minute per visitor. A module that is off answers 403; a module that
+     * fails answers 422 with the reason in `reason`.
      *
      * @response array{output: array<string, mixed>}
      */
@@ -85,10 +101,17 @@ class ModuleController extends Controller
             return response()->json(['message' => 'Moduuli ei ole käytössä.'], 403);
         }
 
-        $input = $request->json()->all();
+        // The body as it was sent: Laravel's middleware would trim strings and
+        // turn empty ones into null in $request->json().
+        $content = $request->getContent();
+        $input = $content === '' ? [] : json_decode($content, true);
 
-        if (strlen($request->getContent()) > self::MAX_INPUT_BYTES || ($input !== [] && array_is_list($input))) {
-            return response()->json(['message' => 'Syötteen pitää olla JSON-objekti, enintään 10 kt.'], 422);
+        if (strlen($content) > $found->maxInputBytes || ! is_array($input) || ($input !== [] && array_is_list($input))) {
+            $limit = $found->maxInputBytes >= 1_000_000
+                ? str_replace('.', ',', (string) round($found->maxInputBytes / 1_000_000, 1)).' Mt'
+                : intdiv($found->maxInputBytes, 1000).' kt';
+
+            return response()->json(['message' => "Syötteen pitää olla JSON-objekti, enintään {$limit}."], 422);
         }
 
         try {
