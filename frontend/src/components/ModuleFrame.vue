@@ -1,7 +1,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { moduleErrorMessage, moduleParams, runModule } from '@/modules'
+import { moduleErrorMessage, moduleLocation, pageParams, runModule } from '@/modules'
+import { pageTitle, setDescription } from '@/pageTitle'
 
 // A module's own page (view.html in its folder) in a sandboxed frame, with the
 // CSS and JS files the module lists in "assets" (its own, or copies of
@@ -11,9 +12,13 @@ import { moduleErrorMessage, moduleParams, runModule } from '@/modules'
 // through the bridge, jalaops.run(input), which asks this component over postMessage.
 //
 // A view can have several pages with addresses of their own: jalaops.params
-// are the page address's parameters (?news=3), jalaops.navigate(params)
-// changes them, and a "jalaops:params" event tells the view when they change
-// (also with the back button). Links in the view may open in a new tab.
+// are the page address's parameters (/news/3 or ?news=3), jalaops.navigate(params)
+// changes them (with { replace: true } without a new history entry, e.g. to
+// move from an old address to the current one), and a "jalaops:params" event tells the view when they change
+// (also with the back button). The module's routes decide the addresses
+// (moduleLocation). jalaops.setPage({ title, description }) gives the page
+// its browser tab title and description, e.g. a news item's, until the
+// address changes. Links in the view may open in a new tab.
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -26,7 +31,7 @@ const height = ref(240)
 
 // The parameters when the page opened. Later changes are sent as messages,
 // so the frame isn't drawn again.
-const initialParams = moduleParams(route.query)
+const initialParams = pageParams(route)
 
 // The app's colours for the module's styles, in the light and the dark theme.
 const STYLE = `
@@ -61,8 +66,11 @@ const BRIDGE = `
       parent.postMessage({ type: 'jalaops:run', id, input }, '*')
       return new Promise((resolve, reject) => pending.set(id, { resolve, reject }))
     },
-    navigate(params = {}) {
-      parent.postMessage({ type: 'jalaops:navigate', params }, '*')
+    navigate(params = {}, options = {}) {
+      parent.postMessage({ type: 'jalaops:navigate', params, replace: options.replace === true }, '*')
+    },
+    setPage(page = {}) {
+      parent.postMessage({ type: 'jalaops:page', title: page.title, description: page.description }, '*')
     },
   }
   addEventListener('message', (event) => {
@@ -124,7 +132,7 @@ async function onMessage(event) {
     return
   }
 
-  const { type, id, input, params, height: reported } = event.data ?? {}
+  const { type, id, input, params, replace, height: reported, title, description } = event.data ?? {}
 
   if (type === 'jalaops:height') {
     height.value = Math.min(Math.max(Math.ceil(Number(reported) || 0), 120), 20000)
@@ -132,7 +140,12 @@ async function onMessage(event) {
   }
 
   if (type === 'jalaops:navigate') {
-    navigate(params)
+    navigate(params, replace === true)
+    return
+  }
+
+  if (type === 'jalaops:page') {
+    setPage(title, description)
     return
   }
 
@@ -152,21 +165,44 @@ async function onMessage(event) {
   }
 }
 
-// A new page of the view: a new address in the browser's history, from the top.
-async function navigate(params) {
-  await router.push({ query: moduleParams(params) })
+// The view's page title and description, as short single-line texts. An
+// empty title keeps the module's name.
+function setPage(title, description) {
+  const clean = (text, max) => (typeof text === 'string' ? text.replace(/\s+/g, ' ').trim().slice(0, max) : '')
+
+  document.title = pageTitle(clean(title, 150) || props.module.name)
+  setDescription(clean(description, 300) || null)
+}
+
+// A new page of the view: a new address in the browser's history, from the
+// top. Replacing changes only the address of the page that's open.
+async function navigate(params, replace) {
+  const location = moduleLocation(props.module, params)
+
+  if (replace) {
+    await router.replace(location)
+    return
+  }
+
+  await router.push(location)
   window.scrollTo({ top: 0 })
 }
 
 // The address changed (navigate, the back button or a link): the view draws
 // the page for the new parameters.
 watch(
-  () => route.query,
-  (query) => reply({ type: 'jalaops:params', params: moduleParams(query) }),
+  () => route.fullPath,
+  () => {
+    setDescription(null)
+    reply({ type: 'jalaops:params', params: pageParams(route) })
+  },
 )
 
 onMounted(() => window.addEventListener('message', onMessage))
-onBeforeUnmount(() => window.removeEventListener('message', onMessage))
+onBeforeUnmount(() => {
+  window.removeEventListener('message', onMessage)
+  setDescription(null)
+})
 </script>
 
 <template>

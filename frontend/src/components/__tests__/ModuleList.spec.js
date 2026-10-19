@@ -1,14 +1,27 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
+import { syncModuleRoutes } from '@/router/moduleRoutes'
 import ModuleList from '../ModuleList.vue'
+
+const router = {}
+
+vi.mock('vue-router', async (importOriginal) => ({ ...(await importOriginal()), useRouter: () => router }))
+vi.mock('@/router/moduleRoutes', () => ({ syncModuleRoutes: vi.fn() }))
 
 function jsonResponse(body, status = 200) {
   return { ok: status < 400, status, json: () => Promise.resolve(body) }
 }
 
 const modules = [
-  { id: 'hello', name: 'Hei maailma', description: 'Tervehtii ja laskee.', version: '1.0.0', enabled: true },
-  { id: 'route', name: 'Päivän reitti', description: 'Järjestää käynnit.', version: '0.1.0', enabled: false },
+  { id: 'hello', name: 'Hei maailma', description: 'Tervehtii ja laskee.', version: '1.0.0', enabled: true, routes: [] },
+  {
+    id: 'route',
+    name: 'Päivän reitti',
+    description: 'Järjestää käynnit.',
+    version: '0.1.0',
+    enabled: false,
+    routes: [{ path: '/route', params: {} }],
+  },
 ]
 
 function mountList() {
@@ -41,7 +54,7 @@ describe('ModuleList', () => {
 
     const links = wrapper.findAllComponents(RouterLinkStub)
     expect(links).toHaveLength(1)
-    expect(links[0].props('to')).toBe('/tools/modules/hello')
+    expect(links[0].props('to')).toEqual({ path: '/tools/modules/hello', query: {} })
   })
 
   it('says when there are no modules', async () => {
@@ -80,7 +93,9 @@ describe('ModuleList', () => {
     expect(fetch).toHaveBeenLastCalledWith('/api/modules/route', expect.objectContaining({ method: 'PATCH' }))
     expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ enabled: true })
     expect(toggle.attributes('aria-checked')).toBe('true')
-    expect(wrapper.findAllComponents(RouterLinkStub)).toHaveLength(2)
+    // The module's own address opens it, and works now that it's on.
+    expect(wrapper.findAllComponents(RouterLinkStub)[1].props('to')).toEqual({ path: '/route', query: {} })
+    expect(syncModuleRoutes).toHaveBeenCalledWith(router, [{ ...modules[1], enabled: true }])
   })
 
   it('says when switching a module fails', async () => {

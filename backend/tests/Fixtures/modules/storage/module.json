@@ -3,6 +3,7 @@
     "enabled": true,
     "storage": true,
     "max_input_kb": 20,
+    "routes": [{ "path": "/stored/:news" }],
     "widgets": [
         { "name": "latest", "title": "Viimeisimmät", "type": "feed", "hook": "dashboard.top", "input": { "action": "feed" } }
     ]

@@ -14,7 +14,9 @@ use Illuminate\Support\Str;
  * package with a module.json at its root is one module, named after the
  * package (jalaops/weather is "weather"); otherwise it's a folder of modules.
  * Whether a module is on comes from modules:enable / modules:disable, or
- * else from the "enabled" in its module.json (off by default).
+ * else from the "enabled" in its module.json (off by default). A module's
+ * routes give its view's pages addresses of their own (/news/:news); each
+ * first part of an address belongs to one module.
  */
 class ModuleRegistry
 {
@@ -53,6 +55,15 @@ class ModuleRegistry
     // The kinds of widgets the app can draw: "feed" is a list of items with
     // a title, text, date and image, each opening the module's page.
     private const WIDGET_TYPES = ['feed'];
+
+    // A route's path: parts of lowercase letters, numbers and hyphens, or
+    // :name for a parameter, starting with a fixed part (/news/:news/edit).
+    private const ROUTE_PATTERN = '#^/[a-z0-9][a-z0-9-]*(/([a-z0-9][a-z0-9-]*|:[a-z][a-z0-9_]*))*$#';
+
+    // Upper limits for a module's routes, and for the parts of one path.
+    private const MAX_ROUTES = 10;
+
+    private const MAX_ROUTE_PARTS = 6;
 
     /**
      * @param  string  $path  The app's own modules folder
@@ -114,7 +125,7 @@ class ModuleRegistry
 
         ksort($modules);
 
-        return $modules;
+        return $this->withoutClashingRoutes($modules);
     }
 
     /**
@@ -126,7 +137,10 @@ class ModuleRegistry
             return $this->load($id, null, null);
         }
 
-        return $this->load($id, $this->locations()[$id] ?? null, ModuleSetting::find($id)?->enabled);
+        $module = $this->load($id, $this->locations()[$id] ?? null, ModuleSetting::find($id)?->enabled);
+
+        // Whether another module has its addresses is known only among all of them.
+        return $module->routes === [] ? $module : ($this->all()[$id] ?? $module);
     }
 
     /**
@@ -141,6 +155,38 @@ class ModuleRegistry
         ModuleSetting::query()->updateOrCreate(['module' => $id], ['enabled' => $enabled]);
 
         return $this->find($id);
+    }
+
+    /**
+     * Each first part of an address (/news) belongs to the first module by
+     * id that uses it. A module that uses another's keeps working at
+     * /tools/modules/<id>, but without its routes.
+     *
+     * @param  array<string, PythonModule>  $modules
+     * @return array<string, PythonModule>
+     */
+    private function withoutClashingRoutes(array $modules): array
+    {
+        $owners = [];
+
+        foreach ($modules as $id => $module) {
+            $firsts = array_unique(array_map(fn (array $route) => explode('/', $route['path'])[1], $module->routes));
+            $taken = array_filter($firsts, fn (string $first) => isset($owners[$first]));
+
+            if ($taken !== []) {
+                $first = reset($taken);
+                Log::warning("Module '{$id}': its routes were skipped, module '{$owners[$first]}' already has /{$first}.");
+                $modules[$id] = $module->withoutRoutes();
+
+                continue;
+            }
+
+            foreach ($firsts as $first) {
+                $owners[$first] = $id;
+            }
+        }
+
+        return $modules;
     }
 
     /**
@@ -248,7 +294,62 @@ class ModuleRegistry
             storage: ($manifest['storage'] ?? false) === true,
             maxInputBytes: $this->maxInputKb($id, $manifest) * 1000,
             widgets: array_map(fn ($widget) => $this->widget($id, $widget), $this->listOf($id, $manifest, 'widgets')),
+            routes: $this->routes($id, $this->listOf($id, $manifest, 'routes')),
         );
+    }
+
+    /**
+     * The view's pages at addresses of their own: a path, and fixed
+     * parameters the page gets besides the path's (/news/new gives view=new).
+     *
+     * @param  list<mixed>  $routes
+     * @return list<array{path: string, params: array<string, string>}>
+     */
+    private function routes(string $id, array $routes): array
+    {
+        if (count($routes) > self::MAX_ROUTES) {
+            throw new ModuleException("Module '{$id}': a module can have at most ".self::MAX_ROUTES.' routes.');
+        }
+
+        $reserved = config('modules.reserved_paths');
+        $patterns = [];
+
+        return array_map(function ($route) use ($id, $reserved, &$patterns) {
+            $path = is_array($route) ? ($route['path'] ?? null) : null;
+            $params = is_array($route) ? ($route['params'] ?? []) : null;
+
+            if (! is_string($path) || ! preg_match(self::ROUTE_PATTERN, $path) || substr_count($path, '/') > self::MAX_ROUTE_PARTS) {
+                throw new ModuleException("Module '{$id}': each route needs a path like /news or /news/:news (a-z, 0-9, -, at most ".self::MAX_ROUTE_PARTS.' parts, the first one fixed).');
+            }
+
+            $parts = explode('/', substr($path, 1));
+            $names = array_map(fn (string $part) => substr($part, 1), array_filter($parts, fn (string $part) => $part[0] === ':'));
+
+            if (in_array($parts[0], $reserved, true)) {
+                throw new ModuleException("Module '{$id}': the route {$path} can't start with /{$parts[0]}, the app uses it.");
+            }
+
+            if (
+                ! is_array($params) || ($params !== [] && array_is_list($params))
+                || array_filter(array_keys($params), fn ($name) => ! is_string($name) || ! preg_match(self::FIELD_PATTERN, $name)) !== []
+                || array_filter($params, fn ($value) => ! is_string($value) || $value === '' || mb_strlen($value) > 200) !== []
+                || count(array_unique($names)) !== count($names)
+                || array_intersect($names, array_keys($params)) !== []
+            ) {
+                throw new ModuleException("Module '{$id}': the route {$path} needs different names for its parameters, and its params must be an object of short texts.");
+            }
+
+            // /news/:news and /news/:id are the same address.
+            $pattern = preg_replace('#/:[a-z0-9_]+#', '/:', $path);
+
+            if (isset($patterns[$pattern])) {
+                throw new ModuleException("Module '{$id}': two routes have the address {$path}.");
+            }
+
+            $patterns[$pattern] = true;
+
+            return ['path' => $path, 'params' => $params];
+        }, $routes);
     }
 
     /**

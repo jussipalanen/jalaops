@@ -1,9 +1,12 @@
 <script setup>
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { moduleLocation } from '@/modules'
 
 // A module's widget, drawn by the app from what the module returned: a feed
 // of items (title, text, date, image, tags). Each item opens the module's
-// page with the item's parameters (/tools/modules/news?news=3). The image is
+// page with the item's parameters, at the module's own address if it has one
+// (/news/3, or else /tools/modules/news?news=3). The image is
 // always a data URL (the backend checks it), so nothing loads from elsewhere.
 
 const props = defineProps({
@@ -23,8 +26,10 @@ function formatDate(iso) {
   return Number.isNaN(date.getTime()) ? '' : dateTime.format(date)
 }
 
+const module = computed(() => ({ id: props.widget.module, routes: props.widget.routes }))
+
 function itemLink(item) {
-  return { path: `/tools/modules/${props.widget.module}`, query: item.params }
+  return moduleLocation(module.value, item.params)
 }
 </script>
 
@@ -33,7 +38,7 @@ function itemLink(item) {
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
       <h2 :id="`widget-${widget.id}`" class="text-lg font-semibold">{{ widget.title }}</h2>
       <RouterLink
-        :to="`/tools/modules/${widget.module}`"
+        :to="moduleLocation(module)"
         class="inline-flex min-h-11 items-center text-sm font-semibold text-primary-700 hover:underline lg:min-h-8 dark:text-primary-400"
       >
         Näytä kaikki →

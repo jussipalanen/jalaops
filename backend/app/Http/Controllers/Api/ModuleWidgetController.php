@@ -25,7 +25,7 @@ class ModuleWidgetController extends Controller
      * Each widget runs its module, so only the app's own pages may call this,
      * at most 30 times per minute per visitor.
      *
-     * @response array{hooks: list<array{id: string, label: string}>, data: list<array{id: string, module: string, module_name: string, title: string, type: string, hook: string, items: list<array{title: string, text: string|null, date: string|null, image: string|null, tags: list<string>, params: array<string, string>}>, error: string|null}>}
+     * @response array{hooks: list<array{id: string, label: string}>, data: list<array{id: string, module: string, module_name: string, routes: list<array{path: string, params: array<string, string>}>, title: string, type: string, hook: string, items: list<array{title: string, text: string|null, date: string|null, image: string|null, tags: list<string>, params: array<string, string>}>, error: string|null}>}
      */
     public function dashboard(ModuleWidgets $widgets): JsonResponse
     {

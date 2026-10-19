@@ -1,13 +1,16 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { apiGet, apiRequestMethod } from '@/api/client'
+import { moduleLocation } from '@/modules'
+import { syncModuleRoutes } from '@/router/moduleRoutes'
 
 // The backend's Python modules and whether each one is on. Modules are
 // optional: users turn them on and off here, and the setting is the same for
 // everyone. An enabled module has its own page, and its widgets show on the
 // dashboard.
 
+const router = useRouter()
 const modules = ref([])
 const loading = ref(true)
 const error = ref('')
@@ -31,6 +34,8 @@ async function toggle(module) {
   try {
     const updated = (await apiRequestMethod('PATCH', `/modules/${encodeURIComponent(module.id)}`, { enabled: !module.enabled })).data
     module.enabled = updated.enabled
+    // Its pages' addresses (/news) work only while it's on.
+    syncModuleRoutes(router, [updated])
   } catch {
     error.value = `Moduulin ${module.name} ${module.enabled ? 'poistaminen käytöstä' : 'käyttöönotto'} epäonnistui. Yritä hetken kuluttua uudelleen.`
   } finally {
@@ -84,7 +89,7 @@ async function toggle(module) {
             </span>
             {{ module.enabled ? 'Käytössä' : 'Pois käytöstä' }}
           </button>
-          <RouterLink v-if="module.enabled" :to="`/tools/modules/${module.id}`" class="btn btn-secondary">Avaa</RouterLink>
+          <RouterLink v-if="module.enabled" :to="moduleLocation(module)" class="btn btn-secondary">Avaa</RouterLink>
         </div>
       </li>
     </ul>
