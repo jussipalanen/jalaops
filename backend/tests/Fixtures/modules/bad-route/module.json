@@ -1,0 +1,6 @@
+{
+    "name": "Bad route",
+    "routes": [
+        { "path": "/tools/notes" }
+    ]
+}

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { mobileAppsPage } from '@/features'
 import { pageTitle, SITE_TITLE } from '@/pageTitle'
 import HomeView from '../views/HomeView.vue'
+import { useModuleRoutes } from './moduleRoutes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -79,7 +80,8 @@ const router = createRouter({
       component: () => import('../views/ToolsView.vue'),
     },
     {
-      // A Python module's page, drawn from its module.json.
+      // A Python module's page, drawn from its module.json. Modules with
+      // routes of their own also have addresses like /news (moduleRoutes.js).
       path: '/tools/modules/:id',
       name: 'module',
       meta: { title: 'Moduuli' },
@@ -106,8 +108,16 @@ const router = createRouter({
       component: () => import('../views/RequestMapView.vue'),
       meta: { title: 'Kartta', fullScreen: true },
     },
+    {
+      path: '/:path(.*)*',
+      name: 'not-found',
+      meta: { title: 'Sivua ei löytynyt' },
+      component: () => import('../views/NotFoundView.vue'),
+    },
   ],
 })
+
+useModuleRoutes(router)
 
 // Each page has its own browser tab title; the home page keeps the full name.
 router.afterEach((to) => {

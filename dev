@@ -28,6 +28,11 @@ Backend (Laravel):
   modules:search [owner]
                      List the GitHub repositories with the topic jalaops-module (Python
                      module packages) and how to install each; default owner: your gh account
+  modules:add <folder | archive | URL> [options]
+                     Check and add a Python module (a folder or an archive on this machine,
+                     an archive URL or a git URL); --check only checks it
+  modules:remove <id> [--purge]
+                     Remove a Python module (--purge also deletes its data)
   migrate            Run database migrations
   fresh              Drop all tables, migrate and seed the database
   shell              Open a shell in the backend container
@@ -152,10 +157,28 @@ case "$command" in
                 echo "$repo: $package, installed"
             else
                 echo "$repo: $package, install with"
-                echo "    ./dev composer config repositories.${repo#*/} vcs $url.git && ./dev composer require $package"
+                echo "    ./dev modules:add $url.git"
             fi
         done
         ;;
+    modules:add)
+        # The backend container sees only backend/, so a folder or an archive
+        # on this machine is copied into a temporary folder in it first.
+        [ -n "$1" ] || { echo "Usage: ./dev modules:add <folder | archive | URL> [options]"; exit 1; }
+        source="$1"
+        shift
+        if [ -e "$source" ]; then
+            target="/tmp/jalaops-module-upload-$$"
+            $COMPOSE exec -T backend mkdir -p "$target"
+            $COMPOSE cp "$source" "backend:$target/"
+            status=0
+            $COMPOSE exec backend php artisan modules:add "$target/$(basename "$source")" "$@" || status=$?
+            $COMPOSE exec -T backend rm -rf "$target"
+            exit "$status"
+        fi
+        $COMPOSE exec backend php artisan modules:add "$source" "$@"
+        ;;
+    modules:remove) $COMPOSE exec backend php artisan modules:remove "$@" ;;
     android)
         # Builds in the jalaops-android image (Node, Java 17, Android SDK, Bubblewrap).
         # The upload key stays outside the repository, in ~/.jalaops/android.

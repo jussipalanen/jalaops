@@ -14,7 +14,9 @@ use Illuminate\Support\Str;
  * package with a module.json at its root is one module, named after the
  * package (jalaops/weather is "weather"); otherwise it's a folder of modules.
  * Whether a module is on comes from modules:enable / modules:disable, or
- * else from the "enabled" in its module.json (off by default).
+ * else from the "enabled" in its module.json (off by default). A module's
+ * routes give its view's pages addresses of their own (/news/:news); each
+ * first part of an address belongs to one module.
  */
 class ModuleRegistry
 {
@@ -42,6 +44,26 @@ class ModuleRegistry
     // Form field types the app can draw: text, a number, a comma-separated
     // list of numbers, longer text, and a choice from options.
     private const FIELD_TYPES = ['text', 'number', 'numbers', 'textarea', 'select'];
+
+    // The input the API sends a module by default, and the most a module can
+    // ask for with "max_input_kb" (images as data URLs need more). Vercel
+    // forwards at most 4.5 MB to the backend.
+    private const DEFAULT_INPUT_KB = 10;
+
+    private const MAX_INPUT_KB = 4096;
+
+    // The kinds of widgets the app can draw: "feed" is a list of items with
+    // a title, text, date and image, each opening the module's page.
+    private const WIDGET_TYPES = ['feed'];
+
+    // A route's path: parts of lowercase letters, numbers and hyphens, or
+    // :name for a parameter, starting with a fixed part (/news/:news/edit).
+    private const ROUTE_PATTERN = '#^/[a-z0-9][a-z0-9-]*(/([a-z0-9][a-z0-9-]*|:[a-z][a-z0-9_]*))*$#';
+
+    // Upper limits for a module's routes, and for the parts of one path.
+    private const MAX_ROUTES = 10;
+
+    private const MAX_ROUTE_PARTS = 6;
 
     /**
      * @param  string  $path  The app's own modules folder
@@ -103,7 +125,7 @@ class ModuleRegistry
 
         ksort($modules);
 
-        return $modules;
+        return $this->withoutClashingRoutes($modules);
     }
 
     /**
@@ -115,7 +137,32 @@ class ModuleRegistry
             return $this->load($id, null, null);
         }
 
-        return $this->load($id, $this->locations()[$id] ?? null, ModuleSetting::find($id)?->enabled);
+        $module = $this->load($id, $this->locations()[$id] ?? null, ModuleSetting::find($id)?->enabled);
+
+        // Whether another module has its addresses is known only among all of them.
+        return $module->routes === [] ? $module : ($this->all()[$id] ?? $module);
+    }
+
+    /**
+     * Loads a module from any folder with the same checks as an installed
+     * one, e.g. to check a module before it's added (modules:add). Whether
+     * it's on is what it would be once added.
+     *
+     * @throws ModuleException when it's set up wrongly
+     */
+    public function inspect(string $directory, string $id): PythonModule
+    {
+        return $this->load($id, ['directory' => $directory, 'package' => null], ModuleSetting::find($id)?->enabled);
+    }
+
+    /**
+     * Where an installed module is, also when it's set up wrongly, or null.
+     *
+     * @return array{directory: string, package: string|null}|null
+     */
+    public function locate(string $id): ?array
+    {
+        return preg_match(self::ID_PATTERN, $id) ? ($this->locations()[$id] ?? null) : null;
     }
 
     /**
@@ -130,6 +177,38 @@ class ModuleRegistry
         ModuleSetting::query()->updateOrCreate(['module' => $id], ['enabled' => $enabled]);
 
         return $this->find($id);
+    }
+
+    /**
+     * Each first part of an address (/news) belongs to the first module by
+     * id that uses it. A module that uses another's keeps working at
+     * /tools/modules/<id>, but without its routes.
+     *
+     * @param  array<string, PythonModule>  $modules
+     * @return array<string, PythonModule>
+     */
+    private function withoutClashingRoutes(array $modules): array
+    {
+        $owners = [];
+
+        foreach ($modules as $id => $module) {
+            $firsts = array_unique(array_map(fn (array $route) => explode('/', $route['path'])[1], $module->routes));
+            $taken = array_filter($firsts, fn (string $first) => isset($owners[$first]));
+
+            if ($taken !== []) {
+                $first = reset($taken);
+                Log::warning("Module '{$id}': its routes were skipped, module '{$owners[$first]}' already has /{$first}.");
+                $modules[$id] = $module->withoutRoutes();
+
+                continue;
+            }
+
+            foreach ($firsts as $first) {
+                $owners[$first] = $id;
+            }
+        }
+
+        return $modules;
     }
 
     /**
@@ -234,7 +313,65 @@ class ModuleRegistry
             view: $view,
             assets: $this->assets($id, $directory, $this->listOf($id, $manifest, 'assets')),
             package: $location['package'],
+            storage: ($manifest['storage'] ?? false) === true,
+            maxInputBytes: $this->maxInputKb($id, $manifest) * 1000,
+            widgets: array_map(fn ($widget) => $this->widget($id, $widget), $this->listOf($id, $manifest, 'widgets')),
+            routes: $this->routes($id, $this->listOf($id, $manifest, 'routes')),
         );
+    }
+
+    /**
+     * The view's pages at addresses of their own: a path, and fixed
+     * parameters the page gets besides the path's (/news/new gives view=new).
+     *
+     * @param  list<mixed>  $routes
+     * @return list<array{path: string, params: array<string, string>}>
+     */
+    private function routes(string $id, array $routes): array
+    {
+        if (count($routes) > self::MAX_ROUTES) {
+            throw new ModuleException("Module '{$id}': a module can have at most ".self::MAX_ROUTES.' routes.');
+        }
+
+        $reserved = config('modules.reserved_paths');
+        $patterns = [];
+
+        return array_map(function ($route) use ($id, $reserved, &$patterns) {
+            $path = is_array($route) ? ($route['path'] ?? null) : null;
+            $params = is_array($route) ? ($route['params'] ?? []) : null;
+
+            if (! is_string($path) || ! preg_match(self::ROUTE_PATTERN, $path) || substr_count($path, '/') > self::MAX_ROUTE_PARTS) {
+                throw new ModuleException("Module '{$id}': each route needs a path like /news or /news/:news (a-z, 0-9, -, at most ".self::MAX_ROUTE_PARTS.' parts, the first one fixed).');
+            }
+
+            $parts = explode('/', substr($path, 1));
+            $names = array_map(fn (string $part) => substr($part, 1), array_filter($parts, fn (string $part) => $part[0] === ':'));
+
+            if (in_array($parts[0], $reserved, true)) {
+                throw new ModuleException("Module '{$id}': the route {$path} can't start with /{$parts[0]}, the app uses it.");
+            }
+
+            if (
+                ! is_array($params) || ($params !== [] && array_is_list($params))
+                || array_filter(array_keys($params), fn ($name) => ! is_string($name) || ! preg_match(self::FIELD_PATTERN, $name)) !== []
+                || array_filter($params, fn ($value) => ! is_string($value) || $value === '' || mb_strlen($value) > 200) !== []
+                || count(array_unique($names)) !== count($names)
+                || array_intersect($names, array_keys($params)) !== []
+            ) {
+                throw new ModuleException("Module '{$id}': the route {$path} needs different names for its parameters, and its params must be an object of short texts.");
+            }
+
+            // /news/:news and /news/:id are the same address.
+            $pattern = preg_replace('#/:[a-z0-9_]+#', '/:', $path);
+
+            if (isset($patterns[$pattern])) {
+                throw new ModuleException("Module '{$id}': two routes have the address {$path}.");
+            }
+
+            $patterns[$pattern] = true;
+
+            return ['path' => $path, 'params' => $params];
+        }, $routes);
     }
 
     /**
@@ -338,6 +475,50 @@ class ModuleRegistry
         }
 
         return array_filter(['name' => $result['name'], 'label' => $result['label'], 'decimals' => $decimals], fn ($value) => $value !== null);
+    }
+
+    /**
+     * @param  array<string, mixed>  $manifest
+     */
+    private function maxInputKb(string $id, array $manifest): int
+    {
+        $kb = $manifest['max_input_kb'] ?? self::DEFAULT_INPUT_KB;
+
+        if (! is_int($kb) || $kb < 1 || $kb > self::MAX_INPUT_KB) {
+            throw new ModuleException("Module '{$id}': max_input_kb must be a whole number from 1 to ".self::MAX_INPUT_KB.'.');
+        }
+
+        return $kb;
+    }
+
+    /**
+     * A widget the module shows in one of the app's hooks (config/modules.php).
+     *
+     * @return array{name: string, title: string, type: string, hook: string, input: array<string, mixed>}
+     */
+    private function widget(string $id, mixed $widget): array
+    {
+        $hooks = array_keys(config('modules.hooks'));
+        $input = $widget['input'] ?? [];
+
+        if (
+            ! is_array($widget)
+            || ! is_string($widget['name'] ?? null) || ! preg_match(self::ID_PATTERN, $widget['name'])
+            || ! is_string($widget['title'] ?? null) || trim($widget['title']) === ''
+            || ! in_array($widget['type'] ?? 'feed', self::WIDGET_TYPES, true)
+            || ! in_array($widget['hook'] ?? null, $hooks, true)
+            || ! is_array($input) || ($input !== [] && array_is_list($input))
+        ) {
+            throw new ModuleException("Module '{$id}': each widget needs a name (a-z, 0-9, -), a title, a type (".implode(', ', self::WIDGET_TYPES).'), a hook ('.implode(', ', $hooks).') and an input object.');
+        }
+
+        return [
+            'name' => $widget['name'],
+            'title' => $widget['title'],
+            'type' => $widget['type'] ?? 'feed',
+            'hook' => $widget['hook'],
+            'input' => $input,
+        ];
     }
 
     private function isNamed(mixed $item): bool

@@ -47,7 +47,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('imports', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('geocode-suggest', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
 
-        // Each module run starts a Python process on the server.
-        RateLimiter::for('modules', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        // Each module run starts a Python process on the server. A module's
+        // view can have several pages (a list, an item, a form), each a run.
+        RateLimiter::for('modules', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+        RateLimiter::for('module-settings', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
+        // Loading the dashboard's widgets runs each widget's module.
+        RateLimiter::for('module-widgets', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
     }
 }

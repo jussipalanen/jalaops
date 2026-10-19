@@ -1,10 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { reactive } from 'vue'
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
 import ModuleView from '../ModuleView.vue'
 
+// The page's address: /tools/modules/hello, or a module's own route.
+const route = reactive({ params: { id: 'hello' }, query: {}, meta: {}, fullPath: '/tools/modules/hello' })
+
+function goTo({ path, query = {} }) {
+  route.query = query
+  route.fullPath = `${path}?${new URLSearchParams(query)}`
+}
+
+const router = {
+  push: vi.fn(async (location) => goTo(location)),
+  replace: vi.fn(async (location) => goTo(location)),
+}
+
 vi.mock('vue-router', async (importOriginal) => ({
   ...(await importOriginal()),
-  useRoute: () => ({ params: { id: 'hello' } }),
+  useRoute: () => route,
+  useRouter: () => router,
 }))
 
 function jsonResponse(body, status = 200) {
@@ -48,6 +63,9 @@ describe('ModuleView', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     document.body.innerHTML = ''
+    Object.assign(route, { params: { id: 'hello' }, query: {}, meta: {}, fullPath: '/tools/modules/hello' })
+    router.push.mockClear()
+    router.replace.mockClear()
   })
 
   it('draws a form from the module and shows the results', async () => {
@@ -137,7 +155,8 @@ describe('ModuleView', () => {
       const wrapper = await mountView(withView)
 
       const frame = frameOf(wrapper)
-      expect(frame.getAttribute('sandbox')).toBe('allow-scripts allow-forms')
+      // Popups only for links, which open in a new tab outside the sandbox.
+      expect(frame.getAttribute('sandbox')).toBe('allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox')
       expect(frame.getAttribute('srcdoc')).toContain('<body><p>Oma näkymä</p></body>')
       expect(frame.getAttribute('srcdoc')).toContain("default-src 'none'")
       expect(frame.getAttribute('srcdoc')).toContain('window.jalaops')
@@ -199,6 +218,127 @@ describe('ModuleView', () => {
       expect(fetch).toHaveBeenCalledTimes(1)
     })
 
+    it("gives the view the page address's parameters, safely escaped", async () => {
+      route.query = { news: '3', tag: '</script><script>alert(1)', 'Bad-Key': 'x', list: ['a', 'b'] }
+      const wrapper = await mountView(withView)
+
+      const srcdoc = frameOf(wrapper).getAttribute('srcdoc')
+      expect(srcdoc).toContain(
+        '<script type="application/json" id="jalaops-params">{"news":"3","tag":"\\u003c/script>\\u003cscript>alert(1)"}</script>',
+      )
+      expect(srcdoc.indexOf('jalaops-params')).toBeLessThan(srcdoc.indexOf('window.jalaops'))
+    })
+
+    it('moves to another page of the view and tells the view', async () => {
+      const wrapper = await mountView(withView)
+      const postMessage = vi.spyOn(frameOf(wrapper).contentWindow, 'postMessage')
+      const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+
+      await fromFrame(wrapper, { type: 'jalaops:navigate', params: { news: 3, evil: { a: 1 } } })
+
+      expect(router.push).toHaveBeenCalledWith({ path: '/tools/modules/hello', query: { news: '3' } })
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0 })
+      expect(postMessage).toHaveBeenLastCalledWith({ type: 'jalaops:params', params: { news: '3' } }, '*')
+      // The frame isn't drawn again.
+      expect(frameOf(wrapper).getAttribute('srcdoc')).toContain('{}</script>')
+    })
+
+    describe('with routes of its own', () => {
+      const news = {
+        ...withView,
+        id: 'news',
+        routes: [
+          { path: '/news', params: {} },
+          { path: '/news/new', params: { view: 'new' } },
+          { path: '/news/:news', params: {} },
+          { path: '/news/:news/edit', params: { view: 'edit' } },
+        ],
+      }
+
+      it("gives the view the path's and the route's parameters", async () => {
+        Object.assign(route, {
+          params: { news: 'syyshuollot' },
+          query: { tag: 'huolto' },
+          meta: { module: 'news', moduleParams: { view: 'edit' } },
+          fullPath: '/news/syyshuollot/edit?tag=huolto',
+        })
+        const wrapper = await mountView(news)
+
+        expect(fetch).toHaveBeenCalledWith('/api/modules/news', expect.any(Object))
+        expect(frameOf(wrapper).getAttribute('srcdoc')).toContain('{"tag":"huolto","view":"edit","news":"syyshuollot"}</script>')
+        expect(router.replace).not.toHaveBeenCalled()
+      })
+
+      it("moves to the route that fits the parameters", async () => {
+        Object.assign(route, { params: {}, meta: { module: 'news', moduleParams: {} }, fullPath: '/news' })
+        const wrapper = await mountView(news)
+
+        for (const [params, location] of [
+          [{ news: 'syyshuollot' }, { path: '/news/syyshuollot', query: {} }],
+          [{ news: '3', view: 'edit' }, { path: '/news/3/edit', query: {} }],
+          [{ view: 'new' }, { path: '/news/new', query: {} }],
+          [{ tag: 'huolto' }, { path: '/news', query: { tag: 'huolto' } }],
+          [{ news: 'a b/c', page: '2' }, { path: '/news/a%20b%2Fc', query: { page: '2' } }],
+        ]) {
+          await fromFrame(wrapper, { type: 'jalaops:navigate', params })
+          expect(router.push).toHaveBeenLastCalledWith(location)
+        }
+      })
+
+      it('can change the address without a new history entry', async () => {
+        Object.assign(route, { params: { news: '3' }, meta: { module: 'news', moduleParams: {} }, fullPath: '/news/3' })
+        const wrapper = await mountView(news)
+        const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+        scrollTo.mockClear()
+
+        await fromFrame(wrapper, { type: 'jalaops:navigate', params: { news: 'syyshuollot' }, replace: true })
+
+        expect(router.replace).toHaveBeenCalledWith({ path: '/news/syyshuollot', query: {} })
+        expect(router.push).not.toHaveBeenCalled()
+        expect(scrollTo).not.toHaveBeenCalled()
+      })
+
+      it('sends an old address to the module\'s own', async () => {
+        Object.assign(route, { params: { id: 'news' }, query: { news: '3' }, fullPath: '/tools/modules/news?news=3' })
+        const wrapper = await mountView(news)
+
+        expect(router.replace).toHaveBeenCalledWith({ path: '/news/3', query: {} })
+        expect(wrapper.find('iframe').exists()).toBe(true)
+      })
+
+      it('stays at the old address while the module is off', async () => {
+        Object.assign(route, { params: { id: 'news' } })
+        await mountView({ ...news, enabled: false })
+
+        expect(router.replace).not.toHaveBeenCalled()
+      })
+    })
+
+    it('gives the page the title and description the view asks for, until the address changes', async () => {
+      const meta = document.createElement('meta')
+      meta.name = 'description'
+      meta.content = 'Sovelluksen kuvaus'
+      document.head.append(meta)
+      const wrapper = await mountView(withView)
+      expect(document.title).toBe('Hei maailma – JalaOps')
+
+      await fromFrame(wrapper, { type: 'jalaops:page', title: ' Syyshuollot\n alkavat ', description: 'Suodattimet vaihdetaan.' })
+      expect(document.title).toBe('Syyshuollot alkavat – JalaOps')
+      expect(meta.content).toBe('Suodattimet vaihdetaan.')
+
+      await fromFrame(wrapper, { type: 'jalaops:page', title: { evil: 1 }, description: 'x'.repeat(500) })
+      expect(document.title).toBe('Hei maailma – JalaOps')
+      expect(meta.content).toHaveLength(300)
+
+      await fromFrame(wrapper, { type: 'jalaops:navigate', params: {} })
+      expect(meta.content).toBe('Sovelluksen kuvaus')
+
+      await fromFrame(wrapper, { type: 'jalaops:page', description: 'Taas' })
+      wrapper.unmount()
+      expect(meta.content).toBe('Sovelluksen kuvaus')
+      meta.remove()
+    })
+
     it('fits its height to the content, within limits', async () => {
       const wrapper = await mountView(withView)
 
@@ -206,7 +346,7 @@ describe('ModuleView', () => {
       expect(frameOf(wrapper).style.height).toBe('513px')
 
       await fromFrame(wrapper, { type: 'jalaops:height', height: 99999 })
-      expect(frameOf(wrapper).style.height).toBe('4000px')
+      expect(frameOf(wrapper).style.height).toBe('20000px')
     })
   })
 })

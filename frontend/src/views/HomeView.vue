@@ -4,7 +4,15 @@ import { RouterLink } from 'vue-router'
 import { apiGet } from '@/api/client'
 import AiStatusOverview from '@/components/AiStatusOverview.vue'
 import DashboardCounts from '@/components/DashboardCounts.vue'
+import DashboardLayoutEditor from '@/components/DashboardLayoutEditor.vue'
+import ModuleHook from '@/components/ModuleHook.vue'
+import { useDashboardWidgets } from '@/composables/useDashboardWidgets'
 import { priorityLabels, statusLabels } from '@/labels'
+
+// Module widgets go in the dashboard's hooks (ModuleHook); users can move or
+// hide them for themselves with "Muokkaa etusivua".
+const { hooks, widgets, customized, load: loadWidgets, inHook, place, reset } = useDashboardWidgets()
+const editing = ref(false)
 
 // 'loading' | 'ok' | 'error'
 const apiStatus = ref('loading')
@@ -14,6 +22,8 @@ const apiStatusClasses = {
   ok: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
   error: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
 }
+
+onMounted(loadWidgets)
 
 onMounted(async () => {
   try {
@@ -66,9 +76,15 @@ onMounted(async () => {
       </div>
     </div>
 
+    <ModuleHook name="dashboard.top" :widgets="inHook('dashboard.top')" />
+
     <DashboardCounts />
 
+    <ModuleHook name="dashboard.after_counts" :widgets="inHook('dashboard.after_counts')" />
+
     <AiStatusOverview />
+
+    <ModuleHook name="dashboard.after_overview" :widgets="inHook('dashboard.after_overview')" />
 
     <div>
       <h2 class="mb-3 text-lg font-semibold">Näin JalaOps toimii</h2>
@@ -123,6 +139,20 @@ onMounted(async () => {
           </div>
         </article>
       </div>
+    </div>
+    <ModuleHook name="dashboard.bottom" :widgets="inHook('dashboard.bottom')" />
+
+    <DashboardLayoutEditor
+      v-if="editing"
+      :hooks="hooks"
+      :widgets="widgets"
+      :customized="customized"
+      @place="place"
+      @reset="reset"
+      @close="editing = false"
+    />
+    <div v-else-if="widgets.length" class="flex justify-end">
+      <button type="button" class="btn btn-secondary" @click="editing = true">Muokkaa etusivua</button>
     </div>
   </section>
 </template>

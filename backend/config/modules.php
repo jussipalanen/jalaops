@@ -27,4 +27,24 @@ return [
     // The Python interpreter that runs the modules.
     'python' => env('PYTHON_BINARY', 'python3'),
 
+    // Where modules with "storage": true keep their data, one folder per
+    // module (given to the module in JALAOPS_DATA_DIR).
+    'storage' => env('MODULES_STORAGE_PATH', storage_path('app/modules')),
+
+    // The places in the app where module widgets can be shown (action
+    // hooks), with the names users see. A widget's module.json picks one,
+    // modules:place changes it for everyone, and each user can move or hide
+    // it in their own browser.
+    // First parts of addresses that module routes can't use: the frontend's
+    // own pages, the API and the build's files. The frontend also skips
+    // any route its own pages already have.
+    'reserved_paths' => ['api', 'assets', 'docs', 'requests', 'customers', 'invoices', 'tools', 'map', 'about', 'mobile-apps'],
+
+    'hooks' => [
+        'dashboard.top' => 'Etusivun yläosa',
+        'dashboard.after_counts' => 'Tilanteen jälkeen',
+        'dashboard.after_overview' => 'Tilannekatsauksen jälkeen',
+        'dashboard.bottom' => 'Etusivun alaosa',
+    ],
+
 ];

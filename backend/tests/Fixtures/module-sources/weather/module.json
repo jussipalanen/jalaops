@@ -1,0 +1,6 @@
+{
+    "name": "Sää",
+    "description": "Testimoduuli modules:add-komennolle.",
+    "version": "1.0.0",
+    "routes": [{ "path": "/weather" }]
+}

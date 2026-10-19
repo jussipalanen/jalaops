@@ -6,6 +6,50 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-10-19
+
+### Added
+- `modules:add` and `modules:remove` ([#91](https://github.com/jussipalanen/jalaops/issues/91)):
+  - **Sources:** `modules:add` adds a Python module from a folder, an archive (`.zip`, `.tar`, `.tar.gz`, `.tgz` or `.gz`; a file or a URL) or a git URL.
+  - **Checks:** before anything changes, it checks the module as the app would load it, plus its id, its routes against the other modules, its files (no links, size limits, no archive paths outside its folder), that its Python compiles, and its own tests.
+  - **Install:** a git repository that is a module package is added with Composer at a version tag. Anything else is copied into `backend/modules/<id>`.
+  - **Options:** `--check` only checks, `--ref` picks a git tag or branch, `--id` names the module, `--copy` copies a package into `backend/modules` without Composer, `--force` replaces a module and `--skip-tests` skips its tests.
+  - **Removing:** `modules:remove` deletes a module's folder or removes its package; `--purge` also deletes its data and settings.
+  - **Production:** both commands ask first on a production server, where the change wouldn't last.
+- `./dev modules:add` and `./dev modules:remove`. `./dev modules:add` copies a folder or an archive on your machine into the backend container first.
+
+### Changed
+- `./dev modules:search` suggests `./dev modules:add <url>` to install a package.
+
+## [1.12.0] - 2026-10-19
+
+### Added
+- Module routes: a module's pages can have addresses of their own, declared in `module.json` (`routes`), such as `/news`, `/news/new` and `/news/:news`. The view gets the path's parameters in `jalaops.params` as before, and `jalaops.navigate` and widget links use the module's addresses. Routes can't use the app's own addresses (`reserved_paths` in `config/modules.php`), each first part belongs to one module, and only modules that are on have them. An old `/tools/modules/<id>?…` address goes to the module's own. `GET /api/modules`, `GET /api/modules/{id}` and `GET /api/dashboard/widgets` return `routes` ([#89](https://github.com/jussipalanen/jalaops/issues/89)).
+- `jalaops.setPage({ title, description })` for a module's view: the page's browser tab title and description, such as a news item's.
+- `jalaops.navigate(params, { replace: true })` changes the address without a new history entry.
+- A "Sivua ei löytynyt" page for addresses with no page; they used to show an empty page.
+
+### Changed
+- **Uutiset** 1.1.0 ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)): the news are at `/news`, and each news item at an address with a slug from its title (`/news/syyshuollot-alkavat`), kept when the title is edited. Addresses with an id still work and change to the slug. A news item's page has its title in the browser tab.
+- A module's page has the module's name in the browser tab, also at `/tools/modules/<id>`.
+
+## [1.11.0] - 2026-10-19
+
+### Added
+- **Uutiset** (`news`), a news feed module from its own package, [jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news) 1.0.2. Users write news with a title, a short description, HTML content (with a toolbar and a preview), tags and up to six images; read them as a list filtered by tag or one by one; and edit and delete them. The newest news show on the dashboard. The module comes off: turn it on in **Työkalut → Moduulit**. Its database gets six demo news.
+- Turning modules on and off in the app: a switch for each module in **Työkalut → Moduulit**, the same for everyone (`PATCH /api/modules/{id}`). Modules are optional; `modules:enable` and `modules:disable` still work on the server.
+- Module widgets and hooks: places on the dashboard (`dashboard.top`, `dashboard.after_counts`, `dashboard.after_overview`, `dashboard.bottom`) where modules show content, declared in `module.json` (`widgets`). The app draws a `feed` widget from the module's output. `php artisan modules:place` moves or hides a widget for everyone and `modules:widgets` lists them; each user can also move or hide widgets in their own browser with **Muokkaa etusivua**. API: `GET /api/dashboard/widgets`.
+- A data folder for modules with `"storage": true` (`storage/app/modules/<id>`, given in `JALAOPS_DATA_DIR`; `MODULES_STORAGE_PATH` changes it).
+- `max_input_kb` in `module.json` for modules that take more input, such as images (at most 4 MB).
+- Pages with addresses of their own in a module's view: `jalaops.params` and `jalaops.navigate(params)` use the page address's parameters (`?news=3`), so the back button works and items can be linked to. Links in a view can open in a new tab.
+
+### Changed
+- A module gets its input exactly as it was sent: strings are no longer trimmed or turned into null.
+- Module runs are limited to 30 per minute per visitor (was 10), as a view can now have several pages.
+
+### Fixed
+- A module's own view shrinks again when its content gets shorter; it used to keep its tallest height. A view can now be up to 20 000 px tall (was 4000 px).
+
 ## [1.10.0] - 2026-10-19
 
 ### Changed
@@ -430,7 +474,10 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...HEAD
+[1.13.0]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...v1.13.0
+[1.12.0]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...v1.12.0
+[1.11.0]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/jussipalanen/jalaops/compare/v1.7.0...v1.8.0

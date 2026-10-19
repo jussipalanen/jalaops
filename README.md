@@ -84,6 +84,7 @@ If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
 | `./dev artisan <args>` | Run an Artisan command                       |
 | `./dev composer <args>`| Run Composer in the backend container        |
 | `./dev modules:search` | Find Python module packages on GitHub ([more](#python-modules)) |
+| `./dev modules:add <source>` | Check and add a Python module from a folder, an archive or a git URL ([more](#python-modules)) |
 | `./dev npm <args>`     | Run npm in the frontend container            |
 | `./dev migrate`        | Run database migrations                      |
 | `./dev fresh`          | Recreate the database and seed it            |
@@ -200,7 +201,9 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 |--------|----------------------|-----------------------------|
 | GET    | `/api/modules`       | Python modules and whether each is on |
 | GET    | `/api/modules/{id}`  | A module's form, results and own view |
+| PATCH  | `/api/modules/{id}`  | Turn a module on or off (app's own pages only) |
 | POST   | `/api/modules/{id}/run` | Run a module: the body is its input (app's own pages only) |
+| GET    | `/api/dashboard/widgets` | The dashboard's module widgets and where each is shown (app's own pages only) |
 
 </details>
 
@@ -285,23 +288,27 @@ An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, th
 
 ## Python modules
 
-Modules add features in Python: small programs in [`backend/modules`](backend/modules) that Laravel runs as separate processes, JSON in and JSON out. **Työkalut → Moduulit** lists them and whether each is on, and each enabled module has a page in the app, drawn from its `module.json` or its own `view.html`. Two examples come with the app: **ALV-laskuri** (VAT) and **Hei maailma**, which has its own view with a bar chart. **Työaikalaskuri** (hours worked, overtime and labour cost) is installed as a package from its own repository, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime).
+Modules add features in Python: small programs in [`backend/modules`](backend/modules) that Laravel runs as separate processes, JSON in and JSON out. **Työkalut → Moduulit** lists them and whether each is on, and each enabled module has a page in the app, drawn from its `module.json` or its own `view.html`. Two examples come with the app: **ALV-laskuri** (VAT) and **Hei maailma**, which has its own view with a bar chart. Two are installed as packages from their own repositories: **Työaikalaskuri** (hours worked, overtime and labour cost, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) and **Uutiset**, a news feed with tags and images whose newest news show on the dashboard ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)).
+
+Modules are optional: users turn each on and off with its switch in **Työkalut → Moduulit**. Uutiset comes off. A module's pages can have addresses of their own (routes), such as `/news` and `/news/syyshuollot-alkavat`, and the page's title in the browser tab. A module can show content on the dashboard (widgets, in places called hooks); **Muokkaa etusivua** at the bottom of the dashboard moves or hides them in your own browser, and `modules:place` does it for everyone. A module can also keep data in a folder of its own.
 
 Modules come from the code through pull requests, never from uploads. Each runs without the backend's API keys and is stopped after its timeout. The app's own view of a module runs in a sandboxed frame that can't reach the app or the network.
 
 A module can also live in a git repository of its own, such as one on your own server, as a Composer package of type `jalaops-module`. Its git tags are its versions and `composer.lock` pins the commit, so installing or updating one is a pull request here too. Composer installs it into `backend/modules/packages/<name>`, which git ignores:
 
 ```bash
-./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git
-./dev composer require jalaops/worktime:^1.0
+./dev modules:add https://git.example.com/jalaops/worktime.git
 ```
 
-On GitHub, a module package's repository gets the topic `jalaops-module`, and `./dev modules:search` lists them with the commands to install each.
+`modules:add` checks a module before adding it: its `module.json`, files, routes, Python and its own tests. Besides git URLs, it takes a folder or an archive (`.zip`, `.tar`, `.tar.gz`, `.tgz`, `.gz`; a file or a URL), which it copies into `backend/modules/<id>`. `modules:remove` takes a module out. Either way the change goes to production through a pull request and the deploy. On GitHub, a module package's repository gets the topic `jalaops-module`, and `./dev modules:search` lists them with the command to install each.
 
 ```bash
+./dev modules:add ~/Downloads/weather.zip --check   # only check it
+./dev modules:remove weather                        # --purge also deletes its data
 ./dev artisan modules:list
 ./dev artisan modules:run vat-calculator '{"amount": 100}'
 ./dev artisan modules:disable hello
+./dev artisan modules:place news.latest dashboard.bottom   # or hidden, or default
 ```
 
 How to write a module and make a module package: [backend/modules/README.md](backend/modules/README.md).

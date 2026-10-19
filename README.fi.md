@@ -84,6 +84,7 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 | `./dev artisan <args>` | Aja Artisan-komento                          |
 | `./dev composer <args>`| Aja Composer backend-kontissa                |
 | `./dev modules:search` | Etsi Python-moduulipaketteja GitHubista ([lisää](#python-moduulit)) |
+| `./dev modules:add <lähde>` | Tarkista ja lisää Python-moduuli hakemistosta, arkistosta tai git-osoitteesta ([lisää](#python-moduulit)) |
 | `./dev npm <args>`     | Aja npm frontend-kontissa                    |
 | `./dev migrate`        | Aja tietokantamigraatiot                     |
 | `./dev fresh`          | Luo tietokanta uudelleen ja lisää demodata   |
@@ -200,7 +201,9 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 |--------|----------------------|-------------------------------|
 | GET    | `/api/modules`       | Python-moduulit ja onko kukin käytössä |
 | GET    | `/api/modules/{id}`  | Moduulin lomake, tulokset ja oma näkymä |
+| PATCH  | `/api/modules/{id}`  | Ota moduuli käyttöön tai poista se käytöstä (vain sovelluksen omilta sivuilta) |
 | POST   | `/api/modules/{id}/run` | Suorita moduuli: runko on sen syöte (vain sovelluksen omilta sivuilta) |
+| GET    | `/api/dashboard/widgets` | Etusivun moduulien sisällöt ja niiden paikat (vain sovelluksen omilta sivuilta) |
 
 </details>
 
@@ -285,23 +288,27 @@ EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, su
 
 ## Python-moduulit
 
-Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio. **Työaikalaskuri** (tehdyt tunnit, ylityö ja työn hinta) asennetaan pakettina omasta repositoriostaan, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime).
+Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio. Kaksi asennetaan paketteina omista repositorioistaan: **Työaikalaskuri** (tehdyt tunnit, ylityö ja työn hinta, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) ja **Uutiset**, uutissyöte tunnisteineen ja kuvineen, jonka uusimmat uutiset näkyvät etusivulla ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)).
+
+Moduulit ovat valinnaisia: kunkin voi ottaa käyttöön tai poistaa käytöstä sen kytkimellä kohdassa **Työkalut → Moduulit**. Uutiset on aluksi pois käytöstä. Moduulin sivuilla voi olla omat osoitteet (reitit), kuten `/news` ja `/news/syyshuollot-alkavat`, ja sivun otsikko selaimen välilehdellä. Moduuli voi näyttää sisältöä etusivulla (widgetit, paikoissa eli hookeissa); etusivun alareunan **Muokkaa etusivua** siirtää tai piilottaa ne omassa selaimessa, ja `modules:place` kaikilta. Moduuli voi myös tallentaa tietoja omaan hakemistoonsa.
 
 Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata sovellukseen. Jokainen ajetaan ilman taustapalvelun API-avaimia, ja se pysäytetään aikakatkaisun jälkeen. Moduulin oma näkymä toimii eristetyssä kehyksessä, josta ei pääse sovellukseen eikä verkkoon.
 
 Moduuli voi olla myös omassa git-repositoriossaan, esimerkiksi omalla palvelimella, `jalaops-module`-tyyppisenä Composer-pakettina. Sen git-tagit ovat sen versiot ja `composer.lock` lukitsee commitin, joten paketin asentaminen tai päivittäminen on sekin pull request tähän repositorioon. Composer asentaa sen hakemistoon `backend/modules/packages/<nimi>`, jota git ei seuraa:
 
 ```bash
-./dev composer config repositories.worktime vcs https://git.example.com/jalaops/worktime.git
-./dev composer require jalaops/worktime:^1.0
+./dev modules:add https://git.example.com/jalaops/worktime.git
 ```
 
-GitHubissa moduulipaketin repositoriolle annetaan aihe (topic) `jalaops-module`, ja `./dev modules:search` listaa ne ja niiden asennuskomennot.
+`modules:add` tarkistaa moduulin ennen sen lisäämistä: sen `module.json`-tiedoston, tiedostot, reitit, Python-koodin ja sen omat testit. Git-osoitteiden lisäksi se ottaa hakemiston tai arkiston (`.zip`, `.tar`, `.tar.gz`, `.tgz`, `.gz`; tiedosto tai osoite), jonka se kopioi hakemistoon `backend/modules/<id>`. `modules:remove` poistaa moduulin. Kummassakin tapauksessa muutos viedään tuotantoon pull requestilla ja julkaisulla. GitHubissa moduulipaketin repositoriolle annetaan aihe (topic) `jalaops-module`, ja `./dev modules:search` listaa ne ja niiden asennuskomennot.
 
 ```bash
+./dev modules:add ~/Downloads/weather.zip --check   # vain tarkistus
+./dev modules:remove weather                        # --purge poistaa myös sen tiedot
 ./dev artisan modules:list
 ./dev artisan modules:run vat-calculator '{"amount": 100}'
 ./dev artisan modules:disable hello
+./dev artisan modules:place news.latest dashboard.bottom   # tai hidden tai default
 ```
 
 Ohje moduulin ja moduulipaketin tekemiseen (englanniksi): [backend/modules/README.md](backend/modules/README.md).

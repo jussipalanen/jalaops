@@ -30,6 +30,7 @@ class ModuleApiTest extends TestCase
                 'description' => 'Esimerkkimoduuli: tervehtii ja laskee lukujen summan, keskiarvon ja mediaanin.',
                 'version' => '1.0.0',
                 'enabled' => true,
+                'routes' => [],
             ])
             ->assertJsonPath('data.1.id', 'vat-calculator');
 
@@ -142,7 +143,7 @@ class ModuleApiTest extends TestCase
     {
         $this->withHeader('Origin', self::SITE);
 
-        foreach (range(1, 10) as $attempt) {
+        foreach (range(1, 30) as $attempt) {
             $this->postJson('/api/modules/hello/run')->assertOk();
         }
 

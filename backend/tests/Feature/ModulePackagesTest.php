@@ -107,6 +107,7 @@ class ModulePackagesTest extends TestCase
                 'description' => '',
                 'version' => '2.1.0',
                 'enabled' => true,
+                'routes' => [],
             ]);
     }
 

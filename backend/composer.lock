@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b09fdf2fb602ac5dd1cb5f8771f80da6",
+    "content-hash": "172bd1e023dc18376e3bcd254594e0de",
     "packages": [
         {
             "name": "brick/math",
@@ -1484,6 +1484,31 @@
                 "symlink": false,
                 "relative": true
             }
+        },
+        {
+            "name": "jalaops/news",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jussipalanen/jalaops-module-news.git",
+                "reference": "f9cbc08be461300b168769ec679745dad1112b45"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-news/zipball/f9cbc08be461300b168769ec679745dad1112b45",
+                "reference": "f9cbc08be461300b168769ec679745dad1112b45",
+                "shasum": ""
+            },
+            "type": "jalaops-module",
+            "license": [
+                "MIT"
+            ],
+            "description": "JalaOps module: a news feed with tags and images, and the newest news on the dashboard.",
+            "support": {
+                "source": "https://github.com/jussipalanen/jalaops-module-news/tree/v1.1.0",
+                "issues": "https://github.com/jussipalanen/jalaops-module-news/issues"
+            },
+            "time": "2026-10-19T15:30:10+00:00"
         },
         {
             "name": "jalaops/worktime",

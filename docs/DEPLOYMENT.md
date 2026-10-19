@@ -208,6 +208,8 @@ Python modules can come from git repositories of their own as Composer packages 
 - **The git server must be up when the image is built.** A running service doesn't need it: the module is inside the image.
 - **The version is the one in `composer.lock`.** A new tag in the module's repository changes nothing until `composer update` and a merged pull request deploy it.
 
+Modules with a data folder (`"storage": true`, such as Uutiset) keep it in `storage/app/modules` inside the container, so on Cloud Run it resets when the instance restarts, like the demo data and the modules' on/off settings. A module like Uutiset fills a new database with its demo content again. `MODULES_STORAGE_PATH` can point elsewhere, but not to a Cloud Storage volume: SQLite needs file locking that it doesn't offer.
+
 ## 2. Backend on Render (free, sleeps when idle)
 
 > On Render's free plan, a service that gets no traffic for 15 minutes is stopped and starts again on the next request. In demo mode this also resets the demo data, which keeps a public demo tidy.

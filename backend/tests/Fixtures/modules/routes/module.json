@@ -1,0 +1,10 @@
+{
+    "name": "Routes",
+    "enabled": true,
+    "routes": [
+        { "path": "/notes" },
+        { "path": "/notes/new", "params": { "view": "new" } },
+        { "path": "/notes/:note" },
+        { "path": "/notes/:note/edit", "params": { "view": "edit" } }
+    ]
+}
