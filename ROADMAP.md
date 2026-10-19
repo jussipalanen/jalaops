@@ -579,6 +579,7 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Työaikalaskuri: hours worked, overtime and labour cost, the first module from its own repository ([jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) | Done in 1.9.0 |
 | Module widgets and hooks: places on the dashboard where modules show content, moved or hidden for everyone (`modules:place`) or per browser (Muokkaa etusivua); module data folders; modules switched on and off in the app | Done in 1.11.0 |
 | Uutiset: a news feed with tags, images and HTML content, and the newest news on the dashboard, from its own repository ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)) | Done in 1.11.0 |
+| Module routes: addresses of their own for a module's pages (`/news`, `/news/<slug>`), and the page's title in the browser tab ([#89](https://github.com/jussipalanen/jalaops/issues/89)) | Done in 1.12.0 |
 | Module options: an options page per module whose settings are saved and loaded and passed to the module. Needs an admin login first, so visitors can't change them | Planned |
 
 Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).

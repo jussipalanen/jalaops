@@ -6,6 +6,18 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-10-19
+
+### Added
+- Module routes: a module's pages can have addresses of their own, declared in `module.json` (`routes`), such as `/news`, `/news/new` and `/news/:news`. The view gets the path's parameters in `jalaops.params` as before, and `jalaops.navigate` and widget links use the module's addresses. Routes can't use the app's own addresses (`reserved_paths` in `config/modules.php`), each first part belongs to one module, and only modules that are on have them. An old `/tools/modules/<id>?…` address goes to the module's own. `GET /api/modules`, `GET /api/modules/{id}` and `GET /api/dashboard/widgets` return `routes` ([#89](https://github.com/jussipalanen/jalaops/issues/89)).
+- `jalaops.setPage({ title, description })` for a module's view: the page's browser tab title and description, such as a news item's.
+- `jalaops.navigate(params, { replace: true })` changes the address without a new history entry.
+- A "Sivua ei löytynyt" page for addresses with no page; they used to show an empty page.
+
+### Changed
+- **Uutiset** 1.1.0 ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)): the news are at `/news`, and each news item at an address with a slug from its title (`/news/syyshuollot-alkavat`), kept when the title is edited. Addresses with an id still work and change to the slug. A news item's page has its title in the browser tab.
+- A module's page has the module's name in the browser tab, also at `/tools/modules/<id>`.
+
 ## [1.11.0] - 2026-10-19
 
 ### Added
@@ -447,7 +459,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...HEAD
+[1.12.0]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/jussipalanen/jalaops/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/jussipalanen/jalaops/compare/v1.8.0...v1.9.0
