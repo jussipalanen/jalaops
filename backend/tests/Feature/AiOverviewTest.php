@@ -33,7 +33,11 @@ class AiOverviewTest extends TestCase
             'services.gemini.model' => 'gemini-test',
             'services.puter.auth_token' => null,
             'services.puter.model' => 'puter-test',
+            'cors.allowed_origins' => ['https://jalaops.example'],
         ]);
+
+        // Like the app's own pages; other origins are tested in AllowedOriginsTest.
+        $this->withHeader('Origin', 'https://jalaops.example');
     }
 
     /**
@@ -224,11 +228,16 @@ class AiOverviewTest extends TestCase
     {
         $this->fakeGemini();
 
+        // Behind Cloud Run's proxy, the visitor's address is in X-Forwarded-For.
+        $this->withServerVariables(['REMOTE_ADDR' => '169.254.1.1']);
+        $from = fn (string $ip) => $this->withHeader('X-Forwarded-For', "{$ip}, 76.76.21.21");
+
         foreach (range(1, 3) as $attempt) {
-            $this->postJson('/api/dashboard/ai-overview/refresh')->assertOk();
+            $from('203.0.113.10')->postJson('/api/dashboard/ai-overview/refresh')->assertOk();
         }
 
-        $this->postJson('/api/dashboard/ai-overview/refresh')->assertTooManyRequests();
+        $from('203.0.113.10')->postJson('/api/dashboard/ai-overview/refresh')->assertTooManyRequests();
+        $from('203.0.113.20')->postJson('/api/dashboard/ai-overview/refresh')->assertOk();
     }
 
     public function test_it_shows_the_previous_overview_when_the_hourly_limit_is_used_up(): void

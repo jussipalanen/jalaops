@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\RequestItemController;
 use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
 use App\Http\Controllers\Api\SystemController;
+use App\Http\Middleware\AllowedOriginsOnly;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -77,6 +78,9 @@ Route::get('/geocode/suggest', [GeocodeController::class, 'suggest'])->middlewar
 Route::get('/dashboard', [DashboardController::class, 'show']);
 
 // AI-tilannekatsaus for the dashboard (Gemini or Puter). Off unless AI_INSIGHTS_ENABLED and the provider's key are set.
-Route::get('/dashboard/ai-overview', [AiOverviewController::class, 'show']);
-Route::post('/dashboard/ai-overview/refresh', [AiOverviewController::class, 'refresh'])
-    ->middleware('throttle:ai-overview-refresh');
+// Only the app's own pages may use it, because each overview is an AI call.
+Route::middleware(AllowedOriginsOnly::class)->group(function () {
+    Route::get('/dashboard/ai-overview', [AiOverviewController::class, 'show']);
+    Route::post('/dashboard/ai-overview/refresh', [AiOverviewController::class, 'refresh'])
+        ->middleware('throttle:ai-overview-refresh');
+});

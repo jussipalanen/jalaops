@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // A demo application: keep every page and API response out of search engines.
         $middleware->append(NoIndex::class);
+
+        // Cloud Run (and Vercel in front of it) pass the visitor's address in
+        // X-Forwarded-For. Without this, every visitor would have the proxy's
+        // address and share one rate limit.
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

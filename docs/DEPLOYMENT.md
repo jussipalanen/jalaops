@@ -203,7 +203,8 @@ gcloud run services update jalaops-backend --region $REGION \
    | Key | Value |
    |---|---|
    | `APP_URL` | `https://jalaops-api.onrender.com` (your service's address) |
-   | `FRONTEND_URL` | Your Vercel address, e.g. `https://jalaops.vercel.app` (optional: the backend home page links to it, and the QR code on a request's PDF and HTML opens the request there) |
+   | `FRONTEND_URL` | Your Vercel address, e.g. `https://jalaops.vercel.app`. The AI-tilannekatsaus answers only this address (and `APP_URL`); the backend home page links to it, and the QR code on a request's PDF and HTML opens the request there |
+   | `ALLOWED_ORIGINS` | Optional: more frontend addresses, comma-separated, if the app is opened from more than one (e.g. a custom domain and the Vercel address) |
 
    That is all demo mode needs. `DEMO_MODE=true` is the image's default, and an app key is generated on start if `APP_KEY` is not set.
 
