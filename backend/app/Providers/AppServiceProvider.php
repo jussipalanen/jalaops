@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Services\Ai\AiClient;
 use App\Services\Ai\GeminiClient;
 use App\Services\Ai\PuterClient;
+use App\Services\Modules\ModuleRegistry;
+use App\Services\Modules\ModuleRunner;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -26,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
             'puter' => PuterClient::fromConfig(),
             default => GeminiClient::fromConfig(),
         });
+
+        // Python modules: the folder and the interpreter come from config/modules.php.
+        $this->app->bind(ModuleRegistry::class, fn () => ModuleRegistry::fromConfig());
+        $this->app->bind(ModuleRunner::class, fn () => ModuleRunner::fromConfig());
     }
 
     /**
@@ -40,5 +46,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('geocode', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('imports', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('geocode-suggest', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+
+        // Each module run starts a Python process on the server.
+        RateLimiter::for('modules', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
     }
 }

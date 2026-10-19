@@ -1,0 +1,21 @@
+{
+    "name": "Hei maailma",
+    "description": "Esimerkkimoduuli: tervehtii ja laskee lukujen summan, keskiarvon ja mediaanin.",
+    "version": "1.0.0",
+    "entry": "main.py",
+    "timeout": 5,
+    "enabled": true,
+    "assets": ["assets/hello.css", "assets/chart.js"],
+    "form": [
+        { "name": "name", "label": "Nimi", "type": "text", "default": "Maailma" },
+        { "name": "numbers", "label": "Luvut", "type": "numbers", "help": "Pilkulla erotettuina, esim. 3, 5, 10", "default": [3, 5, 10] }
+    ],
+    "results": [
+        { "name": "message", "label": "Tervehdys" },
+        { "name": "count", "label": "Lukuja" },
+        { "name": "sum", "label": "Summa" },
+        { "name": "average", "label": "Keskiarvo" },
+        { "name": "median", "label": "Mediaani" },
+        { "name": "python", "label": "Python-versio" }
+    ]
+}

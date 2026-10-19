@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\RequestItemController;
 use App\Http\Controllers\Api\RequestTransferController;
 use App\Http\Controllers\Api\ServiceRequestController;
@@ -84,3 +85,10 @@ Route::middleware(AllowedOriginsOnly::class)->group(function () {
     Route::post('/dashboard/ai-overview/refresh', [AiOverviewController::class, 'refresh'])
         ->middleware('throttle:ai-overview-refresh');
 });
+
+// Python modules (backend/modules). Anyone may list them; only the app's own
+// pages may run one, because each run starts a process on the server.
+Route::get('/modules', [ModuleController::class, 'index']);
+Route::get('/modules/{module}', [ModuleController::class, 'show']);
+Route::post('/modules/{module}/run', [ModuleController::class, 'run'])
+    ->middleware([AllowedOriginsOnly::class, 'throttle:modules']);

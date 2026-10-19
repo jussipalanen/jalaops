@@ -1,0 +1,5 @@
+{
+    "name": "Outside asset",
+    "enabled": true,
+    "assets": ["../environment/main.py"]
+}

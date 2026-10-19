@@ -1,0 +1,5 @@
+{
+    "name": "Bad form",
+    "enabled": true,
+    "form": [{ "name": "x", "label": "X", "type": "html" }]
+}

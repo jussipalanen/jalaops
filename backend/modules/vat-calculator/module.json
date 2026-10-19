@@ -1,0 +1,17 @@
+{
+    "name": "ALV-laskuri",
+    "description": "Laskee verottoman hinnan, arvonlisäveron ja verollisen hinnan.",
+    "version": "1.0.0",
+    "entry": "main.py",
+    "timeout": 5,
+    "enabled": true,
+    "form": [
+        { "name": "amount", "label": "Veroton hinta (€)", "type": "number", "required": true, "default": 100 },
+        { "name": "rate", "label": "ALV-kanta (%)", "type": "select", "options": ["25.5", "14", "10", "0"] }
+    ],
+    "results": [
+        { "name": "net", "label": "Veroton hinta (€)", "decimals": 2 },
+        { "name": "vat", "label": "ALV (€)", "decimals": 2 },
+        { "name": "total", "label": "Verollinen hinta (€)", "decimals": 2 }
+    ]
+}

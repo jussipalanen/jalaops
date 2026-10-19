@@ -1,0 +1,76 @@
+<!--
+  The hello module's own page. The app shows it in a sandboxed frame with its
+  base styles and colours (--primary, --text, --muted, --border, --surface),
+  the files listed in "assets" in module.json (assets/hello.css and
+  assets/chart.js), and a bridge: jalaops.run(input) runs this module and
+  resolves with its output. The frame can't reach the network or the app;
+  everything goes through the bridge.
+-->
+<form id="form" class="stack">
+  <label>
+    Nimi
+    <input id="name" value="Maailma" autocomplete="off">
+  </label>
+  <label>
+    Luvut
+    <input id="numbers" value="3, 5, 10, 4, 8" inputmode="decimal" aria-describedby="numbers-help">
+    <small id="numbers-help">Pilkulla erotettuina, desimaalit pisteellä.</small>
+  </label>
+  <div><button type="submit" id="run">Laske</button></div>
+</form>
+
+<p id="error" class="error" role="alert" hidden></p>
+
+<section id="result" class="stack" aria-live="polite" hidden>
+  <h2 id="message"></h2>
+  <dl class="stats">
+    <div><dt>Summa</dt><dd id="sum"></dd></div>
+    <div><dt>Keskiarvo</dt><dd id="average"></dd></div>
+    <div><dt>Mediaani</dt><dd id="median"></dd></div>
+  </dl>
+  <svg id="chart" role="img" aria-label="Luvut pylväinä, viiva näyttää keskiarvon"></svg>
+  <small id="python"></small>
+</section>
+
+<script>
+  const $ = (id) => document.getElementById(id)
+  const format = new Intl.NumberFormat('fi-FI', { maximumFractionDigits: 2 }).format
+
+  $('form').addEventListener('submit', (event) => {
+    event.preventDefault()
+    calculate()
+  })
+
+  // The module's output is a plain object: its values (output.message,
+  // output.sum…) are read directly. Calculated once when the page opens too.
+  calculate()
+
+  async function calculate() {
+    $('error').hidden = true
+    $('run').disabled = true
+
+    const numbers = $('numbers').value.split(/[,;\s]+/).filter(Boolean).map(Number)
+
+    try {
+      const output = await jalaops.run({ name: $('name').value, numbers })
+      show(output, numbers)
+    } catch (error) {
+      $('result').hidden = true
+      $('error').textContent = error.message
+      $('error').hidden = false
+    } finally {
+      $('run').disabled = false
+    }
+  }
+
+  function show(output, numbers) {
+    $('message').textContent = output.message
+    $('sum').textContent = output.sum === undefined ? '–' : format(output.sum)
+    $('average').textContent = output.average === undefined ? '–' : format(output.average)
+    $('median').textContent = output.median === undefined ? '–' : format(output.median)
+    $('python').textContent = `Laskettu Pythonilla ${output.python}`
+    // barChart comes from assets/chart.js.
+    barChart($('chart'), numbers, { average: output.average, format })
+    $('result').hidden = false
+  }
+</script>

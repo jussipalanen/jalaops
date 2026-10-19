@@ -3,6 +3,7 @@ import { computed, ref, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import { apiUpload } from '@/api/client'
 import ExportMenu from '@/components/ExportMenu.vue'
+import ModuleList from '@/components/ModuleList.vue'
 import { formatDate, priorityLabels, statusLabels } from '@/labels'
 
 // Export: all requests, or those with a status and/or priority.
@@ -68,7 +69,7 @@ async function send(dryRun) {
     <header class="page-header">
       <div>
         <h1 class="page-title">Työkalut</h1>
-        <p class="page-subtitle mt-1">Vie pyynnöt tiedostoon tai tuo niitä tiedostosta.</p>
+        <p class="page-subtitle mt-1">Vie pyynnöt tiedostoon, tuo niitä tiedostosta tai käytä palvelimen moduuleja.</p>
       </div>
     </header>
 
@@ -201,6 +202,8 @@ async function send(dryRun) {
           </div>
         </div>
       </div>
+
+      <ModuleList />
     </div>
   </section>
 </template>
