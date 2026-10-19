@@ -261,6 +261,24 @@ class ModuleCommandsTest extends TestCase
         $this->assertDirectoryDoesNotExist("{$this->modules}/weather");
     }
 
+    public function test_a_package_can_be_copied_without_composer(): void
+    {
+        Process::fake(["'composer' *" => Process::result()]);
+        $url = $this->repository($this->source('jalaops-module-weather', [
+            'composer.json' => '{"name": "jalaops/weather", "type": "jalaops-module"}',
+        ]), ['v1.0.0']);
+
+        $this->artisan('modules:add', ['source' => $url, '--copy' => true])
+            ->expectsOutputToContain("It's the Composer package jalaops/weather, copied without Composer")
+            ->expectsOutputToContain("Added module 'weather' (Sää) to")
+            ->assertExitCode(0);
+
+        Process::assertNotRan(fn (PendingProcess $process) => ($process->command[0] ?? null) === 'composer');
+        $this->assertFileExists("{$this->modules}/weather/composer.json");
+        // It works at once, from the modules folder.
+        $this->assertSame('Sää', app(ModuleRegistry::class)->find('weather')->name);
+    }
+
     public function test_a_failed_composer_require_takes_the_repository_back_out(): void
     {
         Process::fake([

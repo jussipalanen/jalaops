@@ -198,6 +198,7 @@ The copy is reviewed in the pull request like the rest of the module, and the ap
 ./dev modules:add https://example.com/releases/weather-1.2.0.tar.gz --id=weather
 ./dev modules:add https://github.com/owner/jalaops-module-weather.git  # a git repository
 ./dev modules:add https://github.com/owner/jalaops-module-weather.git --ref=v1.2.0
+./dev modules:add https://github.com/owner/jalaops-module-weather.git --copy   # a package without Composer
 ./dev modules:add <source> --check                                     # only check it
 ./dev modules:remove weather                                           # asks first; --purge also deletes its data
 ```
@@ -220,7 +221,9 @@ A `requirements.txt` gives a warning: its libraries go in the Docker images (see
 **Where it goes.**
 
 - **A git repository that is a module package** (a `composer.json` of type `jalaops-module`, see "Modules from Composer packages") is added with Composer: `modules:add` adds the repository to `composer.json` and requires the package at the checked version, so `composer.lock` pins it. A package is installed at a version tag: its newest one, or `--ref=v1.2.0` (`^1.2`).
-- **Anything else** (a folder, an archive, a git repository without a package) is copied into `backend/modules/<id>`, without `.git` and Python's caches. The files belong to you, not to the container's root user.
+- **Anything else** (a folder, an archive, a git repository without a package) is copied into `backend/modules/<id>`, without `.git` and Python's caches. The files belong to you, not to the container's root user. `--copy` copies a package this way too, at the same version tag, without Composer: `composer.lock` doesn't pin it then, and updating it is another `modules:add --copy --force`.
+
+A copied module works at once: the app reads the modules folder on every request, so nothing needs a restart. Turn it on in **Työkalut → Moduulit** or with `modules:enable <id>`.
 
 `modules:remove` deletes a module's folder in `backend/modules`, or removes a package with Composer (and its repository `jalaops-module-<id>` from `composer.json`). `--purge` also deletes its data folder and its settings: whether it's on, and its widgets' places.
 

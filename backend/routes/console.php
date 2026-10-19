@@ -140,6 +140,7 @@ Artisan::command('modules:add
     {source : A folder, an archive (.zip, .tar, .tar.gz, .tgz, .gz; a file or a URL) or a git URL}
     {--ref= : A git tag or branch (a package needs a version tag; by default its newest)}
     {--id= : The module id, when the source doesn\'t tell it}
+    {--copy : Copy a module package into the modules folder instead of adding it with Composer}
     {--check : Only check the module, add nothing}
     {--force : Replace a module in the modules folder that has the same id}
     {--skip-tests : Don\'t run the module\'s own tests}', function (ModuleManager $manager) {
@@ -151,7 +152,7 @@ Artisan::command('modules:add
 
     try {
         $this->line("Fetching {$this->argument('source')}…");
-        $source = $manager->fetch($this->argument('source'), $this->option('ref'));
+        $source = $manager->fetch($this->argument('source'), $this->option('ref'), $this->option('copy'));
 
         try {
             $this->line('Checking the module'.($this->option('skip-tests') ? '' : ' and running its tests').'…');

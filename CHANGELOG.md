@@ -13,7 +13,7 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
   - **Sources:** `modules:add` adds a Python module from a folder, an archive (`.zip`, `.tar`, `.tar.gz`, `.tgz` or `.gz`; a file or a URL) or a git URL.
   - **Checks:** before anything changes, it checks the module as the app would load it, plus its id, its routes against the other modules, its files (no links, size limits, no archive paths outside its folder), that its Python compiles, and its own tests.
   - **Install:** a git repository that is a module package is added with Composer at a version tag. Anything else is copied into `backend/modules/<id>`.
-  - **Options:** `--check` only checks, `--ref` picks a git tag or branch, `--id` names the module, `--force` replaces a module and `--skip-tests` skips its tests.
+  - **Options:** `--check` only checks, `--ref` picks a git tag or branch, `--id` names the module, `--copy` copies a package into `backend/modules` without Composer, `--force` replaces a module and `--skip-tests` skips its tests.
   - **Removing:** `modules:remove` deletes a module's folder or removes its package; `--purge` also deletes its data and settings.
   - **Production:** both commands ask first on a production server, where the change wouldn't last.
 - `./dev modules:add` and `./dev modules:remove`. `./dev modules:add` copies a folder or an archive on your machine into the backend container first.

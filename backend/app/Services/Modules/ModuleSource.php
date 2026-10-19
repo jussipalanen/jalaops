@@ -16,6 +16,7 @@ final class ModuleSource
      * @param  string  $name  A name from the source (its folder, repository or archive), for the module's id
      * @param  string|null  $ref  The git tag or branch it was cloned at
      * @param  string|null  $package  The Composer package name of a jalaops-module package, e.g. jalaops/weather
+     * @param  bool  $copy  Copy it into the modules folder even if it's a package (--copy)
      */
     public function __construct(
         public readonly string $directory,
@@ -25,13 +26,15 @@ final class ModuleSource
         public readonly string $name,
         public readonly ?string $ref = null,
         public readonly ?string $package = null,
+        public readonly bool $copy = false,
     ) {}
 
     /**
-     * Whether it's installed with Composer: a git repository that is a module package.
+     * Whether it's installed with Composer: a git repository that is a module
+     * package, unless it's copied.
      */
     public function isPackage(): bool
     {
-        return $this->kind === 'git' && $this->package !== null;
+        return $this->kind === 'git' && $this->package !== null && ! $this->copy;
     }
 }

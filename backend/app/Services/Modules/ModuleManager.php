@@ -55,11 +55,12 @@ class ModuleManager
     /**
      * Fetches a module into a temporary folder: a local folder is copied, a
      * git URL is cloned (at ref, or a package's newest version tag), and an
-     * archive (a file or a URL) is unpacked.
+     * archive (a file or a URL) is unpacked. With copy, a package is copied
+     * into the modules folder like any other module instead of using Composer.
      *
      * @throws ModuleException when it can't be fetched
      */
-    public function fetch(string $source, ?string $ref = null): ModuleSource
+    public function fetch(string $source, ?string $ref = null, bool $copy = false): ModuleSource
     {
         $remote = (bool) preg_match('#^https?://#i', $source);
         // A URL (is_dir() would also open file:// ones), or else a file or folder.
@@ -81,26 +82,26 @@ class ModuleManager
         File::ensureDirectoryExists($temporary);
 
         try {
-            $copy = "{$temporary}/source";
+            $folder = "{$temporary}/source";
 
             if ($kind === 'path') {
-                $this->copy(realpath($source), $copy);
+                $this->copy(realpath($source), $folder);
             } elseif ($kind === 'archive') {
-                $this->unpack($source, $remote, $archive, $temporary, $copy);
+                $this->unpack($source, $remote, $archive, $temporary, $folder);
             } else {
-                $this->cloneRepository($source, $ref, $copy);
+                $this->cloneRepository($source, $ref, $folder);
             }
 
-            $directory = $this->moduleRoot($copy);
+            $directory = $this->moduleRoot($folder);
             $package = $this->packageName($directory);
 
             // A package is installed at a version tag, so the code checked here
             // is the code Composer installs: without --ref, its newest one.
             if ($kind === 'git' && $package !== null && $ref === null) {
                 $ref = $this->newestVersionTag($source);
-                File::deleteDirectory($copy);
-                $this->cloneRepository($source, $ref, $copy);
-                $directory = $this->moduleRoot($copy);
+                File::deleteDirectory($folder);
+                $this->cloneRepository($source, $ref, $folder);
+                $directory = $this->moduleRoot($folder);
             }
         } catch (Throwable $exception) {
             File::deleteDirectory($temporary);
@@ -108,7 +109,7 @@ class ModuleManager
             throw $exception;
         }
 
-        return new ModuleSource($directory, $temporary, $kind, $source, $this->name($kind, $source, $directory, $copy), $ref, $package);
+        return new ModuleSource($directory, $temporary, $kind, $source, $this->name($kind, $source, $directory, "{$temporary}/source"), $ref, $package, $copy);
     }
 
     /**
@@ -153,7 +154,7 @@ class ModuleManager
         }
 
         if ($source->package !== null && ! $source->isPackage()) {
-            $warnings[] = "It's the Composer package {$source->package}: adding it from its git URL keeps it versioned in composer.lock.";
+            $warnings[] = "It's the Composer package {$source->package}, copied without Composer, so composer.lock doesn't pin its version. From its git URL without --copy, it's added with Composer.";
         }
 
         return ['modules' => $modules, 'warnings' => $warnings];
@@ -333,7 +334,7 @@ class ModuleManager
         }
 
         if (! $hasManifest) {
-            throw new ModuleException('It is a package with several modules: add it from its git URL.');
+            throw new ModuleException('It is a package with several modules: add it from its git URL, without --copy.');
         }
 
         $id ??= Str::of($source->package !== null ? Str::afterLast($source->package, '/') : $source->name)
