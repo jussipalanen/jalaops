@@ -6,6 +6,11 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-10-20
+
+### Changed
+- **Uutiset** 2.0.0 ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)) and **Työaikalaskuri** 2.0.0 ([jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) use the module SDK (`NewsFeedModule`, `WorktimeModule`), required at `^2.0`. Their input and output stay the same. An unknown action in Uutiset names itself and lists the allowed ones, and Työaikalaskuri now has its own tests and CI.
+
 ## [1.15.0] - 2026-10-20
 
 ### Added
@@ -503,7 +508,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.16.0...HEAD
+[1.16.0]: https://github.com/jussipalanen/jalaops/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/jussipalanen/jalaops/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...v1.13.0

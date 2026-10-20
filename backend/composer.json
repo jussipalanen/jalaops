@@ -12,8 +12,8 @@
         "dedoc/scramble": "^0.13.47",
         "dompdf/dompdf": "^3.1",
         "jalaops/module-installer": "^1.0",
-        "jalaops/news": "^1.0",
-        "jalaops/worktime": "^1.1",
+        "jalaops/news": "^2.0",
+        "jalaops/worktime": "^2.0",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0"
     },

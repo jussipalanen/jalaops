@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "172bd1e023dc18376e3bcd254594e0de",
+    "content-hash": "330510211a936a04f43e5b8d95d14011",
     "packages": [
         {
             "name": "brick/math",
@@ -1487,16 +1487,16 @@
         },
         {
             "name": "jalaops/news",
-            "version": "v1.1.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jussipalanen/jalaops-module-news.git",
-                "reference": "f9cbc08be461300b168769ec679745dad1112b45"
+                "reference": "531e2bca351c07b60672913ebc9893f157f7b8c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-news/zipball/f9cbc08be461300b168769ec679745dad1112b45",
-                "reference": "f9cbc08be461300b168769ec679745dad1112b45",
+                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-news/zipball/531e2bca351c07b60672913ebc9893f157f7b8c8",
+                "reference": "531e2bca351c07b60672913ebc9893f157f7b8c8",
                 "shasum": ""
             },
             "type": "jalaops-module",
@@ -1505,23 +1505,23 @@
             ],
             "description": "JalaOps module: a news feed with tags and images, and the newest news on the dashboard.",
             "support": {
-                "source": "https://github.com/jussipalanen/jalaops-module-news/tree/v1.1.0",
+                "source": "https://github.com/jussipalanen/jalaops-module-news/tree/v2.0.0",
                 "issues": "https://github.com/jussipalanen/jalaops-module-news/issues"
             },
-            "time": "2026-10-19T15:30:10+00:00"
+            "time": "2026-10-20T11:37:11+00:00"
         },
         {
             "name": "jalaops/worktime",
-            "version": "v1.1.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jussipalanen/jalaops-module-worktime.git",
-                "reference": "05cafe07eb5c14664ed3dad3af1d293fb311c316"
+                "reference": "2d72d75c7153d207bc8d8ca019a4a327d5906406"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-worktime/zipball/05cafe07eb5c14664ed3dad3af1d293fb311c316",
-                "reference": "05cafe07eb5c14664ed3dad3af1d293fb311c316",
+                "url": "https://api.github.com/repos/jussipalanen/jalaops-module-worktime/zipball/2d72d75c7153d207bc8d8ca019a4a327d5906406",
+                "reference": "2d72d75c7153d207bc8d8ca019a4a327d5906406",
                 "shasum": ""
             },
             "type": "jalaops-module",
@@ -1530,10 +1530,10 @@
             ],
             "description": "JalaOps module: hours worked and labour cost from start and end times.",
             "support": {
-                "source": "https://github.com/jussipalanen/jalaops-module-worktime/tree/v1.1.0",
+                "source": "https://github.com/jussipalanen/jalaops-module-worktime/tree/v2.0.0",
                 "issues": "https://github.com/jussipalanen/jalaops-module-worktime/issues"
             },
-            "time": "2026-10-19T11:46:40+00:00"
+            "time": "2026-10-20T11:36:56+00:00"
         },
         {
             "name": "laravel/framework",
