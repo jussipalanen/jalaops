@@ -407,11 +407,11 @@ There is no App Store app; JalaOps is added to the home screen as a web app inst
 
 This builds `android/dist/jalaops.apk` (install on a phone) and `android/dist/jalaops.aab` (upload to Google Play) in Docker, so only Docker is needed. It uses [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) with the settings in [`android/twa-manifest.json`](android/twa-manifest.json); the app's version follows the frontend's (0.24.0 → version code 2400). The first build downloads Java, the Android SDK and Gradle (about 2 GB) and takes several minutes; later builds take about a minute.
 
-**Signing key:** the first build creates an upload key in `~/.jalaops/android` (outside the repository). Back that folder up: Google Play only accepts updates signed with the same key. The key's SHA-256 fingerprint is listed in [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); without it the app opens with an address bar. A different key (for example on another machine) needs its fingerprint added there.
+**Signing key:** the first build creates an upload key in `~/.jalaops/android` (outside the repository). Back that folder up: Google Play only accepts updates signed with the same key. The key's SHA-256 fingerprint is listed in [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); without it the app opens with an address bar. It also lists Google Play's app signing key (Play Console → Test and release → App integrity), because Google re-signs the app it delivers from Google Play. A different key (for example on another machine) needs its fingerprint added there.
 
 **Release builds:** the [Android workflow](.github/workflows/android.yml) attaches `jalaops.apk`, `jalaops.aab` and `SHA256SUMS` to every GitHub release with a build provenance attestation, and can be started by hand from the Actions tab. It needs the key in GitHub secrets once: run `./dev android-secrets` (uses the `gh` CLI).
 
-**Google Play:** upload `jalaops.aab` to the internal testing track in the [Play Console](https://play.google.com/console). See the plan in [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
+**Google Play:** upload `jalaops.aab` to the internal testing track in the [Play Console](https://play.google.com/console). The store listing's privacy policy is the app's Tietosuoja page, `https://jalaops-demo.jussialanen.com/privacy`. See the plan in [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
 
 </details>
 

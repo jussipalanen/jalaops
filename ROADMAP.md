@@ -563,7 +563,7 @@ Planned after the features above. Each is developed through its own GitHub issue
 
 | Feature | Status |
 |---|---|
-| Android app (Google Play testing) | Steps 1–5 done in 0.24.0; Google Play submission is next. |
+| Android app (Google Play testing) | Steps 1–5 done in 0.24.0; the app is created in the Play Console, and 1.14.0 adds the privacy page and Google Play's signing key. Internal and closed testing are next. |
 | Lähellä minua: nearest requests first on the map and the list ([#61](https://github.com/jussipalanen/jalaops/issues/61)) | Planned |
 | Statistics and charts on the dashboard | Planned |
 | Invoicing (laskutus) of the maintenance work: 1. Asiakkaat ([#63](https://github.com/jussipalanen/jalaops/issues/63)) | Done in 1.1.0 |
@@ -594,7 +594,7 @@ Invoicing hands finished invoices to accounting software; the app doesn't proces
 
 Goal: JalaOps as an Android app that testers install from Google Play, built with **one command**.
 
-**Status:** steps 1–5 are done (version 0.24.0): `./dev android` builds the app, and each GitHub release gets a `jalaops.apk`. Step 6, Google Play, is next.
+**Status:** steps 1–5 are done (version 0.24.0): `./dev android` builds the app, and each GitHub release gets a `jalaops.apk`. Step 6 has started: the app is created in the Play Console, and 1.14.0 adds the privacy page (`/privacy`) for the store listing and Google Play's app signing key to `assetlinks.json`.
 
 ### Approach
 

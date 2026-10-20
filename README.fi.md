@@ -407,11 +407,11 @@ App Storessa ei ole sovellusta, vaan JalaOps lisätään Koti-valikkoon verkkoso
 
 Komento rakentaa Dockerissa tiedostot `android/dist/jalaops.apk` (asennus puhelimeen) ja `android/dist/jalaops.aab` (Google Playhin), joten vain Docker tarvitaan. Se käyttää [Bubblewrapia](https://github.com/GoogleChromeLabs/bubblewrap) ja tiedoston [`android/twa-manifest.json`](android/twa-manifest.json) asetuksia; sovelluksen versio seuraa frontendin versiota (0.24.0 → versiokoodi 2400). Ensimmäinen rakennus lataa Javan, Android SDK:n ja Gradlen (noin 2 Gt) ja kestää useita minuutteja; myöhemmin noin minuutin.
 
-**Allekirjoitusavain:** ensimmäinen rakennus luo latausavaimen kansioon `~/.jalaops/android` (repositorion ulkopuolelle). Varmuuskopioi kansio: Google Play hyväksyy päivitykset vain samalla avaimella allekirjoitettuina. Avaimen SHA-256-sormenjälki on tiedostossa [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); ilman sitä sovellus avautuu osoiterivin kanssa. Eri avaimen (esimerkiksi toisella koneella) sormenjälki pitää lisätä sinne.
+**Allekirjoitusavain:** ensimmäinen rakennus luo latausavaimen kansioon `~/.jalaops/android` (repositorion ulkopuolelle). Varmuuskopioi kansio: Google Play hyväksyy päivitykset vain samalla avaimella allekirjoitettuina. Avaimen SHA-256-sormenjälki on tiedostossa [`frontend/public/.well-known/assetlinks.json`](frontend/public/.well-known/assetlinks.json); ilman sitä sovellus avautuu osoiterivin kanssa. Siinä on myös Google Playn sovelluksen allekirjoitusavain (Play Consolen Sovelluksen eheys -sivulla), koska Google allekirjoittaa Google Playsta jaettavan sovelluksen uudelleen. Eri avaimen (esimerkiksi toisella koneella) sormenjälki pitää lisätä sinne.
 
 **Julkaisut:** [Android-työnkulku](.github/workflows/android.yml) liittää `jalaops.apk`-, `jalaops.aab`- ja `SHA256SUMS`-tiedostot jokaiseen GitHub-julkaisuun alkuperätodistuksen kanssa, ja sen voi käynnistää myös käsin Actions-välilehdeltä. Avain tallennetaan kerran GitHubin salaisuuksiin komennolla `./dev android-secrets` (käyttää `gh`-työkalua).
 
-**Google Play:** lataa `jalaops.aab` sisäiseen testaukseen [Play Consolessa](https://play.google.com/console). Suunnitelma on tiedostossa [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
+**Google Play:** lataa `jalaops.aab` sisäiseen testaukseen [Play Consolessa](https://play.google.com/console). Kauppasivun tietosuojaselosteena on sovelluksen Tietosuoja-sivu, `https://jalaops-demo.jussialanen.com/privacy`. Suunnitelma on tiedostossa [ROADMAP.md](ROADMAP.md#android-app-google-play-testing).
 
 </details>
 
