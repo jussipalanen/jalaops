@@ -572,8 +572,9 @@ class ModuleManager
 
     /**
      * The environment for a module's Python: no inherited variables, so it
-     * never sees the backend's keys, and the module SDK on PYTHONPATH (the
-     * same as ModuleRunner).
+     * never sees the backend's keys, the module SDK on PYTHONPATH, and no
+     * .pyc files (the same as ModuleRunner with -B), which would be left in
+     * the SDK's folder, owned by the container's root.
      *
      * @return array<string, string|false>
      */
@@ -584,6 +585,7 @@ class ModuleManager
             'PATH' => getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin',
             'LANG' => 'C.UTF-8',
             'PYTHONPATH' => config('modules.sdk'),
+            'PYTHONDONTWRITEBYTECODE' => '1',
         ];
     }
 
