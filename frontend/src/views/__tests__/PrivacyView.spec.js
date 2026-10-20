@@ -11,7 +11,7 @@ describe('PrivacyView', () => {
     expect(wrapper.findAll('dt').map((term) => term.text())).toEqual([
       'Karttapohja: OpenFreeMap ↗',
       'Osoitehaku: OpenStreetMap Nominatim ja Photon ↗',
-      'AI-tilannekatsaus: Google Gemini tai Puter ↗',
+      'AI-tilannekatsaus: Google Gemini ↗',
     ])
     expect(wrapper.text()).toContain('Asiakkaita, osoitteita, kuvauksia tai allekirjoituksia ei lähetetä.')
   })

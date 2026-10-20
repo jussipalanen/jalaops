@@ -19,7 +19,7 @@ const services = [
   },
   {
     name: 'AI-tilannekatsaus',
-    provider: 'Google Gemini tai Puter',
+    provider: 'Google Gemini',
     url: 'https://ai.google.dev',
     what: 'Palvelin lähettää keskeneräisten pyyntöjen otsikot, prioriteetit, tilat ja eräpäivät sekä lukumäärät. Asiakkaita, osoitteita, kuvauksia tai allekirjoituksia ei lähetetä. Gemini API:n ilmaisversiossa Google voi käyttää lähetettyjä tietoja palvelujensa kehittämiseen.',
   },
