@@ -179,7 +179,7 @@ class ModuleCommandsTest extends TestCase
         // modules:add checks it and runs its tests without leaving .pyc files.
         File::put("{$directory}/module.json", str_replace('"0.1.0"', '"0.2.0"', File::get("{$directory}/module.json")));
         $this->artisan('modules:add', ['source' => $directory, '--check' => true, '--id' => 'weather-copy'])
-            ->expectsOutputToContain("✓ weather-copy: Sää \"asema\" 0.2.0 is valid.")
+            ->expectsOutputToContain('✓ weather-copy: Sää "asema" 0.2.0 is valid.')
             ->assertExitCode(0);
         $this->assertDirectoryDoesNotExist(config('modules.sdk').'/__pycache__');
         $this->assertDirectoryDoesNotExist("{$directory}/__pycache__");
