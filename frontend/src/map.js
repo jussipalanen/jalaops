@@ -83,7 +83,12 @@ export function createMap(element, { zoomPosition = 'topleft', ...options } = {}
     map,
     destroy() {
       stopWatchingTheme()
-      map.remove()
+      // Leaving the map page while it zooms in: Leaflet 1.9 ends the zoom
+      // animation from a timer, which fails once the map is gone, so it's
+      // ended now with Leaflet's private method. The basemap then updates in
+      // the next frame, so the map is removed after that.
+      if (map._animatingZoom) map._onZoomTransitionEnd()
+      L.Util.requestAnimFrame(() => map.remove())
     },
   }
 }

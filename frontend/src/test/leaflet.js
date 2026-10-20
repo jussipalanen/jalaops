@@ -128,6 +128,8 @@ const L = {
   control: { zoom: (options) => ({ options, addTo() {} }) },
   divIcon: (options) => options,
   latLngBounds: (points) => ({ points }),
+  // Runs at once, so a map removed in the next frame is removed when the component unmounts.
+  Util: { requestAnimFrame: (callback) => callback() },
 }
 
 export default L

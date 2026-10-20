@@ -28,7 +28,8 @@ const navLinks = [
 ]
 
 // On phones and tablets (below 1024 px) the links are behind a menu button;
-// it closes when a page opens.
+// it closes when a page opens, and when its link to the current page is
+// tapped (the address doesn't change then).
 const mobileMenu = useTemplateRef('mobileMenu')
 const { open: menuOpen, toggle: toggleMenu, close: closeMenu } = useDropdown(mobileMenu)
 watch(() => route.fullPath, closeMenu)
@@ -88,6 +89,7 @@ watch(() => route.fullPath, closeMenu)
                 :to="link.to"
                 class="nav-link min-h-12 w-full rounded-xl px-4 text-base"
                 v-bind="link.exact ? { 'exact-active-class': 'active' } : { 'active-class': 'active' }"
+                @click="closeMenu"
               >
                 {{ link.label }}
               </RouterLink>

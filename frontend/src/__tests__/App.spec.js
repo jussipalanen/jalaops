@@ -61,6 +61,13 @@ describe('App navigation', () => {
     await flushPromises()
     expect(menu.isVisible()).toBe(false)
 
+    // Tapping the link of the page that's already open closes it too.
+    await button.trigger('click')
+    await menu.find('a[href="/tools"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/tools')
+    expect(menu.isVisible()).toBe(false)
+
     // Escape closes the menu and returns focus to its button.
     await button.trigger('click')
     menu.find('a').element.focus()
