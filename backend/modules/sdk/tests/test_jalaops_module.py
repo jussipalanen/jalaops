@@ -78,7 +78,7 @@ class ActionsTest(unittest.TestCase):
 
     def test_refuses_an_unknown_action_and_methods_that_are_not_actions(self):
         for name in ("delete", "helper", 3):
-            with self.subTest(name=name), self.assertRaisesRegex(InputError, "^Tuntematon toiminto"):
+            with self.subTest(name=name), self.assertRaisesRegex(InputError, f"^Tuntematon toiminto: {name}. Sallitut: list, get, types, rest, broken, not-a-dict.$"):
                 self.module.handle({"action": name})
 
     def test_needs_an_action_without_a_default(self):

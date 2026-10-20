@@ -126,7 +126,7 @@ class Module:
             if method is None:
                 raise InputError("Anna toiminto (action).")
         elif not isinstance(name, str) or name not in actions:
-            raise InputError(f"Tuntematon toiminto: {name}.")
+            raise InputError(f"Tuntematon toiminto: {name}. Sallitut: {', '.join(actions)}.")
         else:
             method = actions[name]
 
@@ -159,11 +159,15 @@ class Module:
         return Path(path)
 
     def _actions(self):
-        """The marked methods by action name, bound to this module."""
+        """The marked methods by action name, in the order they're defined."""
+        functions = {}
+        for cls in reversed(type(self).__mro__):
+            functions.update(vars(cls))
+
         actions = {}
         defaults = []
 
-        for _, function in inspect.getmembers(type(self), inspect.isfunction):
+        for function in functions.values():
             marked = getattr(function, "_jalaops_action", None)
             if marked is None:
                 continue

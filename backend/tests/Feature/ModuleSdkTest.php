@@ -55,7 +55,7 @@ class ModuleSdkTest extends TestCase
         $this->assertSame('Ei löytynyt.', $this->reason(['action' => 'get', 'id' => 10]));
         $this->assertSame('Numero: anna kokonaisluku.', $this->reason(['action' => 'get', 'id' => 'neljä']));
         $this->assertSame('Numero: pakollinen tieto.', $this->reason(['action' => 'get']));
-        $this->assertSame('Tuntematon toiminto: delete.', $this->reason(['action' => 'delete']));
+        $this->assertSame('Tuntematon toiminto: delete. Sallitut: list, get, crash.', $this->reason(['action' => 'delete']));
     }
 
     public function test_a_crash_shows_a_generic_message_and_logs_the_details(): void
