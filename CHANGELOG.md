@@ -6,6 +6,23 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-10-20
+
+### Added
+- **Module SDK** ([#92](https://github.com/jussipalanen/jalaops/issues/92)): `backend/modules/sdk/jalaops_module.py`, a base class for Python modules (`class WeatherModule(Module)`). JalaOps puts it on every module's `PYTHONPATH`, so folder modules and packages use it without installing anything.
+  - **Actions:** methods marked with `@action("name")`, picked by the input's `"action"`, one of them the default.
+  - **Input checks:** from the method's type hints (`int`, `float`, `str`, `bool`, `list[...]`, `dict`, `Literal[...]`, `X | None`), with Finnish messages that use the form's labels in `module.json`, e.g. "Veroton hinta (€): anna numero.".
+  - **Errors:** an `InputError` is the message users see; any other error shows "Moduulissa tapahtui virhe." and logs the traceback.
+  - **Helpers:** `self.data_dir`, `self.manifest`, `self.directory` and `feed_item()` for widgets; `handle()` for a module's own tests.
+  - Using it is optional: plain `main.py` programs keep working.
+- `modules:create <id> [--name=]` and `./dev modules:create`: a new module in `backend/modules/<id>` from the stubs in `backend/stubs/module`, with a `main.py` class that uses the SDK (`weather-station` → `WeatherStationModule`) and its tests.
+
+### Changed
+- **Hei maailma** (`HelloModule`) and **ALV-laskuri** (`VatCalculatorModule`) use the SDK. Their error messages now start with the field's label ("Luvut: anna lista, jossa on vain numeroita."), and ALV-laskuri's `rate` must be one of the texts `"25.5"`, `"14"`, `"10"` or `"0"`, as its form sends it.
+- Modules run without Python's `-E`, which would also ignore the SDK's `PYTHONPATH`; the runner still passes on none of the backend's variables.
+- The log of a failing module keeps the end of a long error, where a traceback names it, instead of its start.
+- `modules:add` refuses the ids `sdk` and `packages`, the folders in `backend/modules` that aren't modules.
+
 ## [1.14.0] - 2026-10-20
 
 ### Added
@@ -486,7 +503,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.14.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/jussipalanen/jalaops/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...v1.12.0

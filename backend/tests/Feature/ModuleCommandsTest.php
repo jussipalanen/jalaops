@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ModuleSetting;
 use App\Models\ModuleWidgetSetting;
 use App\Services\Modules\ModuleRegistry;
+use App\Services\Modules\ModuleRunner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\File;
@@ -161,6 +162,49 @@ class ModuleCommandsTest extends TestCase
         $this->assertFileExists("{$this->modules}/weather/main.py");
     }
 
+    public function test_create_makes_a_module_that_uses_the_sdk(): void
+    {
+        $this->artisan('modules:create', ['module' => 'weather-station', '--name' => 'Sää "asema"'])
+            ->expectsOutputToContain("Created module 'weather-station':")
+            ->assertExitCode(0);
+
+        $directory = "{$this->modules}/weather-station";
+        $this->assertStringContainsString('class WeatherStationModule(Module):', File::get("{$directory}/main.py"));
+        $this->assertSame('Sää "asema"', json_decode(File::get("{$directory}/module.json"), true)['name']);
+
+        $module = app(ModuleRegistry::class)->find('weather-station');
+        $this->assertSame('Sää "asema"', $module->name);
+        $this->assertSame(['message' => 'Hei, Maailma!'], app(ModuleRunner::class)->run($module));
+
+        // modules:add checks it and runs its tests without leaving .pyc files.
+        File::put("{$directory}/module.json", str_replace('"0.1.0"', '"0.2.0"', File::get("{$directory}/module.json")));
+        $this->artisan('modules:add', ['source' => $directory, '--check' => true, '--id' => 'weather-copy'])
+            ->expectsOutputToContain('✓ weather-copy: Sää "asema" 0.2.0 is valid.')
+            ->assertExitCode(0);
+        $this->assertDirectoryDoesNotExist(config('modules.sdk').'/__pycache__');
+        $this->assertDirectoryDoesNotExist("{$directory}/__pycache__");
+
+        // Its own tests pass, with the SDK on PYTHONPATH as modules:add runs them.
+        $tests = Process::path($directory)->env(['PYTHONPATH' => config('modules.sdk')])->run([config('modules.python'), '-B', '-m', 'unittest']);
+        $this->assertTrue($tests->successful(), $tests->errorOutput());
+        $this->assertStringContainsString('Ran 2 tests', $tests->errorOutput());
+    }
+
+    public function test_create_needs_a_free_valid_id(): void
+    {
+        foreach ([
+            'Weather' => "'Weather' can't be a module id (a-z, 0-9 and -).",
+            'sdk' => "'sdk' is a folder of the modules folder, not a module id.",
+            'routes' => "A module with the id 'routes' already exists.",
+        ] as $id => $error) {
+            $this->artisan('modules:create', ['module' => $id])->expectsOutputToContain($error)->assertExitCode(1);
+        }
+
+        $this->artisan('modules:create', ['module' => '3d-printer'])->assertExitCode(0);
+        $this->assertStringContainsString('class _3dPrinterModule(Module):', File::get("{$this->modules}/3d-printer/main.py"));
+        $this->assertSame('3d printer', json_decode(File::get("{$this->modules}/3d-printer/module.json"), true)['name']);
+    }
+
     public function test_a_module_cant_have_links(): void
     {
         $source = $this->source();
@@ -175,6 +219,11 @@ class ModuleCommandsTest extends TestCase
     {
         $this->artisan('modules:add', ['source' => $this->source('Weather_Module')])
             ->expectsOutputToContain("'weather_module' can't be a module id (a-z, 0-9 and -): give one with --id.")
+            ->assertExitCode(1);
+
+        // The module SDK's folder can't be replaced, not even with --force.
+        $this->artisan('modules:add', ['source' => $this->source(), '--id' => 'sdk', '--force' => true])
+            ->expectsOutputToContain("'sdk' is a folder of the modules folder, not a module id: give another one with --id.")
             ->assertExitCode(1);
 
         $this->artisan('modules:add', ['source' => $this->source()])->assertExitCode(0);

@@ -14,8 +14,14 @@ Complete examples:
 
 ## Create a module
 
-1. Make a folder whose name is the module's id: lowercase letters, numbers and hyphens, e.g. `modules/vat-calculator`.
-2. Add `module.json` and `main.py` (below).
+1. Create it with its id (lowercase letters, numbers and hyphens) and the name users see:
+
+   ```bash
+   ./dev modules:create weather-station --name="Sääasema"
+   ```
+
+   This makes `modules/weather-station` with a `module.json`, a `main.py` whose class `WeatherStationModule` uses the module SDK, and its tests in `tests/`. You can also make the folder and the files by hand.
+2. Change `module.json` and `main.py` (below) to do what the module is for.
 3. Try it on the command line:
 
    ```bash
@@ -29,9 +35,11 @@ Complete examples:
 ```text
 modules/
   packages/            module packages installed by Composer (not in git)
+  sdk/                 the module SDK, jalaops_module.py (not a module)
   vat-calculator/
     module.json        name, settings, form and results
     main.py            the program: JSON in, JSON out
+    tests/             optional: its own tests (python3 -m unittest)
     view.html          optional: the module's own page
     assets/            optional: CSS and JS files for the view
 ```
@@ -93,7 +101,41 @@ Empty fields are left out of the input, so the program can use its own defaults 
 
 ## main.py
 
-A shortened version of `modules/vat-calculator/main.py`, which also rounds to cents and checks the VAT rate:
+`modules/vat-calculator/main.py`, shortened. A module is a class that uses the module SDK in `modules/sdk/jalaops_module.py`, which JalaOps puts on every module's `PYTHONPATH`:
+
+```python
+from typing import Literal
+
+from jalaops_module import InputError, Module, action
+
+
+class VatCalculatorModule(Module):
+    @action("calculate", default=True)
+    def calculate(self, amount: float, rate: Literal["25.5", "14", "10", "0"] = "25.5"):
+        if amount < 0:
+            raise InputError("Verottoman hinnan pitää olla vähintään 0 €.")
+
+        vat = round(amount * float(rate) / 100, 2)
+        return {"vat": vat, "total": round(amount + vat, 2)}
+
+
+if __name__ == "__main__":
+    VatCalculatorModule.main()
+```
+
+What the SDK does:
+
+- **Actions:** each method marked with `@action("name")` is an action, picked by the input's `"action"`: `{"action": "get", "id": 3}` calls the `get` action with `id=3`. `default=True` marks the one that runs when the input has no `"action"`. Values the method doesn't take are left out, unless it takes `**rest`. An action returns a dict, which is printed as JSON.
+- **Input checks:** the type hints check the values before the method runs: `int`, `float` (whole numbers too), `str`, `bool`, `list` and `list[int]` etc., `dict`, `Literal[...]` for a fixed choice, and `X | None` for a value that can be null. A parameter without a default is required. The messages are Finnish and start with the field's label from the form in `module.json` (`"Veroton hinta (€): anna numero."`), or with `labels={"amount": "Hinta"}` in `@action`, or the parameter's name.
+- **Errors:** `raise InputError("…")` ends with that message for the user. Any other error ends with "Moduulissa tapahtui virhe." for the user and the traceback in the backend's log.
+- **Helpers:** `self.data_dir` is the data folder (with `"storage": true`), `self.manifest` the `module.json` and `self.directory` the module's folder. `feed_item(title, text=…, date=…, image=…, tags=…, params=…)` makes one item of a feed widget's output.
+- **Tests:** `self.handle({"action": "get", "id": 3})` runs an action without stdin and stdout, so a module's tests can call it directly (see `modules:create`'s `tests/test_main.py`).
+
+The SDK gives modules structure and the same checks everywhere. It isn't a security boundary: the protection is that a module runs as its own process, without the backend's secrets and with a timeout.
+
+### Without the SDK
+
+A module can also be a plain program that reads stdin and writes stdout:
 
 ```python
 import json
@@ -123,11 +165,11 @@ The rules:
 - **Input:** one JSON object on stdin, `{}` when there's nothing to send, exactly as the page sent it (strings aren't trimmed, and empty ones stay empty). Check it before using it: anything in the input comes from the user.
 - **Output:** one JSON object on stdout and nothing else. Use stderr for debugging output.
 - **Errors:** print a short Finnish message to stderr and exit with a non-zero code. The app shows the message's last line to the user, and the full error goes to the backend's log.
-- **Environment:** the program gets only `PATH` and `LANG` (and `JALAOPS_DATA_DIR` with `"storage": true`), not the backend's variables, so it never sees API keys or database passwords. It runs in its own folder as the working directory.
+- **Environment:** the program gets only `PATH`, `LANG` and `PYTHONPATH` with the module SDK (and `JALAOPS_DATA_DIR` with `"storage": true`), not the backend's variables, so it never sees API keys or database passwords. It runs in its own folder as the working directory.
 - **Libraries:** the standard library works. A module that needs other libraries lists them with pinned versions in a `requirements.txt`, and they are installed when the Docker image is built (`backend/Dockerfile` and `docker/backend/Dockerfile`), never at runtime.
 - **Text:** everything users see (names, labels, messages) is in Finnish; code and comments in English.
 
-A program can be tried on its own too: `echo '{"amount": 100}' | python3 modules/vat-calculator/main.py`.
+A program can be tried on its own too, with the SDK on the path: `echo '{"amount": 100}' | PYTHONPATH=modules/sdk python3 modules/vat-calculator/main.py`.
 
 ## Its own view (view.html)
 
@@ -371,3 +413,5 @@ $this->assertSame(125.5, $output['total']);
 ```
 
 Test both good input and the errors the program reports. CI runs the tests with Python, like the Docker images.
+
+A module's own Python tests go in its `tests/` folder (`modules:create` makes one). They run with `python3 -m unittest` in the module's folder, with `PYTHONPATH=../sdk` when you run them yourself, and `modules:add` runs them before adding a module. The SDK's own tests are in `modules/sdk/tests`, and `ModuleSdkTest` runs them in CI.

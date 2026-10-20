@@ -83,6 +83,7 @@ Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./d
 | `./dev logs [palvelu]` | Seuraa lokeja                                |
 | `./dev artisan <args>` | Aja Artisan-komento                          |
 | `./dev composer <args>`| Aja Composer backend-kontissa                |
+| `./dev modules:create <id>` | Luo uusi Python-moduuli, joka käyttää moduulien SDK:ta, testeineen ([lisää](#python-moduulit)) |
 | `./dev modules:search` | Etsi Python-moduulipaketteja GitHubista ([lisää](#python-moduulit)) |
 | `./dev modules:add <lähde>` | Tarkista ja lisää Python-moduuli hakemistosta, arkistosta tai git-osoitteesta ([lisää](#python-moduulit)) |
 | `./dev npm <args>`     | Aja npm frontend-kontissa                    |
@@ -291,6 +292,8 @@ EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, su
 Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio. Kaksi asennetaan paketteina omista repositorioistaan: **Työaikalaskuri** (tehdyt tunnit, ylityö ja työn hinta, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) ja **Uutiset**, uutissyöte tunnisteineen ja kuvineen, jonka uusimmat uutiset näkyvät etusivulla ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)).
 
 Moduulit ovat valinnaisia: kunkin voi ottaa käyttöön tai poistaa käytöstä sen kytkimellä kohdassa **Työkalut → Moduulit**. Uutiset on aluksi pois käytöstä. Moduulin sivuilla voi olla omat osoitteet (reitit), kuten `/news` ja `/news/syyshuollot-alkavat`, ja sivun otsikko selaimen välilehdellä. Moduuli voi näyttää sisältöä etusivulla (widgetit, paikoissa eli hookeissa); etusivun alareunan **Muokkaa etusivua** siirtää tai piilottaa ne omassa selaimessa, ja `modules:place` kaikilta. Moduuli voi myös tallentaa tietoja omaan hakemistoonsa.
+
+Moduuli on luokka, joka käyttää moduulien SDK:ta, [`jalaops_module`](backend/modules/sdk/jalaops_module.py): sen metodit ovat toimintoja, niiden tyyppivihjeet tarkistavat syötteen, ja virheet näkyvät käyttäjille suomenkielisinä viesteinä. `./dev modules:create weather --name="Sää"` luo uuden moduulin hakemistoon `backend/modules/weather` testeineen. Myös tavallinen Python-ohjelma, joka lukee ja kirjoittaa JSONia, toimii. Katso [backend/modules/README.md](backend/modules/README.md).
 
 Moduulit tulevat koodin mukana pull requestien kautta, eikä niitä voi ladata sovellukseen. Jokainen ajetaan ilman taustapalvelun API-avaimia, ja se pysäytetään aikakatkaisun jälkeen. Moduulin oma näkymä toimii eristetyssä kehyksessä, josta ei pääse sovellukseen eikä verkkoon.
 

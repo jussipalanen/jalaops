@@ -1,0 +1,25 @@
+"""Tests for the {{ id }} module. Run in its folder: python3 -m unittest
+
+modules:add runs them too, with the module SDK on PYTHONPATH.
+"""
+
+import unittest
+
+from jalaops_module import InputError
+from main import {{ class }}
+
+
+class {{ class }}Test(unittest.TestCase):
+    def setUp(self):
+        self.module = {{ class }}()
+
+    def test_greets(self):
+        self.assertEqual(self.module.handle({"name": "Maailma"}), {"message": "Hei, Maailma!"})
+
+    def test_needs_a_name(self):
+        with self.assertRaisesRegex(InputError, "^Nimi: pakollinen tieto.$"):
+            self.module.handle({"name": " "})
+
+
+if __name__ == "__main__":
+    unittest.main()

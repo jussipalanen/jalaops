@@ -1,0 +1,14 @@
+{
+    "name": "{{ name }}",
+    "description": "Kuvaile tähän, mitä moduuli tekee.",
+    "version": "0.1.0",
+    "entry": "main.py",
+    "timeout": 5,
+    "enabled": true,
+    "form": [
+        { "name": "name", "label": "Nimi", "type": "text", "default": "Maailma" }
+    ],
+    "results": [
+        { "name": "message", "label": "Tervehdys" }
+    ]
+}

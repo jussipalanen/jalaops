@@ -32,6 +32,10 @@ class ModuleManager
 {
     private const ID_PATTERN = '/^[a-z0-9][a-z0-9-]*$/';
 
+    // Folders in the modules folder that aren't modules: the installed
+    // packages and the module SDK.
+    private const RESERVED_IDS = ['packages', 'sdk'];
+
     // Upper limits for a module's files, so an archive can't fill the disk.
     private const MAX_FILES = 1000;
 
@@ -204,6 +208,60 @@ class ModuleManager
     }
 
     /**
+     * Creates a new module in the modules folder from the stubs in
+     * stubs/module: a module.json, a main.py whose class uses the module SDK
+     * (weather-station → WeatherStationModule) and its tests.
+     *
+     * @return list<string> The files created
+     *
+     * @throws ModuleException when the id isn't valid or is taken
+     */
+    public function create(string $id, ?string $name = null): array
+    {
+        if (! preg_match(self::ID_PATTERN, $id)) {
+            throw new ModuleException("'{$id}' can't be a module id (a-z, 0-9 and -).");
+        }
+
+        if (in_array($id, self::RESERVED_IDS, true)) {
+            throw new ModuleException("'{$id}' is a folder of the modules folder, not a module id.");
+        }
+
+        $target = rtrim(config('modules.path'), '/')."/{$id}";
+
+        if ($this->modules->locate($id) !== null || file_exists($target)) {
+            throw new ModuleException("A module with the id '{$id}' already exists.");
+        }
+
+        // A Python class name can't start with a digit.
+        $class = Str::studly($id).'Module';
+        $class = ctype_digit($class[0]) ? "_{$class}" : $class;
+        $values = [
+            '{{ id }}' => $id,
+            '{{ name }}' => $name ?? Str::ucfirst(str_replace('-', ' ', $id)),
+            '{{ class }}' => $class,
+        ];
+
+        $created = [];
+
+        foreach (File::allFiles(base_path('stubs/module')) as $stub) {
+            $file = "{$target}/".Str::beforeLast($stub->getRelativePathname(), '.stub');
+            // In module.json the name is inside a JSON string.
+            $content = strtr($stub->getContents(), basename($file) === 'module.json'
+                ? ['{{ name }}' => substr(json_encode($values['{{ name }}'], JSON_UNESCAPED_UNICODE), 1, -1)] + $values
+                : $values);
+
+            File::ensureDirectoryExists(dirname($file));
+            File::put($file, $content);
+            $created[] = $this->relative($file);
+        }
+
+        $this->giveToOwnerOf(config('modules.path'), $target);
+        sort($created);
+
+        return $created;
+    }
+
+    /**
      * Removes an installed module: a package with Composer (and its
      * repository in composer.json), a folder by deleting it. With purge, also
      * its data folder and its settings in the database.
@@ -344,6 +402,10 @@ class ModuleManager
 
         if (! preg_match(self::ID_PATTERN, $id)) {
             throw new ModuleException("'{$id}' can't be a module id (a-z, 0-9 and -): give one with --id.");
+        }
+
+        if (in_array($id, self::RESERVED_IDS, true)) {
+            throw new ModuleException("'{$id}' is a folder of the modules folder, not a module id: give another one with --id.");
         }
 
         return [$id => $source->directory];
@@ -510,7 +572,9 @@ class ModuleManager
 
     /**
      * The environment for a module's Python: no inherited variables, so it
-     * never sees the backend's keys (the same as ModuleRunner).
+     * never sees the backend's keys, the module SDK on PYTHONPATH, and no
+     * .pyc files (the same as ModuleRunner with -B), which would be left in
+     * the SDK's folder, owned by the container's root.
      *
      * @return array<string, string|false>
      */
@@ -520,6 +584,8 @@ class ModuleManager
             ...array_fill_keys(array_keys(getenv() + $_ENV), false),
             'PATH' => getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin',
             'LANG' => 'C.UTF-8',
+            'PYTHONPATH' => config('modules.sdk'),
+            'PYTHONDONTWRITEBYTECODE' => '1',
         ];
     }
 
