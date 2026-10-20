@@ -27,6 +27,10 @@ return [
     // The Python interpreter that runs the modules.
     'python' => env('PYTHON_BINARY', 'python3'),
 
+    // The module SDK (jalaops_module.py), put on every module's PYTHONPATH.
+    // It's part of the backend, so it doesn't move with MODULES_PATH.
+    'sdk' => base_path('modules/sdk'),
+
     // Where modules with "storage": true keep their data, one folder per
     // module (given to the module in JALAOPS_DATA_DIR).
     'storage' => env('MODULES_STORAGE_PATH', storage_path('app/modules')),

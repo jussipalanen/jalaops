@@ -191,6 +191,25 @@ Artisan::command('modules:add
     $this->line('Commit the changes and open a pull request.');
 })->purpose('Add a Python module from a folder, an archive or a git URL, after checking it');
 
+Artisan::command('modules:create
+    {module : The new module\'s id (a-z, 0-9 and -), also its folder name}
+    {--name= : The name users see, in Finnish (default: from the id)}', function (ModuleManager $manager) {
+    try {
+        $files = $manager->create($this->argument('module'), $this->option('name'));
+    } catch (ModuleException $exception) {
+        $this->error($exception->getMessage());
+
+        return 1;
+    }
+
+    $id = $this->argument('module');
+    $this->info("Created module '{$id}':");
+    foreach ($files as $file) {
+        $this->line("  {$file}");
+    }
+    $this->line("Try it: ./dev artisan modules:run {$id} '{\"name\": \"Maailma\"}'. Its tests run with python3 -m unittest in its folder.");
+})->purpose('Create a new Python module that uses the module SDK');
+
 Artisan::command('modules:remove
     {module}
     {--purge : Also delete its data folder and its settings}

@@ -123,7 +123,7 @@ class ModuleApiTest extends TestCase
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'Moduulin suoritus epäonnistui.',
-                'reason' => 'Lukujen pitää olla lista numeroita.',
+                'reason' => 'Luvut: anna lista, jossa on vain numeroita.',
             ]);
     }
 

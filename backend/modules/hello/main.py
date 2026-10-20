@@ -1,7 +1,9 @@
 """Hello world module for JalaOps.
 
 Greets and does a small calculation, to show how Laravel runs Python modules:
-a JSON object comes in on stdin and a JSON object goes out on stdout.
+a JSON object comes in on stdin and a JSON object goes out on stdout. It uses
+the module SDK (modules/sdk/jalaops_module.py), which reads the input, checks
+it against the method's type hints and prints the output.
 
 Input (both optional):
     {"name": "Maailma", "numbers": [3, 5, 10]}
@@ -13,50 +15,32 @@ Output:
 Try it: ./dev artisan modules:run hello '{"name": "Maailma", "numbers": [3, 5, 10]}'
 """
 
-import json
 import platform
 import statistics
-import sys
+
+from jalaops_module import InputError, Module, action
 
 
-def fail(message):
-    """Ends with an error; Laravel shows stderr in its error message."""
-    print(message, file=sys.stderr)
-    sys.exit(1)
+class HelloModule(Module):
+    # The default action: the input needs no "action". Error messages use
+    # the form's labels in module.json ("Luvut: anna lista, jossa…").
+    @action("greet", default=True)
+    def greet(self, name: str = "Maailma", numbers: list[float] | None = None):
+        if not name.strip():
+            raise InputError("Nimi: pakollinen tieto.")
 
+        numbers = numbers or []
+        result = {"message": f"Hei, {name.strip()}!", "count": len(numbers)}
 
-def main():
-    try:
-        data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        fail("Syöte ei ole kelvollista JSONia.")
+        if numbers:
+            result["sum"] = sum(numbers)
+            result["average"] = round(statistics.mean(numbers), 2)
+            result["median"] = statistics.median(numbers)
 
-    if not isinstance(data, dict):
-        fail("Syötteen pitää olla JSON-objekti.")
+        result["python"] = platform.python_version()
 
-    name = data.get("name", "Maailma")
-    numbers = data.get("numbers", [])
-
-    if not isinstance(name, str) or not name.strip():
-        fail("Nimen pitää olla tekstiä.")
-
-    # bool is a subclass of int in Python, so true and false are ruled out separately.
-    if not isinstance(numbers, list) or not all(
-        isinstance(number, (int, float)) and not isinstance(number, bool) for number in numbers
-    ):
-        fail("Lukujen pitää olla lista numeroita.")
-
-    result = {"message": f"Hei, {name.strip()}!", "count": len(numbers)}
-
-    if numbers:
-        result["sum"] = sum(numbers)
-        result["average"] = round(statistics.mean(numbers), 2)
-        result["median"] = statistics.median(numbers)
-
-    result["python"] = platform.python_version()
-
-    json.dump(result, sys.stdout, ensure_ascii=False)
+        return result
 
 
 if __name__ == "__main__":
-    main()
+    HelloModule.main()

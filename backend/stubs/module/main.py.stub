@@ -1,0 +1,25 @@
+"""{{ name }}: a JalaOps module.
+
+JalaOps runs this program with a JSON object on stdin and reads a JSON object
+from stdout. The module SDK (backend/modules/sdk/jalaops_module.py) picks the
+action by the input's "action", checks the values against the type hints and
+turns an InputError into the Finnish message users see.
+
+Try it: ./dev artisan modules:run {{ id }} '{"name": "Maailma"}'
+"""
+
+from jalaops_module import InputError, Module, action
+
+
+class {{ class }}(Module):
+    # The default action: runs when the input has no "action".
+    @action("greet", default=True)
+    def greet(self, name: str = "Maailma"):
+        if not name.strip():
+            raise InputError("Nimi: pakollinen tieto.")
+
+        return {"message": f"Hei, {name.strip()}!"}
+
+
+if __name__ == "__main__":
+    {{ class }}.main()

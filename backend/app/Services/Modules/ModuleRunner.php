@@ -18,11 +18,11 @@ class ModuleRunner
     /**
      * @param  string  $storage  The folder with each module's data folder
      */
-    public function __construct(private readonly string $python, private readonly string $storage) {}
+    public function __construct(private readonly string $python, private readonly string $storage, private readonly string $sdk) {}
 
     public static function fromConfig(): self
     {
-        return new self(config('modules.python'), config('modules.storage'));
+        return new self(config('modules.python'), config('modules.storage'), config('modules.sdk'));
     }
 
     /**
@@ -42,9 +42,10 @@ class ModuleRunner
                 ->timeout($module->timeout)
                 ->env($this->environment($module))
                 ->input(json_encode((object) $input, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR))
-                // -E -s: ignore PYTHON* variables and the user's site-packages,
-                // -B: write no .pyc files, -X utf8: UTF-8 everywhere.
-                ->run([$this->python, '-E', '-s', '-B', '-X', 'utf8', $module->entry]);
+                // -s: ignore the user's site-packages, -B: write no .pyc files,
+                // -X utf8: UTF-8 everywhere. No -E, which would also drop the
+                // PYTHONPATH to the SDK; environment() sets every variable.
+                ->run([$this->python, '-s', '-B', '-X', 'utf8', $module->entry]);
         } catch (ProcessTimedOutException) {
             throw new ModuleException(
                 "Module '{$module->id}' took longer than {$module->timeout} s and was stopped.",
@@ -56,9 +57,12 @@ class ModuleRunner
             $error = trim($result->errorOutput());
 
             // The reason shown to users is the error output's last line: a
-            // module's own message, or the exception line of a traceback.
+            // module's own message, or the exception line of a traceback. The
+            // log keeps the end of a long error, where a traceback names it.
+            $logged = Str::length($error) > 1000 ? '…'.Str::substr($error, -1000) : $error;
+
             throw new ModuleException(
-                "Module '{$module->id}' failed with exit code {$result->exitCode()}: ".(Str::limit($error, 500) ?: 'no error output'),
+                "Module '{$module->id}' failed with exit code {$result->exitCode()}: ".($logged ?: 'no error output'),
                 Str::limit(Str::afterLast($error, "\n"), 200) ?: 'Moduuli päättyi virheeseen.',
             );
         }
@@ -80,8 +84,9 @@ class ModuleRunner
     /**
      * The variables the module gets. Symfony Process would pass on the
      * backend's whole environment, API keys included, so every inherited
-     * variable is switched off (false) and only these few are set. A module
-     * with "storage": true also gets its own data folder.
+     * variable is switched off (false) and only these few are set: PYTHONPATH
+     * has the module SDK. A module with "storage": true also gets its own
+     * data folder.
      *
      * @return array<string, string|false>
      */
@@ -93,6 +98,7 @@ class ModuleRunner
             ...$inherited,
             'PATH' => getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin',
             'LANG' => 'C.UTF-8',
+            'PYTHONPATH' => $this->sdk,
             ...($module->storage ? ['JALAOPS_DATA_DIR' => $this->dataDirectory($module)] : []),
         ];
     }

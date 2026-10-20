@@ -50,7 +50,7 @@ class PythonModulesTest extends TestCase
     public function test_hello_rejects_numbers_that_are_not_numbers(): void
     {
         $this->expectException(ModuleException::class);
-        $this->expectExceptionMessage('Lukujen pitää olla lista numeroita.');
+        $this->expectExceptionMessage('Luvut: anna lista, jossa on vain numeroita.');
 
         $this->runModule('hello', ['numbers' => [1, 'kaksi', true]]);
     }
@@ -65,8 +65,10 @@ class PythonModulesTest extends TestCase
     public function test_the_vat_calculator_checks_its_input(): void
     {
         foreach ([
-            [['amount' => 'sata'], 'Anna veroton hinta numerona.'],
-            [['amount' => 100, 'rate' => '24'], 'ALV-kannan pitää olla 25.5, 14, 10 tai 0 %.'],
+            [[], 'Veroton hinta (€): pakollinen tieto.'],
+            [['amount' => 'sata'], 'Veroton hinta (€): anna numero.'],
+            [['amount' => 100, 'rate' => '24'], 'ALV-kanta (%): valitse jokin näistä: 25.5, 14, 10, 0.'],
+            [['amount' => 100, 'rate' => 14], 'ALV-kanta (%): valitse jokin näistä: 25.5, 14, 10, 0.'],
             [['amount' => -1], 'Verottoman hinnan pitää olla 0–1 000 000 000 €.'],
         ] as [$input, $reason]) {
             try {
@@ -220,6 +222,7 @@ class PythonModulesTest extends TestCase
         }
 
         $this->assertContains('PATH', $variables);
+        $this->assertContains('PYTHONPATH', $variables);
         $this->assertNotContains('GEMINI_API_KEY', $variables);
         $this->assertNotContains('DB_PASSWORD', $variables);
         $this->assertNotContains('APP_KEY', $variables);

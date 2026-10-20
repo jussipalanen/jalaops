@@ -582,7 +582,8 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Module routes: addresses of their own for a module's pages (`/news`, `/news/<slug>`), and the page's title in the browser tab ([#89](https://github.com/jussipalanen/jalaops/issues/89)) | Done in 1.12.0 |
 | `modules:add` and `modules:remove`: install a module from a folder, an archive (a file or a URL) or a git URL with validation, and remove one; production gets it through a pull request and the deploy ([#91](https://github.com/jussipalanen/jalaops/issues/91)) | Done in 1.13.0 |
 | Demo: install a module on the live backend with a token (`modules:add --remote`), kept until the next restart; no extra Google Cloud services ([#94](https://github.com/jussipalanen/jalaops/issues/94)) | Planned |
-| Python module SDK: a base class for modules (`class NewsFeedModule(Module)`) with actions, input checks and Finnish errors ([#92](https://github.com/jussipalanen/jalaops/issues/92)) | Planned |
+| Python module SDK: a base class for modules (`class NewsFeedModule(Module)`) with actions, input checks and Finnish errors, and `modules:create` for a new module ([#92](https://github.com/jussipalanen/jalaops/issues/92)) | Done in 1.15.0 |
+| Työaikalaskuri and Uutiset on the module SDK: new versions in their own repositories, which need JalaOps 1.15.0 | Planned |
 | Module options: an options page per module whose settings are saved and loaded and passed to the module. Needs an admin login first, so visitors can't change them | Planned |
 
 Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).

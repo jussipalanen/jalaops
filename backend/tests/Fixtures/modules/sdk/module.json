@@ -1,0 +1,5 @@
+{
+    "name": "SDK",
+    "enabled": true,
+    "form": [{ "name": "id", "label": "Numero", "type": "number" }]
+}

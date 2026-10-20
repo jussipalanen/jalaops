@@ -28,6 +28,9 @@ Backend (Laravel):
   modules:search [owner]
                      List the GitHub repositories with the topic jalaops-module (Python
                      module packages) and how to install each; default owner: your gh account
+  modules:create <id> [--name=<name>]
+                     Create a new Python module in backend/modules/<id> that uses the
+                     module SDK, with its tests
   modules:add <folder | archive | URL> [options]
                      Check and add a Python module (a folder or an archive on this machine,
                      an archive URL or a git URL); --check only checks it
@@ -178,6 +181,7 @@ case "$command" in
         fi
         $COMPOSE exec backend php artisan modules:add "$source" "$@"
         ;;
+    modules:create) $COMPOSE exec backend php artisan modules:create "$@" ;;
     modules:remove) $COMPOSE exec backend php artisan modules:remove "$@" ;;
     android)
         # Builds in the jalaops-android image (Node, Java 17, Android SDK, Bubblewrap).
