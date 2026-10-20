@@ -9,7 +9,7 @@ const services = [
     name: 'Karttapohja',
     provider: 'OpenFreeMap',
     url: 'https://openfreemap.org',
-    what: 'Selain lataa karttakuvat suoraan palvelusta, joten palvelu näkee IP-osoitteesi ja katsomasi kartan alueen.',
+    what: 'Selain lataa karttakuvat suoraan palvelusta, joten palvelu näkee IP-osoitteesi ja katsomasi kartan alueen. Jos OpenFreeMap ei vastaa, kartta ladataan OpenStreetMapin palvelusta (tile.openstreetmap.org).',
   },
   {
     name: 'Osoitehaku',
@@ -21,7 +21,7 @@ const services = [
     name: 'AI-tilannekatsaus',
     provider: 'Google Gemini tai Puter',
     url: 'https://ai.google.dev',
-    what: 'Palvelin lähettää keskeneräisten pyyntöjen otsikot, prioriteetit, tilat ja eräpäivät sekä lukumäärät. Asiakkaita, osoitteita, kuvauksia tai allekirjoituksia ei lähetetä.',
+    what: 'Palvelin lähettää keskeneräisten pyyntöjen otsikot, prioriteetit, tilat ja eräpäivät sekä lukumäärät. Asiakkaita, osoitteita, kuvauksia tai allekirjoituksia ei lähetetä. Gemini API:n ilmaisversiossa Google voi käyttää lähetettyjä tietoja palvelujensa kehittämiseen.',
   },
 ]
 </script>
@@ -54,16 +54,17 @@ const services = [
           </li>
           <li>
             Palvelimien tavalliset lokit, kuten IP-osoite, selaimen tiedot ja pyydetty osoite. Niitä käytetään vain
-            vikojen selvittämiseen ja väärinkäytön estämiseen.
+            vikojen selvittämiseen ja väärinkäytön estämiseen, ja ne poistuvat palveluntarjoajien säilytysajan
+            jälkeen (Google Cloudissa 30 päivää).
           </li>
           <li>
-            Selaimeen tallennetaan teeman valinta ja etusivun asettelu. Ne pysyvät laitteellasi, eikä niitä lähetetä
-            palvelimelle.
+            Selaimeen tallennetaan teeman valinta, etusivun asettelu ja offline-sivu. Ne pysyvät laitteellasi, eikä
+            niitä lähetetä palvelimelle.
           </li>
         </ul>
         <p class="mt-3">
-          Sovellus ei käytä evästeitä seurantaan, analytiikkaa eikä mainoksia, eikä tietoja myydä tai luovuteta
-          markkinointiin.
+          Sovellus ei aseta evästeitä eikä käytä analytiikkaa tai mainoksia, eikä tietoja myydä tai luovuteta
+          markkinointiin. Erilliset API-etusivu ja API-dokumentaatio käyttävät vain toiminnallista istuntoevästettä.
         </p>
       </div>
 
