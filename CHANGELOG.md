@@ -6,6 +6,18 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-10-20
+
+### Added
+- **Tietosuoja** page (`/privacy`): what data the web app and the Android app handle, which outside services get what, and that the demo has no accounts, tracking or ads. Google Play needs it for the store listing. Linked from the footer and the Tietoja page.
+
+### Fixed
+- The phone and tablet menu closes when you tap the link of the page you're on, such as Etusivu on the home page; before, it stayed open.
+- Leaving the map page while it was still zooming in (within a fraction of a second, e.g. from the phone menu) caused a JavaScript error in Leaflet; the zoom is now finished before the map is removed.
+
+### Changed
+- `assetlinks.json` also trusts Google Play's app signing key, so the app installed from Google Play opens without an address bar, like the downloaded `jalaops.apk`.
+
 ## [1.13.0] - 2026-10-19
 
 ### Added
@@ -474,7 +486,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/jussipalanen/jalaops/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/jussipalanen/jalaops/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/jussipalanen/jalaops/compare/v1.10.0...v1.11.0

@@ -131,6 +131,7 @@ onMounted(load)
       <div class="card card-body">
         <h2 class="text-lg font-bold">Linkit</h2>
         <ul class="mt-2 grid gap-1">
+          <li><RouterLink to="/privacy" class="inline-flex min-h-11 items-center font-semibold text-primary-700 hover:underline lg:min-h-8 dark:text-primary-400">Tietosuoja</RouterLink></li>
           <li v-if="mobileAppsPage"><RouterLink to="/mobile-apps" class="inline-flex min-h-11 items-center font-semibold text-primary-700 hover:underline lg:min-h-8 dark:text-primary-400">Mobiilisovellukset</RouterLink></li>
           <li><a :href="apiDocsUrl" class="inline-flex min-h-11 items-center font-semibold text-primary-700 hover:underline lg:min-h-8 dark:text-primary-400" target="_blank" rel="noopener">API-dokumentaatio ↗</a></li>
           <li><a :href="apiHomeUrl" class="inline-flex min-h-11 items-center font-semibold text-primary-700 hover:underline lg:min-h-8 dark:text-primary-400" target="_blank" rel="noopener">API-etusivu ↗</a></li>

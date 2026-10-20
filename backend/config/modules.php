@@ -38,7 +38,7 @@ return [
     // First parts of addresses that module routes can't use: the frontend's
     // own pages, the API and the build's files. The frontend also skips
     // any route its own pages already have.
-    'reserved_paths' => ['api', 'assets', 'docs', 'requests', 'customers', 'invoices', 'tools', 'map', 'about', 'mobile-apps'],
+    'reserved_paths' => ['api', 'assets', 'docs', 'requests', 'customers', 'invoices', 'tools', 'map', 'about', 'privacy', 'mobile-apps'],
 
     'hooks' => [
         'dashboard.top' => 'Etusivun yläosa',
