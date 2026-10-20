@@ -119,6 +119,9 @@ watch(() => route.fullPath, closeMenu)
         <RouterLink to="/about" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
           Tietoja
         </RouterLink>
+        <RouterLink to="/privacy" class="font-semibold text-primary-700 hover:underline dark:text-primary-400">
+          Tietosuoja
+        </RouterLink>
         <a
           :href="apiDocsUrl"
           class="font-semibold text-primary-700 hover:underline dark:text-primary-400"

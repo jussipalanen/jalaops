@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.jussialanen.jalaops",
       "sha256_cert_fingerprints": [
-        "23:EB:D0:3C:40:45:D6:29:D4:8B:39:D1:5E:61:5E:7E:FA:B8:BA:CF:0D:35:D6:44:5B:EF:EF:CE:F4:83:12:00"
+        "23:EB:D0:3C:40:45:D6:29:D4:8B:39:D1:5E:61:5E:7E:FA:B8:BA:CF:0D:35:D6:44:5B:EF:EF:CE:F4:83:12:00",
+        "AA:2A:09:B1:BC:CB:C1:A7:7A:A7:2A:2E:43:C8:89:38:85:DE:C4:D1:B7:FD:8E:04:09:93:E3:C1:8A:45:97:62"
       ]
     }
   }

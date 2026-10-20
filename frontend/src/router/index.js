@@ -93,6 +93,12 @@ const router = createRouter({
       meta: { title: 'Tietoja' },
       component: () => import('../views/AboutView.vue'),
     },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      meta: { title: 'Tietosuoja' },
+      component: () => import('../views/PrivacyView.vue'),
+    },
     // While the page is switched off, old links and QR codes open the home page.
     mobileAppsPage
       ? {

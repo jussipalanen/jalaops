@@ -43,7 +43,7 @@ return [
         /*
          * API version.
          */
-        'version' => env('API_VERSION', '1.13.0'),
+        'version' => env('API_VERSION', '1.14.0'),
 
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
