@@ -33,4 +33,6 @@ fi
 # the first visitor doesn't wait for the AI. Does nothing when the feature is off.
 php artisan ai-overview:warm &
 
-exec php artisan serve --host=0.0.0.0 --port="${PORT:-10000}"
+# --no-reload lets PHP_CLI_SERVER_WORKERS (see the Dockerfile) take effect;
+# without it, one slow request, such as an AI call, holds up all the others.
+exec php artisan serve --host=0.0.0.0 --port="${PORT:-10000}" --no-reload

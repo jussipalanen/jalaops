@@ -26,7 +26,8 @@ class AiOverviewController extends Controller
      * A cached overview is returned right away. `outdated` is true when the
      * requests have changed since it was written (or it has expired); the
      * frontend then calls the refresh endpoint in the background. Only when no
-     * overview exists yet does this call wait for the AI.
+     * overview exists yet does this call wait for the AI. For a minute after a
+     * failed AI call, it answers 503 right away instead of trying again.
      *
      * @response array{enabled: bool, summary?: string, actions?: list<string>, risks?: list<string>, generated_at?: string, provider?: string, model?: string, stale?: bool, outdated?: bool}
      */
