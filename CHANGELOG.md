@@ -6,6 +6,12 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.16.1] - 2026-10-22
+
+### Fixed
+- A slow or failing AI call no longer holds up the rest of the app on Cloud Run. The backend ran a single PHP process because `php artisan serve` ignores `PHP_CLI_SERVER_WORKERS` without `--no-reload`, so while the AI-tilannekatsaus waited up to 30 seconds for Gemini, the dashboard, lists and `/api/health` waited too. `start.sh` now passes `--no-reload`, and the four workers run on the same instance at no extra cost.
+- After a failed AI call, the AI-tilannekatsaus waits a minute before calling the AI again, and answers right away with the usual error in the meantime. Before, while Gemini was down or overloaded, every dashboard visit waited for a new call to fail.
+
 ## [1.16.0] - 2026-10-20
 
 ### Changed
@@ -508,7 +514,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.16.0...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.16.1...HEAD
+[1.16.1]: https://github.com/jussipalanen/jalaops/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/jussipalanen/jalaops/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/jussipalanen/jalaops/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/jussipalanen/jalaops/compare/v1.13.0...v1.14.0

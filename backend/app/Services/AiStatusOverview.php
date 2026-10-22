@@ -22,7 +22,8 @@ use Illuminate\Support\Str;
  * numbers are always right; the AI only turns them into a summary with
  * suggested actions. A cached overview is always returned right away; when it
  * is out of date, the frontend asks for a refresh in the background. AI calls
- * run one at a time under a lock, and their number per hour is capped.
+ * run one at a time under a lock, and their number per hour is capped. After
+ * a failed call, the next one waits a minute.
  */
 class AiStatusOverview
 {
@@ -31,6 +32,12 @@ class AiStatusOverview
     private const RATE_LIMIT_KEY = 'ai-status-overview-generations';
 
     private const LOCK_KEY = 'ai-status-overview-lock';
+
+    private const FAILURE_KEY = 'ai-status-overview-failed';
+
+    // After a failed AI call, the next one waits this long. The provider is
+    // likely still down, and each attempt would keep a visitor waiting.
+    private const RETRY_AFTER_SECONDS = 60;
 
     private const LIST_LIMIT = 10;
 
@@ -119,6 +126,10 @@ class AiStatusOverview
                     return $this->present($cached, stale: false, outdated: ! $this->isCurrent($cached, $fingerprint));
                 }
 
+                if (Cache::has(self::FAILURE_KEY)) {
+                    throw new AiException('The previous AI call failed less than '.self::RETRY_AFTER_SECONDS.' seconds ago.');
+                }
+
                 $limit = config('ai_overview.max_generations_per_hour');
 
                 if ($limit < 1 || RateLimiter::tooManyAttempts(self::RATE_LIMIT_KEY, $limit)) {
@@ -131,8 +142,16 @@ class AiStatusOverview
 
                 RateLimiter::hit(self::RATE_LIMIT_KEY, 3600);
 
+                try {
+                    $generated = $this->generate($facts);
+                } catch (AiException $exception) {
+                    Cache::put(self::FAILURE_KEY, true, self::RETRY_AFTER_SECONDS);
+
+                    throw $exception;
+                }
+
                 $overview = [
-                    ...$this->generate($facts),
+                    ...$generated,
                     'fingerprint' => $fingerprint,
                     'generated_at' => now()->toIso8601String(),
                     'provider' => $this->ai->provider(),

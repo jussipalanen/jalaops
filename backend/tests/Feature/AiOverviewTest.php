@@ -277,6 +277,24 @@ class AiOverviewTest extends TestCase
             ->assertJsonPath('message', 'AI-tilannekatsauksen luominen epäonnistui. Yritä hetken kuluttua uudelleen.');
     }
 
+    public function test_it_waits_a_minute_before_calling_the_ai_again_after_a_failure(): void
+    {
+        Http::fake([self::GEMINI_URL => Http::sequence()
+            ->push(['error' => ['message' => 'High demand']], 503)
+            ->push($this->geminiReply(['summary' => 'Kaikki kunnossa.', 'actions' => [], 'risks' => []])),
+        ]);
+
+        $this->getJson('/api/dashboard/ai-overview')->assertServiceUnavailable();
+        $this->getJson('/api/dashboard/ai-overview')->assertServiceUnavailable();
+        $this->postJson('/api/dashboard/ai-overview/refresh')->assertServiceUnavailable();
+        Http::assertSentCount(1);
+
+        $this->travel(61)->seconds();
+
+        $this->getJson('/api/dashboard/ai-overview')->assertOk()->assertJsonPath('summary', 'Kaikki kunnossa.');
+        Http::assertSentCount(2);
+    }
+
     public function test_it_rejects_a_reply_without_a_summary(): void
     {
         Http::fake([self::GEMINI_URL => Http::response($this->geminiReply(['actions' => ['Tee jotain.']]))]);
