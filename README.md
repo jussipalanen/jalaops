@@ -332,6 +332,7 @@ The feature is off by default. Turn it on in `backend/.env` and pick the provide
 | `GEMINI_API_KEY` | Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey), when the provider is `gemini` |
 | `PUTER_AUTH_TOKEN` | Puter auth token from the [Puter dashboard](https://puter.com/dashboard), when the provider is `puter`. Calling Puter from the backend needs a Puter subscription. |
 | `GEMINI_MODEL` / `PUTER_MODEL` | Optional model override (defaults: `gemini-3.1-flash-lite`, and `google/gemma-4-31b-it`, listed at $0 on Puter) |
+| `GEMINI_FALLBACK_MODEL` | Gemini model that answers when the main model is overloaded (503, after one retry) or out of quota (429). Default `gemini-3.5-flash-lite`, also on the free tier; empty turns it off |
 | `AI_INSIGHTS_CACHE_MINUTES` | How long an overview is reused while the requests stay the same (default 60) |
 | `AI_INSIGHTS_MAX_PER_HOUR` | Upper limit of AI calls per hour for the whole app (default 20) |
 

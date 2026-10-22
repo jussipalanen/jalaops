@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Sleep;
 use Tests\TestCase;
 
 class AiOverviewTest extends TestCase
@@ -23,6 +24,7 @@ class AiOverviewTest extends TestCase
         parent::setUp();
 
         Carbon::setTestNow('2026-10-09 12:00:00');
+        Sleep::fake();
 
         config([
             'ai_overview.enabled' => true,
@@ -31,6 +33,7 @@ class AiOverviewTest extends TestCase
             'ai_overview.max_generations_per_hour' => 20,
             'services.gemini.api_key' => 'test-key',
             'services.gemini.model' => 'gemini-test',
+            'services.gemini.fallback_model' => 'gemini-fallback',
             'services.puter.auth_token' => null,
             'services.puter.model' => 'puter-test',
             'cors.allowed_origins' => ['https://jalaops.example'],
@@ -280,7 +283,7 @@ class AiOverviewTest extends TestCase
     public function test_it_waits_a_minute_before_calling_the_ai_again_after_a_failure(): void
     {
         Http::fake([self::GEMINI_URL => Http::sequence()
-            ->push(['error' => ['message' => 'High demand']], 503)
+            ->push(['error' => ['message' => 'Internal error']], 500)
             ->push($this->geminiReply(['summary' => 'Kaikki kunnossa.', 'actions' => [], 'risks' => []])),
         ]);
 
@@ -292,6 +295,76 @@ class AiOverviewTest extends TestCase
         $this->travel(61)->seconds();
 
         $this->getJson('/api/dashboard/ai-overview')->assertOk()->assertJsonPath('summary', 'Kaikki kunnossa.');
+        Http::assertSentCount(2);
+    }
+
+    public function test_it_tries_an_overloaded_model_once_more_after_a_pause(): void
+    {
+        Http::fake([self::GEMINI_URL => Http::sequence()
+            ->push(['error' => ['message' => 'High demand']], 503)
+            ->push($this->geminiReply(['summary' => 'Toisella yrityksellä.', 'actions' => [], 'risks' => []])),
+        ]);
+
+        $this->getJson('/api/dashboard/ai-overview')
+            ->assertOk()
+            ->assertJson(['summary' => 'Toisella yrityksellä.', 'model' => 'gemini-test']);
+
+        Sleep::assertSleptTimes(1);
+        Http::assertSentCount(2);
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), '/models/gemini-test:generateContent'));
+        Http::assertNotSent(fn (Request $request) => str_contains($request->url(), 'gemini-fallback'));
+    }
+
+    public function test_the_fallback_model_answers_when_the_model_stays_overloaded(): void
+    {
+        Http::fake([self::GEMINI_URL => Http::sequence()
+            ->push(['error' => ['message' => 'High demand']], 503)
+            ->push(['error' => ['message' => 'High demand']], 503)
+            ->push($this->geminiReply(['summary' => 'Varamallin katsaus.', 'actions' => [], 'risks' => []])),
+        ]);
+
+        $this->getJson('/api/dashboard/ai-overview')
+            ->assertOk()
+            ->assertJson(['summary' => 'Varamallin katsaus.', 'provider' => 'Gemini', 'model' => 'gemini-fallback']);
+
+        Http::assertSentCount(3);
+        Http::assertSent(fn (Request $request) => $request->url()
+            === 'https://generativelanguage.googleapis.com/v1beta/models/gemini-fallback:generateContent');
+
+        // The next visit reuses the overview, although another model wrote it.
+        $this->getJson('/api/dashboard/ai-overview')->assertJsonPath('outdated', false);
+        Http::assertSentCount(3);
+    }
+
+    public function test_the_fallback_model_answers_right_away_when_the_quota_is_used_up(): void
+    {
+        Http::fake([self::GEMINI_URL => Http::sequence()
+            ->push(['error' => ['message' => 'Quota exceeded']], 429)
+            ->push($this->geminiReply(['summary' => 'Varamallin katsaus.', 'actions' => [], 'risks' => []])),
+        ]);
+
+        $this->getJson('/api/dashboard/ai-overview')->assertOk()->assertJsonPath('model', 'gemini-fallback');
+
+        Sleep::assertNeverSlept();
+        Http::assertSentCount(2);
+    }
+
+    public function test_it_fails_when_the_fallback_model_is_busy_too(): void
+    {
+        Http::fake([self::GEMINI_URL => Http::response(['error' => ['message' => 'High demand']], 503)]);
+
+        $this->getJson('/api/dashboard/ai-overview')->assertServiceUnavailable();
+
+        Http::assertSentCount(3);
+    }
+
+    public function test_the_fallback_model_can_be_turned_off(): void
+    {
+        config(['services.gemini.fallback_model' => '']);
+        Http::fake([self::GEMINI_URL => Http::response(['error' => ['message' => 'High demand']], 503)]);
+
+        $this->getJson('/api/dashboard/ai-overview')->assertServiceUnavailable();
+
         Http::assertSentCount(2);
     }
 

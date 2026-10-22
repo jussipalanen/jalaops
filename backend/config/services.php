@@ -40,6 +40,9 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'timeout' => (int) env('GEMINI_TIMEOUT', 30),
+        // Answers when the main model is overloaded (503) or out of quota (429).
+        // Empty turns it off.
+        'fallback_model' => env('GEMINI_FALLBACK_MODEL', 'gemini-3.5-flash-lite'),
     ],
 
     'puter' => [

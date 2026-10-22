@@ -6,6 +6,12 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.16.2] - 2026-10-22
+
+### Fixed
+- The AI-tilannekatsaus fails less often when Gemini is overloaded. `gemini-3.1-flash-lite` often answers 503 "high demand" (35 times on Oct 19). A 503 is now tried once more after 2 seconds, and if the model is still busy, or its quota is used up (429), a fallback model writes the overview instead: `GEMINI_FALLBACK_MODEL`, by default `gemini-3.5-flash-lite`, which is also on the free tier and has a quota of its own. Its name shows under the overview. An empty `GEMINI_FALLBACK_MODEL` turns it off.
+- `backend/.env.example` no longer suggests `gemini-2.5-flash`: Google has closed it to new users (404).
+
 ## [1.16.1] - 2026-10-22
 
 ### Fixed
@@ -514,7 +520,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.16.1...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.16.2...HEAD
+[1.16.2]: https://github.com/jussipalanen/jalaops/compare/v1.16.1...v1.16.2
 [1.16.1]: https://github.com/jussipalanen/jalaops/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/jussipalanen/jalaops/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/jussipalanen/jalaops/compare/v1.14.0...v1.15.0

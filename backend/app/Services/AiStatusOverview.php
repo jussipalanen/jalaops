@@ -119,7 +119,8 @@ class AiStatusOverview
     private function generateLocked(array $facts, string $fingerprint, Closure $reuse): array
     {
         try {
-            return Cache::lock(self::LOCK_KEY, 90)->block(60, function () use ($facts, $fingerprint, $reuse) {
+            // Long enough for a retry and a fallback call, each up to the provider's timeout.
+            return Cache::lock(self::LOCK_KEY, 120)->block(60, function () use ($facts, $fingerprint, $reuse) {
                 $cached = Cache::get(self::CACHE_KEY);
 
                 if ($reuse($cached)) {
@@ -155,7 +156,7 @@ class AiStatusOverview
                     'fingerprint' => $fingerprint,
                     'generated_at' => now()->toIso8601String(),
                     'provider' => $this->ai->provider(),
-                    'model' => $this->ai->model(),
+                    'model' => $this->ai->repliedModel(),
                 ];
 
                 Cache::forever(self::CACHE_KEY, $overview);

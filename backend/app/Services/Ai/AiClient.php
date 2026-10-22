@@ -22,6 +22,11 @@ abstract class AiClient
     ) {}
 
     /**
+     * The model that wrote the last reply, when it wasn't the configured one.
+     */
+    protected ?string $repliedModel = null;
+
+    /**
      * Display name of the provider, e.g. "Gemini".
      */
     abstract public function provider(): string;
@@ -41,6 +46,14 @@ abstract class AiClient
     public function model(): string
     {
         return $this->model;
+    }
+
+    /**
+     * The model that wrote the last reply: the configured one, or a fallback.
+     */
+    public function repliedModel(): string
+    {
+        return $this->repliedModel ?? $this->model;
     }
 
     /**
@@ -69,14 +82,14 @@ abstract class AiClient
      * Logs how long the provider took, split into DNS lookup, connecting and
      * waiting for the reply, to tell network delays from slow generation.
      */
-    protected function logTiming(Response $response): void
+    protected function logTiming(Response $response, ?string $model = null): void
     {
         $stats = $response->handlerStats();
 
         Log::info(sprintf(
             '%s (%s) replied with status %d in %.2f s (DNS %.2f s, connect %.2f s, TLS %.2f s, first byte %.2f s).',
             $this->provider(),
-            $this->model,
+            $model ?? $this->model,
             $response->status(),
             $stats['total_time'] ?? 0,
             $stats['namelookup_time'] ?? 0,
