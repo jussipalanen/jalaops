@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Services\Ai\AiClient;
 use App\Services\Ai\GeminiClient;
 use App\Services\Ai\PuterClient;
@@ -10,6 +11,7 @@ use App\Services\Modules\ModuleRunner;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,6 +41,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Admin-only routes use the "can:admin" middleware.
+        Gate::define('admin', fn (User $user) => $user->isAdmin());
+
+        // Slows down password guessing. The demo buttons have no password to
+        // guess, and visitors behind one address (an office) share the limit.
+        RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('demo-login', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
         // Refreshing the AI overview calls the AI provider, so each visitor gets only a few refreshes.
         RateLimiter::for('ai-overview-refresh', fn (Request $request) => Limit::perMinute(3)->by($request->ip()));
 

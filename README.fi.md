@@ -37,6 +37,7 @@ Käyttäjä voi:
 - laskuttaa valmiit pyynnöt: laskunumerot, viitenumerot, eräpäivät, tilat, lasku PDF- ja HTML-muodossa JalaOps-logolla ja sivunumeroilla sekä vienti kirjanpitoon
 - avata pyynnön puhelimella sen QR-koodista ja kopioida laskun maksutiedot pankkisovellukseen
 - lukea koontinäkymästä valinnaisen tekoälyn kirjoittaman tilannekatsauksen (AI-tilannekatsaus)
+- kirjautua sisään tai kokeilla demoa yhdellä napautuksella käyttäjänä tai ylläpitäjänä; vain ylläpitäjä ottaa moduuleja käyttöön ja poistaa niitä käytöstä
 
 Sovelluksen käyttöliittymä on suomeksi.
 
@@ -69,6 +70,8 @@ Ensimmäinen käynnistys asentaa riippuvuudet ja ajaa tietokantamigraatiot, jote
 | MariaDB  | `localhost:3306` (käyttäjä `jalaops`, salasana `secret`, tietokanta `jalaops`) |
 
 Jos portti 3306 on jo käytössä, käynnistä komennolla `DB_HOST_PORT=3307 ./dev up`.
+
+Sovellus avautuu kirjautumissivulle. Paikallisessa kehityksessä sivulla on demonapit **Kokeile käyttäjänä** ja **Kokeile ylläpitäjänä**, jotka kirjaavat sisään ilman salasanaa. Jos haluat kirjautua sähköpostilla ja salasanalla, aseta `ADMIN_EMAIL` ja `ADMIN_PASSWORD` tiedostoon `backend/.env` ja aja `./dev restart`: ylläpitäjä luodaan käynnistyksessä, jos sitä ei vielä ole.
 
 <details>
 <summary><strong>🧰 <code>dev</code>-apukomento: oikotiet Docker-komentoihin</strong></summary>
@@ -127,6 +130,21 @@ jalaops/
 ## API
 
 Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/docs/api.json`).
+
+Kaikki rajapinnat järjestelmä- ja kirjautumisrajapintoja lukuun ottamatta vaativat kirjautumisen: sovellus kirjautuu istuntoevästeellä (`POST /api/login`), ja muutospyynnöt lähettävät `XSRF-TOKEN`-evästeen arvon otsakkeessa `X-XSRF-TOKEN`. Ilman kirjautumista API vastaa 401, ja vain ylläpitäjille tarkoitetut rajapinnat vastaavat muille käyttäjille 403.
+
+<details>
+<summary><strong>🔐 Kirjautuminen</strong></summary>
+
+| Metodi | Endpoint             | Kuvaus                      |
+|--------|----------------------|-----------------------------|
+| GET    | `/api/login`         | Näyttääkö kirjautumissivu demonapit (`demo_login`) |
+| POST   | `/api/login`         | Kirjaudu kentillä `email` ja `password` (5 yritystä minuutissa) |
+| POST   | `/api/login/demo`    | Kirjaudu demokäyttäjäksi (`role: user`) tai demoylläpitäjäksi (`role: admin`); vain asetuksella `DEMO_LOGIN` |
+| POST   | `/api/logout`        | Kirjaudu ulos               |
+| GET    | `/api/user`          | Kirjautunut käyttäjä ja hänen roolinsa (`admin` tai `user`) |
+
+</details>
 
 <details>
 <summary><strong>🩺 Järjestelmä</strong></summary>
@@ -202,7 +220,7 @@ Interaktiivinen API-dokumentaatio: http://localhost:8000/docs (OpenAPI JSON: `/d
 |--------|----------------------|-------------------------------|
 | GET    | `/api/modules`       | Python-moduulit ja onko kukin käytössä |
 | GET    | `/api/modules/{id}`  | Moduulin lomake, tulokset ja oma näkymä |
-| PATCH  | `/api/modules/{id}`  | Ota moduuli käyttöön tai poista se käytöstä (vain sovelluksen omilta sivuilta) |
+| PATCH  | `/api/modules/{id}`  | Ota moduuli käyttöön tai poista se käytöstä (vain ylläpitäjät, vain sovelluksen omilta sivuilta) |
 | POST   | `/api/modules/{id}/run` | Suorita moduuli: runko on sen syöte (vain sovelluksen omilta sivuilta) |
 | GET    | `/api/dashboard/widgets` | Etusivun moduulien sisällöt ja niiden paikat (vain sovelluksen omilta sivuilta) |
 
@@ -291,7 +309,7 @@ EPC QR -koodi ("SEPA credit transfer"), jossa ovat myyjän IBAN, BIC ja nimi, su
 
 Moduuleilla lisätään ominaisuuksia Pythonilla: ne ovat pieniä ohjelmia hakemistossa [`backend/modules`](backend/modules), ja Laravel ajaa niitä erillisinä prosesseina, JSON sisään ja JSON ulos. **Työkalut → Moduulit** näyttää moduulit ja sen, onko kukin käytössä, ja jokaisella käytössä olevalla moduulilla on sovelluksessa oma sivu, joka piirretään sen `module.json`-tiedostosta tai sen omasta `view.html`-näkymästä. Sovelluksen mukana tulee kaksi esimerkkiä: **ALV-laskuri** ja **Hei maailma**, jolla on oma näkymä ja pylväskaavio. Kaksi asennetaan paketteina omista repositorioistaan: **Työaikalaskuri** (tehdyt tunnit, ylityö ja työn hinta, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) ja **Uutiset**, uutissyöte tunnisteineen ja kuvineen, jonka uusimmat uutiset näkyvät etusivulla ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)).
 
-Moduulit ovat valinnaisia: kunkin voi ottaa käyttöön tai poistaa käytöstä sen kytkimellä kohdassa **Työkalut → Moduulit**. Uutiset on aluksi pois käytöstä. Moduulin sivuilla voi olla omat osoitteet (reitit), kuten `/news` ja `/news/syyshuollot-alkavat`, ja sivun otsikko selaimen välilehdellä. Moduuli voi näyttää sisältöä etusivulla (widgetit, paikoissa eli hookeissa); etusivun alareunan **Muokkaa etusivua** siirtää tai piilottaa ne omassa selaimessa, ja `modules:place` kaikilta. Moduuli voi myös tallentaa tietoja omaan hakemistoonsa.
+Moduulit ovat valinnaisia: ylläpitäjä ottaa kunkin käyttöön tai poistaa sen käytöstä sen kytkimellä kohdassa **Työkalut → Moduulit**, ja muut käyttäjät näkevät, onko moduuli käytössä. Uutiset on aluksi pois käytöstä. Moduulin sivuilla voi olla omat osoitteet (reitit), kuten `/news` ja `/news/syyshuollot-alkavat`, ja sivun otsikko selaimen välilehdellä. Moduuli voi näyttää sisältöä etusivulla (widgetit, paikoissa eli hookeissa); etusivun alareunan **Muokkaa etusivua** siirtää tai piilottaa ne omassa selaimessa, ja `modules:place` kaikilta. Moduuli voi myös tallentaa tietoja omaan hakemistoonsa.
 
 Moduuli on luokka, joka käyttää moduulien SDK:ta, [`jalaops_module`](backend/modules/sdk/jalaops_module.py): sen metodit ovat toimintoja, niiden tyyppivihjeet tarkistavat syötteen, ja virheet näkyvät käyttäjille suomenkielisinä viesteinä. `./dev modules:create weather --name="Sää"` luo uuden moduulin hakemistoon `backend/modules/weather` testeineen. Myös tavallinen Python-ohjelma, joka lukee ja kirjoittaa JSONia, toimii. Katso [backend/modules/README.md](backend/modules/README.md).
 

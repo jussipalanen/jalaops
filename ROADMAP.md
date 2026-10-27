@@ -584,7 +584,9 @@ Planned after the features above. Each is developed through its own GitHub issue
 | Demo: install a module on the live backend with a token (`modules:add --remote`), kept until the next restart; no extra Google Cloud services ([#94](https://github.com/jussipalanen/jalaops/issues/94)) | Planned |
 | Python module SDK: a base class for modules (`class NewsFeedModule(Module)`) with actions, input checks and Finnish errors, and `modules:create` for a new module ([#92](https://github.com/jussipalanen/jalaops/issues/92)) | Done in 1.15.0 |
 | Työaikalaskuri and Uutiset on the module SDK: 2.0.0 in their own repositories, which need JalaOps 1.15.0 | Done in 1.16.0 |
-| Module options: an options page per module whose settings are saved and loaded and passed to the module. Needs an admin login first, so visitors can't change them | Planned |
+| Login and roles: a login window, demo buttons for a user and an admin, and admin-only module settings, checked by the backend ([#101](https://github.com/jussipalanen/jalaops/issues/101)) | Done in 1.17.0 |
+| User management: Käyttäjät list and editing for admins, Oma tili for everyone ([#102](https://github.com/jussipalanen/jalaops/issues/102)) | Planned |
+| Module options: an options page per module whose settings are saved and loaded and passed to the module, for admins (the login and roles are done in 1.17.0) | Planned |
 
 Invoicing hands finished invoices to accounting software; the app doesn't process payments (see Scope Limits).
 

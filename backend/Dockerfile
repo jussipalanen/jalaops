@@ -28,10 +28,13 @@ RUN composer dump-autoload --optimize --no-dev \
 COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
+# SESSION_SECURE_COOKIE: the login cookie is only sent over HTTPS, which
+# Cloud Run, Render and Vercel always use.
 ENV APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
     DEMO_MODE=true \
+    SESSION_SECURE_COOKIE=true \
     PHP_CLI_SERVER_WORKERS=4
 
 USER www-data

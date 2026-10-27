@@ -27,6 +27,15 @@ The backend's data is chosen with one environment variable:
 
 In demo mode the app shows the visitor a notice that changes are not kept permanently.
 
+## Login
+
+The app opens on a login page, and the API answers 401 without a login. The users and their sessions are kept in the same database as the rest of the data, so demo mode needs no database of its own for them either:
+
+- **Demo mode:** the login page has two buttons, **Kokeile käyttäjänä** and **Kokeile ylläpitäjänä**, which sign in as the shared demo accounts without a password. A restart logs everyone out, as the sessions live in the SQLite data (and the app key is new on each start).
+- **Own database (`DEMO_MODE=false`):** no demo buttons. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` (the password in Secret Manager, like `GEMINI_API_KEY`): the admin is created on start if no user has that email yet. Changing the variables later doesn't change an existing admin.
+
+The frontend and the API share one address through Vercel's rewrite, so the session cookie works without CORS settings. The image sets `SESSION_SECURE_COOKIE=true`, so the cookie is only sent over HTTPS.
+
 ## 1. Backend on Google Cloud Run (always on)
 
 The service `jalaops-backend` runs in the `europe-north1` region (Finland) with these settings:
@@ -336,6 +345,10 @@ The Android app opens the frontend's address (`host` in [`android/twa-manifest.j
 | `DEMO_MODE` | `true` | `true`: demo data in SQLite, reset on every start. `false`: use the `DB_*` database. |
 | `SEED_DEMO_DATA` | (unset) | With `DEMO_MODE=false`: `true` seeds the demo requests once, into an empty table. |
 | `APP_KEY` | random on each start | Laravel's encryption key. Set a fixed one when using a real database. |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | (unset) | The first admin, created on start when both are set and no user has the email yet. Keep the password in Secret Manager. |
+| `DEMO_LOGIN` | `true` in demo mode | The login page's demo buttons (demo user and demo admin, no password). |
+| `SESSION_LIFETIME` | `120` | Minutes without activity before the login expires. |
+| `SESSION_SECURE_COOKIE` | `true` | The login cookie only over HTTPS. |
 | `APP_URL` | (unset) | The backend's public address, used e.g. in the API documentation. |
 | `APP_ENV` / `APP_DEBUG` | `production` / `false` | Don't enable debug on a public server. |
 | `DB_*`, `MYSQL_ATTR_SSL_CA` | (unset) | Database connection when `DEMO_MODE=false`. |

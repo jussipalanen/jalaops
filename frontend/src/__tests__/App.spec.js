@@ -1,14 +1,23 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import { user } from '@/auth'
 import App from '../App.vue'
 
-async function mountApp() {
+const demoAdmin = { name: 'Demo Ylläpitäjä', email: 'demo.yllapitaja@example.com', role: 'admin', role_label: 'Ylläpitäjä' }
+
+async function mountApp({ loggedIn = true } = {}) {
+  user.value = loggedIn ? { ...demoAdmin } : null
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ demo: false }) }))
   const page = { template: '<div />' }
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: ['/', '/requests', '/map', '/customers', '/invoices', '/tools', '/about'].map((path) => ({ path, component: page })),
+    routes: ['/', '/requests', '/map', '/customers', '/invoices', '/tools', '/about', '/login'].map((path) => ({
+      path,
+      name: path === '/login' ? 'login' : undefined,
+      meta: path === '/login' ? { bare: true } : {},
+      component: page,
+    })),
   })
   await router.push('/')
   const wrapper = mount(App, { global: { plugins: [router] }, attachTo: document.body })
@@ -20,6 +29,48 @@ describe('App navigation', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     document.body.innerHTML = ''
+    user.value = null
+  })
+
+  it('shows only the logo, the theme and the footer before logging in', async () => {
+    const { wrapper } = await mountApp({ loggedIn: false })
+
+    expect(wrapper.find('nav[aria-label="Päävalikko"]').exists()).toBe(false)
+    expect(wrapper.find('button[aria-label="Valikko"]').exists()).toBe(false)
+    expect(wrapper.find('button[aria-label^="Käyttäjä"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('leaves out the header and footer on the login page', async () => {
+    const { wrapper, router } = await mountApp({ loggedIn: false })
+    await router.push('/login')
+    await flushPromises()
+
+    expect(wrapper.find('header').exists()).toBe(false)
+    expect(wrapper.find('footer').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('shows the user, their role and logging out in the user menu', async () => {
+    const { wrapper, router } = await mountApp()
+    const button = wrapper.find('button[aria-label="Käyttäjä: Demo Ylläpitäjä"]')
+
+    expect(button.text()).toBe('DY')
+    await button.trigger('click')
+    const menu = wrapper.find('.user-menu')
+    expect(menu.isVisible()).toBe(true)
+    expect(menu.text()).toContain('demo.yllapitaja@example.com')
+    expect(menu.text()).toContain('Ylläpitäjä')
+
+    fetch.mockResolvedValue({ ok: true, status: 204, json: () => Promise.resolve(null) })
+    await menu.find('button').trigger('click')
+    await flushPromises()
+
+    expect(fetch).toHaveBeenLastCalledWith('/api/logout', expect.objectContaining({ method: 'POST' }))
+    expect(user.value).toBeNull()
+    expect(router.currentRoute.value.path).toBe('/login')
+    wrapper.unmount()
   })
 
   it('links to every page, including Työkalut', async () => {

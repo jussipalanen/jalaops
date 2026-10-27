@@ -12,9 +12,29 @@ export class ApiError extends Error {
   }
 }
 
-async function apiRequest(method, path, body) {
+// Called when the API answers 401 (not logged in, or the session expired);
+// set by auth.js, which opens the login page.
+let unauthorizedHandler = () => {}
+
+export function onUnauthorized(handler) {
+  unauthorizedHandler = handler
+}
+
+// Laravel's CSRF token from its XSRF-TOKEN cookie, sent back in a header with
+// every request that changes something.
+function xsrfToken() {
+  const cookie = document.cookie.split('; ').find((part) => part.startsWith('XSRF-TOKEN='))
+  return cookie ? decodeURIComponent(cookie.slice('XSRF-TOKEN='.length)) : null
+}
+
+async function apiRequest(method, path, body, retried = false) {
   const headers = { Accept: 'application/json' }
   const options = { method, headers }
+  const token = xsrfToken()
+
+  if (token && method !== 'GET') {
+    headers['X-XSRF-TOKEN'] = token
+  }
 
   if (body instanceof FormData) {
     // The browser sets the multipart Content-Type with its boundary.
@@ -26,8 +46,20 @@ async function apiRequest(method, path, body) {
 
   const response = await fetch(`/api${path}`, options)
 
+  // 419: the CSRF token is missing or old (e.g. after a server restart). Any
+  // answer from the API brings a new one, so fetch one and try once more.
+  if (response.status === 419 && !retried) {
+    await fetch('/api/login', { headers: { Accept: 'application/json' } })
+    return apiRequest(method, path, body, true)
+  }
+
   if (!response.ok) {
     const data = await response.json().catch(() => ({}))
+
+    if (response.status === 401) {
+      unauthorizedHandler()
+    }
+
     throw new ApiError(response.status, data)
   }
 

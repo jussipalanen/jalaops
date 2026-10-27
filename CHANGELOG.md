@@ -6,6 +6,20 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-10-27
+
+### Added
+- **Login and roles** ([#101](https://github.com/jussipalanen/jalaops/issues/101)): the app opens on a login page (Kirjaudu sisään), and the backend checks every API call. Laravel's `auth` middleware answers 401 without a login, and admin-only routes answer 403 to other users (`can:admin`). The login is a session cookie with CSRF protection, with no new packages: Vercel forwards `/api/*`, so the app and the API share one address.
+  - **Endpoints:** `POST /api/login` (5 attempts per minute; the demo buttons 30), `POST /api/logout`, `GET /api/user` and `GET /api/login`, which tells whether the demo buttons are on. Only `/api/health`, `/api/system` and the login routes are open without a login.
+  - **Roles:** `admin` and `user` (`users.role`). Only admins turn modules on and off; in **Työkalut → Moduulit** other users see whether each one is on.
+  - **Demo buttons:** **Kokeile käyttäjänä** and **Kokeile ylläpitäjänä** sign in as the shared demo accounts (Demokäyttäjä and Demoylläpitäjä) without a password (`POST /api/login/demo`). They're on in demo mode and local development (`DEMO_LOGIN`). In demo mode the users and sessions live in the SQLite demo data, so the demo still needs no database.
+  - **First admin:** `ADMIN_EMAIL` and `ADMIN_PASSWORD` create an admin on start (`php artisan users:admin`) if no user has that email yet.
+  - **Login page:** fills the window without the header and footer, on a dark night sky drawn with CSS gradients only (no images, blur or animation, so it costs nothing on phones), and links to Tietoja and Tietosuoja.
+  - **In the app:** the header shows the user's initials, with a menu that has their name, role and **Kirjaudu ulos**. The pages' links show only after logging in. After logging in, the app returns to the page that was asked for, such as a request opened from its QR code. An expired session opens the login page. Tietoja and Tietosuoja stay public.
+
+### Changed
+- The production image sets `SESSION_SECURE_COOKIE=true`, so the login cookie is only sent over HTTPS.
+
 ## [1.16.2] - 2026-10-22
 
 ### Fixed
@@ -520,7 +534,8 @@ The first complete release: every point of the Definition of Done in ROADMAP.md 
 - Vite dev proxy from the frontend to the backend API.
 - README and environment configuration examples.
 
-[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.16.2...HEAD
+[Unreleased]: https://github.com/jussipalanen/jalaops/compare/v1.17.0...HEAD
+[1.17.0]: https://github.com/jussipalanen/jalaops/compare/v1.16.2...v1.17.0
 [1.16.2]: https://github.com/jussipalanen/jalaops/compare/v1.16.1...v1.16.2
 [1.16.1]: https://github.com/jussipalanen/jalaops/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/jussipalanen/jalaops/compare/v1.15.0...v1.16.0

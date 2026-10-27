@@ -90,5 +90,9 @@ return [
         'billing_city' => 'kaupunki',
         'payment_terms_days' => 'maksuehto',
         'notes' => 'muistiinpanot',
+
+        // Login
+        'password' => 'salasana',
+        'role' => 'rooli',
     ],
 ];

@@ -2,13 +2,14 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { apiGet, apiRequestMethod } from '@/api/client'
+import { isAdmin } from '@/auth'
 import { moduleLocation } from '@/modules'
 import { syncModuleRoutes } from '@/router/moduleRoutes'
 
 // The backend's Python modules and whether each one is on. Modules are
-// optional: users turn them on and off here, and the setting is the same for
-// everyone. An enabled module has its own page, and its widgets show on the
-// dashboard.
+// optional: admins turn them on and off here, and the setting is the same for
+// everyone; other users see whether each one is on. An enabled module has its
+// own page, and its widgets show on the dashboard.
 
 const router = useRouter()
 const modules = ref([])
@@ -47,8 +48,12 @@ async function toggle(module) {
 <template>
   <div class="card card-body">
     <h2 class="text-lg font-bold">Moduulit</h2>
-    <p class="mt-1 text-slate-500 dark:text-slate-400">
+    <p v-if="isAdmin" class="mt-1 text-slate-500 dark:text-slate-400">
       Lisäosat, jotka voit ottaa käyttöön tai poistaa käytöstä. Valinta koskee kaikkia käyttäjiä.
+    </p>
+    <p v-else class="mt-1 text-slate-500 dark:text-slate-400">
+      Lisäosat, jotka ylläpitäjä on ottanut käyttöön. Vain ylläpitäjä voi ottaa moduuleja käyttöön tai poistaa niitä
+      käytöstä.
     </p>
 
     <p v-if="loading" class="mt-3 text-slate-500 dark:text-slate-400">Haetaan moduuleja…</p>
@@ -69,6 +74,7 @@ async function toggle(module) {
         </div>
         <div class="flex items-center gap-3">
           <button
+            v-if="isAdmin"
             type="button"
             role="switch"
             class="inline-flex min-h-11 items-center gap-2 rounded-lg px-1 text-sm font-semibold disabled:opacity-60 lg:min-h-8"
@@ -89,6 +95,9 @@ async function toggle(module) {
             </span>
             {{ module.enabled ? 'Käytössä' : 'Pois käytöstä' }}
           </button>
+          <span v-else class="badge" :class="module.enabled ? 'status-completed' : 'priority-low'">
+            {{ module.enabled ? 'Käytössä' : 'Pois käytöstä' }}
+          </span>
           <RouterLink v-if="module.enabled" :to="moduleLocation(module)" class="btn btn-secondary">Avaa</RouterLink>
         </div>
       </li>

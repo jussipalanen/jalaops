@@ -37,6 +37,7 @@ A user can:
 - invoice completed requests: invoice numbers, Finnish reference numbers, due dates, statuses, an invoice PDF and HTML page with the JalaOps logo and page numbers, and an export for accounting software
 - open a request on a phone from its QR code, and copy an invoice's payment details for a banking app
 - read an optional AI-written status overview (AI-tilannekatsaus) on the dashboard
+- log in, or try the demo with one tap as a user or an admin; only admins turn modules on and off
 
 The application UI is in Finnish.
 
@@ -69,6 +70,8 @@ The first start installs the dependencies and runs the database migrations, so i
 | MariaDB  | `localhost:3306` (user `jalaops`, password `secret`, database `jalaops`) |
 
 If port 3306 is already in use, start with `DB_HOST_PORT=3307 ./dev up`.
+
+The app opens on its login page. In local development it has the demo buttons, **Kokeile käyttäjänä** and **Kokeile ylläpitäjänä**, which sign in without a password. To log in with an email and password instead, set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env` and run `./dev restart`: the admin is created on start if it doesn't exist yet.
 
 <details>
 <summary><strong>🧰 The <code>dev</code> helper: shortcuts for Docker commands</strong></summary>
@@ -127,6 +130,21 @@ jalaops/
 ## API
 
 Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/api.json`).
+
+Every endpoint except the system and login ones needs a login: the app logs in with a session cookie (`POST /api/login`), and requests that change something send the `XSRF-TOKEN` cookie's value in the `X-XSRF-TOKEN` header. Without a login the API answers 401, and admin-only endpoints answer 403 to other users.
+
+<details>
+<summary><strong>🔐 Login</strong></summary>
+
+| Method | Endpoint             | Description                 |
+|--------|----------------------|-----------------------------|
+| GET    | `/api/login`         | Whether the login page shows the demo buttons (`demo_login`) |
+| POST   | `/api/login`         | Log in with `email` and `password` (5 attempts per minute) |
+| POST   | `/api/login/demo`    | Log in to the demo user (`role: user`) or demo admin (`role: admin`); only with `DEMO_LOGIN` |
+| POST   | `/api/logout`        | Log out                     |
+| GET    | `/api/user`          | The logged-in user and their role (`admin` or `user`) |
+
+</details>
 
 <details>
 <summary><strong>🩺 System</strong></summary>
@@ -202,7 +220,7 @@ Interactive API documentation: http://localhost:8000/docs (OpenAPI JSON: `/docs/
 |--------|----------------------|-----------------------------|
 | GET    | `/api/modules`       | Python modules and whether each is on |
 | GET    | `/api/modules/{id}`  | A module's form, results and own view |
-| PATCH  | `/api/modules/{id}`  | Turn a module on or off (app's own pages only) |
+| PATCH  | `/api/modules/{id}`  | Turn a module on or off (admins only, app's own pages only) |
 | POST   | `/api/modules/{id}/run` | Run a module: the body is its input (app's own pages only) |
 | GET    | `/api/dashboard/widgets` | The dashboard's module widgets and where each is shown (app's own pages only) |
 
@@ -291,7 +309,7 @@ An EPC QR code ("SEPA credit transfer") with the seller's IBAN, BIC and name, th
 
 Modules add features in Python: small programs in [`backend/modules`](backend/modules) that Laravel runs as separate processes, JSON in and JSON out. **Työkalut → Moduulit** lists them and whether each is on, and each enabled module has a page in the app, drawn from its `module.json` or its own `view.html`. Two examples come with the app: **ALV-laskuri** (VAT) and **Hei maailma**, which has its own view with a bar chart. Two are installed as packages from their own repositories: **Työaikalaskuri** (hours worked, overtime and labour cost, [jalaops-module-worktime](https://github.com/jussipalanen/jalaops-module-worktime)) and **Uutiset**, a news feed with tags and images whose newest news show on the dashboard ([jalaops-module-news](https://github.com/jussipalanen/jalaops-module-news)).
 
-Modules are optional: users turn each on and off with its switch in **Työkalut → Moduulit**. Uutiset comes off. A module's pages can have addresses of their own (routes), such as `/news` and `/news/syyshuollot-alkavat`, and the page's title in the browser tab. A module can show content on the dashboard (widgets, in places called hooks); **Muokkaa etusivua** at the bottom of the dashboard moves or hides them in your own browser, and `modules:place` does it for everyone. A module can also keep data in a folder of its own.
+Modules are optional: admins turn each on and off with its switch in **Työkalut → Moduulit**; other users see whether each one is on. Uutiset comes off. A module's pages can have addresses of their own (routes), such as `/news` and `/news/syyshuollot-alkavat`, and the page's title in the browser tab. A module can show content on the dashboard (widgets, in places called hooks); **Muokkaa etusivua** at the bottom of the dashboard moves or hides them in your own browser, and `modules:place` does it for everyone. A module can also keep data in a folder of its own.
 
 A module is a class that uses the module SDK, [`jalaops_module`](backend/modules/sdk/jalaops_module.py): its methods are actions, their type hints check the input, and errors reach users as Finnish messages. `./dev modules:create weather --name="Sää"` creates a new one in `backend/modules/weather` with its tests. A plain Python program that reads and writes JSON works too. See [backend/modules/README.md](backend/modules/README.md).
 

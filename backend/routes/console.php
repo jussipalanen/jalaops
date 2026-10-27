@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\UserRole;
+use App\Models\User;
 use App\Services\AiStatusOverview;
 use App\Services\Modules\ModuleException;
 use App\Services\Modules\ModuleManager;
@@ -32,6 +34,26 @@ Artisan::command('ai-overview:warm', function (AiStatusOverview $overview) {
         $this->warn('AI status overview could not be generated: '.$exception->getMessage());
     }
 })->purpose('Generate the AI status overview ahead of time');
+
+// The first admin, from ADMIN_EMAIL and ADMIN_PASSWORD. backend/docker/start.sh
+// runs it at startup; an existing user with the email is left as it is.
+Artisan::command('users:admin', function () {
+    ['email' => $email, 'password' => $password] = config('auth.admin');
+
+    if (blank($email) || blank($password)) {
+        $this->info('ADMIN_EMAIL or ADMIN_PASSWORD is not set; no admin to create.');
+
+        return;
+    }
+
+    $user = User::firstOrCreate(['email' => $email], [
+        'name' => 'Ylläpitäjä',
+        'password' => $password,
+        'role' => UserRole::Admin,
+    ]);
+
+    $this->info($user->wasRecentlyCreated ? "Admin {$email} created." : "User {$email} already exists.");
+})->purpose('Create the admin user from ADMIN_EMAIL and ADMIN_PASSWORD');
 
 // Python modules in backend/modules and in module packages (see modules/README.md).
 Artisan::command('modules:list', function (ModuleRegistry $modules) {
