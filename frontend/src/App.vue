@@ -1,10 +1,12 @@
 <script setup>
 import { computed, useTemplateRef, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { user } from '@/auth'
 import { useDropdown } from '@/composables/useDropdown'
 import AppLogo from '@/components/AppLogo.vue'
 import DemoBanner from '@/components/DemoBanner.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import UserMenu from '@/components/UserMenu.vue'
 import { mobileAppsPage } from '@/features'
 import { version } from '../package.json'
 
@@ -17,6 +19,8 @@ const year = new Date().getFullYear()
 // Pages like the map fill the window below the header, without the footer.
 const route = useRoute()
 const fullScreen = computed(() => Boolean(route.meta.fullScreen))
+// Pages like the login page draw the whole window, without the header and footer.
+const bare = computed(() => Boolean(route.meta.bare))
 
 const navLinks = [
   { to: '/', label: 'Etusivu', exact: true },
@@ -36,9 +40,10 @@ watch(() => route.fullPath, closeMenu)
 </script>
 
 <template>
-  <DemoBanner />
+  <DemoBanner v-if="!bare" />
 
   <header
+    v-if="!bare"
     class="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80"
   >
     <div class="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
@@ -48,7 +53,8 @@ watch(() => route.fullPath, closeMenu)
       </RouterLink>
 
       <div class="flex min-w-0 items-center gap-1">
-        <nav class="hidden gap-1 lg:flex" aria-label="Päävalikko">
+        <!-- The pages' links and the user menu only for a logged-in user. -->
+        <nav v-if="user" class="hidden gap-1 lg:flex" aria-label="Päävalikko">
           <RouterLink
             v-for="link in navLinks"
             :key="link.to"
@@ -60,8 +66,9 @@ watch(() => route.fullPath, closeMenu)
           </RouterLink>
         </nav>
         <ThemeToggle />
+        <UserMenu v-if="user" />
 
-        <div ref="mobileMenu" class="lg:hidden">
+        <div v-if="user" ref="mobileMenu" class="lg:hidden">
           <button
             type="button"
             class="grid size-10 cursor-pointer place-items-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -100,8 +107,10 @@ watch(() => route.fullPath, closeMenu)
     </div>
   </header>
 
+  <RouterView v-if="bare" />
+
   <!-- isolate: the map page's panels (z-index 1000) stay below the header menu. -->
-  <main v-if="fullScreen" class="full-screen-page relative isolate min-h-0 flex-1">
+  <main v-else-if="fullScreen" class="full-screen-page relative isolate min-h-0 flex-1">
     <RouterView />
   </main>
 
@@ -109,7 +118,7 @@ watch(() => route.fullPath, closeMenu)
     <RouterView />
   </main>
 
-  <footer v-if="!fullScreen" class="border-t border-slate-200 dark:border-slate-800">
+  <footer v-if="!fullScreen && !bare" class="border-t border-slate-200 dark:border-slate-800">
     <div
       class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:text-slate-400"
     >

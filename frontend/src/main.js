@@ -11,7 +11,14 @@ const app = createApp(App)
 
 app.use(router)
 
-app.mount('#app')
+// Mount once the first page is known (the login check is done and its code is
+// loaded), so the loading screen in index.html stays until then and the
+// header and footer don't flash on pages that have none, like the login page.
+// A failed first navigation still mounts the app.
+router
+  .isReady()
+  .catch(() => {})
+  .then(() => app.mount('#app'))
 
 // The service worker shows an offline page without a connection; it makes the
 // app installable, which the Android app needs. Not in development, where it

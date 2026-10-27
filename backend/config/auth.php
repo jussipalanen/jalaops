@@ -114,4 +114,32 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Demo Login
+    |--------------------------------------------------------------------------
+    |
+    | Whether the login page offers the demo buttons, which sign in as the
+    | shared demo accounts (a user and an admin) without a password. On by
+    | default in demo mode and in local development.
+    |
+    */
+
+    'demo_login' => (bool) env('DEMO_LOGIN', (bool) env('DEMO_MODE', false) || env('APP_ENV', 'production') === 'local'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Account
+    |--------------------------------------------------------------------------
+    |
+    | The first admin, created on start when it doesn't exist yet (the
+    | users:admin command). Without both values no admin is created.
+    |
+    */
+
+    'admin' => [
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];

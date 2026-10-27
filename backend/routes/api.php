@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AiOverviewController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeocodeController;
@@ -42,61 +43,72 @@ Route::get('/health', function () {
 // Application details and health for the "Tietoja" page.
 Route::get('/system', [SystemController::class, 'show']);
 
-// Customers whose maintenance work is billed.
-Route::apiResource('customers', CustomerController::class);
-Route::get('/customers/{customer}/billable-requests', [InvoiceController::class, 'billable']);
+// Login with a session cookie (see AuthController). Everything below needs a
+// logged-in user, and the admin routes the admin role.
+Route::get('/login', [AuthController::class, 'options']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::post('/login/demo', [AuthController::class, 'demo'])->middleware('throttle:demo-login');
 
-// Invoices from completed requests. The export route comes before the
-// resource routes, so "export" isn't read as an invoice id.
-Route::get('/invoices/export', [InvoiceController::class, 'export']);
-Route::apiResource('invoices', InvoiceController::class)->except(['update']);
-Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
-Route::get('/invoices/{invoice}/export/{format}', [InvoiceController::class, 'document'])
-    ->whereIn('format', ['pdf', 'html']);
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
 
-// Bulk export and import. Registered before the resource routes, so "export"
-// and "import" aren't read as request ids.
-Route::get('/requests/export', [RequestTransferController::class, 'export']);
-Route::post('/requests/import', [RequestTransferController::class, 'import'])->middleware('throttle:imports');
+    // Customers whose maintenance work is billed.
+    Route::apiResource('customers', CustomerController::class);
+    Route::get('/customers/{customer}/billable-requests', [InvoiceController::class, 'billable']);
 
-// Work and materials on a request; a row is only found under its own request.
-Route::apiResource('requests.items', RequestItemController::class)
-    ->parameters(['requests' => 'serviceRequest', 'items' => 'item'])
-    ->except(['show'])
-    ->scoped();
+    // Invoices from completed requests. The export route comes before the
+    // resource routes, so "export" isn't read as an invoice id.
+    Route::get('/invoices/export', [InvoiceController::class, 'export']);
+    Route::apiResource('invoices', InvoiceController::class)->except(['update']);
+    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
+    Route::get('/invoices/{invoice}/export/{format}', [InvoiceController::class, 'document'])
+        ->whereIn('format', ['pdf', 'html']);
 
-// The model is ServiceRequest, but the public API uses /api/requests.
-Route::get('/requests/{serviceRequest}/signature', [ServiceRequestController::class, 'signature']);
-Route::get('/requests/{serviceRequest}/export/{format}', [ServiceRequestController::class, 'export'])
-    ->whereIn('format', ['pdf', 'html']);
-Route::apiResource('requests', ServiceRequestController::class)
-    ->parameters(['requests' => 'serviceRequest']);
+    // Bulk export and import. Registered before the resource routes, so "export"
+    // and "import" aren't read as request ids.
+    Route::get('/requests/export', [RequestTransferController::class, 'export']);
+    Route::post('/requests/import', [RequestTransferController::class, 'import'])->middleware('throttle:imports');
 
-// Address to coordinates for request locations (Nominatim), and address suggestions while typing (Photon).
-Route::get('/geocode', [GeocodeController::class, 'show'])->middleware('throttle:geocode');
-Route::get('/geocode/suggest', [GeocodeController::class, 'suggest'])->middleware('throttle:geocode-suggest');
+    // Work and materials on a request; a row is only found under its own request.
+    Route::apiResource('requests.items', RequestItemController::class)
+        ->parameters(['requests' => 'serviceRequest', 'items' => 'item'])
+        ->except(['show'])
+        ->scoped();
 
-// Request counts for the dashboard on the home page.
-Route::get('/dashboard', [DashboardController::class, 'show']);
+    // The model is ServiceRequest, but the public API uses /api/requests.
+    Route::get('/requests/{serviceRequest}/signature', [ServiceRequestController::class, 'signature']);
+    Route::get('/requests/{serviceRequest}/export/{format}', [ServiceRequestController::class, 'export'])
+        ->whereIn('format', ['pdf', 'html']);
+    Route::apiResource('requests', ServiceRequestController::class)
+        ->parameters(['requests' => 'serviceRequest']);
 
-// AI-tilannekatsaus for the dashboard (Gemini or Puter). Off unless AI_INSIGHTS_ENABLED and the provider's key are set.
-// Only the app's own pages may use it, because each overview is an AI call.
-Route::middleware(AllowedOriginsOnly::class)->group(function () {
-    Route::get('/dashboard/ai-overview', [AiOverviewController::class, 'show']);
-    Route::post('/dashboard/ai-overview/refresh', [AiOverviewController::class, 'refresh'])
-        ->middleware('throttle:ai-overview-refresh');
+    // Address to coordinates for request locations (Nominatim), and address suggestions while typing (Photon).
+    Route::get('/geocode', [GeocodeController::class, 'show'])->middleware('throttle:geocode');
+    Route::get('/geocode/suggest', [GeocodeController::class, 'suggest'])->middleware('throttle:geocode-suggest');
+
+    // Request counts for the dashboard on the home page.
+    Route::get('/dashboard', [DashboardController::class, 'show']);
+
+    // AI-tilannekatsaus for the dashboard (Gemini or Puter). Off unless AI_INSIGHTS_ENABLED and the provider's key are set.
+    // Only the app's own pages may use it, because each overview is an AI call.
+    Route::middleware(AllowedOriginsOnly::class)->group(function () {
+        Route::get('/dashboard/ai-overview', [AiOverviewController::class, 'show']);
+        Route::post('/dashboard/ai-overview/refresh', [AiOverviewController::class, 'refresh'])
+            ->middleware('throttle:ai-overview-refresh');
+    });
+
+    // Python modules (backend/modules). Every user may list and run them, but
+    // only from the app's own pages, because each run starts a process on the
+    // server. Only admins turn them on or off.
+    Route::get('/modules', [ModuleController::class, 'index']);
+    Route::get('/modules/{module}', [ModuleController::class, 'show']);
+    Route::patch('/modules/{module}', [ModuleController::class, 'update'])
+        ->middleware(['can:admin', AllowedOriginsOnly::class, 'throttle:module-settings']);
+    Route::post('/modules/{module}/run', [ModuleController::class, 'run'])
+        ->middleware([AllowedOriginsOnly::class, 'throttle:modules']);
+
+    // Module widgets in the dashboard's hooks. Each widget runs its module.
+    Route::get('/dashboard/widgets', [ModuleWidgetController::class, 'dashboard'])
+        ->middleware([AllowedOriginsOnly::class, 'throttle:module-widgets']);
 });
-
-// Python modules (backend/modules). Anyone may list them; only the app's own
-// pages may run one, because each run starts a process on the server, or turn
-// one on or off.
-Route::get('/modules', [ModuleController::class, 'index']);
-Route::get('/modules/{module}', [ModuleController::class, 'show']);
-Route::patch('/modules/{module}', [ModuleController::class, 'update'])
-    ->middleware([AllowedOriginsOnly::class, 'throttle:module-settings']);
-Route::post('/modules/{module}/run', [ModuleController::class, 'run'])
-    ->middleware([AllowedOriginsOnly::class, 'throttle:modules']);
-
-// Module widgets in the dashboard's hooks. Each widget runs its module.
-Route::get('/dashboard/widgets', [ModuleWidgetController::class, 'dashboard'])
-    ->middleware([AllowedOriginsOnly::class, 'throttle:module-widgets']);

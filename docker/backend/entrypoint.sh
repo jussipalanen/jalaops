@@ -17,4 +17,7 @@ fi
 # Docker Compose waits for MariaDB to be healthy before starting this container.
 php artisan migrate --force
 
+# The first admin from ADMIN_EMAIL and ADMIN_PASSWORD in .env, if set and missing.
+php artisan users:admin
+
 exec "$@"

@@ -196,9 +196,9 @@ class ModuleWidgetsTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_users_turn_modules_on_and_off_in_the_app(): void
+    public function test_admins_turn_modules_on_and_off_in_the_app(): void
     {
-        $this->withHeader('Origin', self::SITE);
+        $this->actingAsAdmin()->withHeader('Origin', self::SITE);
 
         $this->patchJson('/api/modules/storage', ['enabled' => false])
             ->assertOk()
@@ -213,7 +213,7 @@ class ModuleWidgetsTest extends TestCase
 
     public function test_turning_a_module_on_or_off_is_checked(): void
     {
-        $this->withHeader('Origin', self::SITE);
+        $this->actingAsAdmin()->withHeader('Origin', self::SITE);
 
         $this->patchJson('/api/modules/storage', [])->assertUnprocessable()->assertJsonValidationErrors('enabled');
         $this->patchJson('/api/modules/nope', ['enabled' => true])->assertNotFound();

@@ -258,6 +258,12 @@
   }
 
   /* Messages */
+  /* The login page: always dark, on a solid background. */
+  .login-space {
+    @apply min-h-dvh bg-slate-950 text-slate-100;
+    color-scheme: dark;
+  }
+
   .alert-error {
     @apply mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300;
   }

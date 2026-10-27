@@ -1,7 +1,21 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { apiGet } from '@/api/client'
+import { demoLogin, logout, user } from '@/auth'
 import router from '@/router'
 
+function stubFetch(status, body) {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: status < 400, status, json: () => Promise.resolve(body) }))
+}
+
+async function logIn() {
+  stubFetch(200, { data: { name: 'Demokäyttäjä', role: 'user' } })
+  await demoLogin('user')
+  vi.unstubAllGlobals()
+}
+
 describe('router', () => {
+  beforeEach(logIn)
+
   it('gives each page its own browser tab title', async () => {
     await router.push('/map')
     expect(document.title).toBe('Kartta – JalaOps')
@@ -56,6 +70,65 @@ describe('router', () => {
       expect(router.currentRoute.value.name).toBe('not-found')
       expect(document.title).toBe('Sivua ei löytynyt – JalaOps')
       expect(fetch).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('login', () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    async function logOut() {
+      stubFetch(204, null)
+      await logout()
+    }
+
+    it('opens the login page without a login, and returns to the page asked for', async () => {
+      await logOut()
+
+      await router.push('/requests/12?tab=items')
+      expect(router.currentRoute.value.name).toBe('login')
+      expect(router.currentRoute.value.query.redirect).toBe('/requests/12?tab=items')
+      expect(document.title).toBe('Kirjaudu – JalaOps')
+
+      await router.push('/')
+      expect(router.currentRoute.value.fullPath).toBe('/login')
+    })
+
+    it('keeps the About and Privacy pages public', async () => {
+      await logOut()
+
+      await router.push('/about')
+      expect(router.currentRoute.value.name).toBe('about')
+      await router.push('/privacy')
+      expect(router.currentRoute.value.name).toBe('privacy')
+    })
+
+    it('opens the settings only for admins', async () => {
+      await router.push('/settings')
+      expect(router.currentRoute.value.name).toBe('home')
+
+      stubFetch(200, { data: { name: 'Demoylläpitäjä', role: 'admin' } })
+      await demoLogin('admin')
+      await router.push('/settings')
+      expect(router.currentRoute.value.name).toBe('settings')
+      expect(document.title).toBe('Asetukset – JalaOps')
+    })
+
+    it('sends someone already logged in from the login page to the app', async () => {
+      await router.push('/login')
+      expect(router.currentRoute.value.path).toBe('/')
+    })
+
+    it('opens the login page when the session expires', async () => {
+      await router.push('/customers')
+      expect(user.value).not.toBeNull()
+
+      // Any API call that answers 401 ends the login.
+      stubFetch(401, { message: 'Kirjaudu ensin sisään.' })
+      await expect(apiGet('/customers')).rejects.toThrow()
+      await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('login'))
+
+      expect(user.value).toBeNull()
+      expect(router.currentRoute.value.query.redirect).toBe('/customers')
     })
   })
 })

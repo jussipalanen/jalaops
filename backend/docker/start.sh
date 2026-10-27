@@ -29,6 +29,9 @@ else
     fi
 fi
 
+# The first admin from ADMIN_EMAIL and ADMIN_PASSWORD, if set and missing.
+php artisan users:admin
+
 # Write the AI status overview in the background while the server starts, so
 # the first visitor doesn't wait for the AI. Does nothing when the feature is off.
 php artisan ai-overview:warm &

@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { installAuthGuard, loadUser } from '@/auth'
 import { mobileAppsPage } from '@/features'
 import { pageTitle, SITE_TITLE } from '@/pageTitle'
 import HomeView from '../views/HomeView.vue'
+// Not lazy: logging out or an expired session opens it at once, without a download.
+import LoginView from '../views/LoginView.vue'
 import { useModuleRoutes } from './moduleRoutes'
 
 const router = createRouter({
@@ -12,6 +15,15 @@ const router = createRouter({
       name: 'home',
       meta: { title: 'Etusivu' },
       component: HomeView,
+    },
+    {
+      // Pages with meta.public open without a login (see auth.js).
+      path: '/login',
+      name: 'login',
+      meta: { title: 'Kirjaudu', public: true, bare: true },
+      component: LoginView,
+      // Someone already logged in goes on to the app.
+      beforeEnter: async () => ((await loadUser()) ? '/' : undefined),
     },
     {
       path: '/requests',
@@ -80,6 +92,13 @@ const router = createRouter({
       component: () => import('../views/ToolsView.vue'),
     },
     {
+      // meta.admin: only admins (see auth.js); the API checks the role too.
+      path: '/settings',
+      name: 'settings',
+      meta: { title: 'Asetukset', admin: true },
+      component: () => import('../views/SettingsView.vue'),
+    },
+    {
       // A Python module's page, drawn from its module.json. Modules with
       // routes of their own also have addresses like /news (moduleRoutes.js).
       path: '/tools/modules/:id',
@@ -90,13 +109,13 @@ const router = createRouter({
     {
       path: '/about',
       name: 'about',
-      meta: { title: 'Tietoja' },
+      meta: { title: 'Tietoja', public: true },
       component: () => import('../views/AboutView.vue'),
     },
     {
       path: '/privacy',
       name: 'privacy',
-      meta: { title: 'Tietosuoja' },
+      meta: { title: 'Tietosuoja', public: true },
       component: () => import('../views/PrivacyView.vue'),
     },
     // While the page is switched off, old links and QR codes open the home page.
@@ -104,7 +123,7 @@ const router = createRouter({
       ? {
           path: '/mobile-apps',
           name: 'mobile-apps',
-          meta: { title: 'Mobiilisovellukset' },
+          meta: { title: 'Mobiilisovellukset', public: true },
           component: () => import('../views/MobileAppsView.vue'),
         }
       : { path: '/mobile-apps', redirect: '/' },
@@ -123,6 +142,8 @@ const router = createRouter({
   ],
 })
 
+// The login check comes first: a module's routes are fetched only when logged in.
+installAuthGuard(router)
 useModuleRoutes(router)
 
 // Each page has its own browser tab title; the home page keeps the full name.
