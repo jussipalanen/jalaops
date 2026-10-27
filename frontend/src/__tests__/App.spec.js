@@ -12,7 +12,7 @@ async function mountApp({ loggedIn = true } = {}) {
   const page = { template: '<div />' }
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: ['/', '/requests', '/map', '/customers', '/invoices', '/tools', '/about', '/login'].map((path) => ({
+    routes: ['/', '/requests', '/map', '/customers', '/invoices', '/tools', '/about', '/login', '/settings'].map((path) => ({
       path,
       name: path === '/login' ? 'login' : undefined,
       meta: path === '/login' ? { bare: true } : {},
@@ -42,6 +42,16 @@ describe('App navigation', () => {
     wrapper.unmount()
   })
 
+  it('leaves Asetukset out of the menu of other users', async () => {
+    const { wrapper } = await mountApp()
+    user.value = { ...demoAdmin, name: 'Demo Käyttäjä', role: 'user', role_label: 'Käyttäjä' }
+    await flushPromises()
+
+    await wrapper.find('button[aria-label="Käyttäjä: Demo Käyttäjä"]').trigger('click')
+    expect(wrapper.find('.user-menu a[href="/settings"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it('leaves out the header and footer on the login page', async () => {
     const { wrapper, router } = await mountApp({ loggedIn: false })
     await router.push('/login')
@@ -62,6 +72,7 @@ describe('App navigation', () => {
     expect(menu.isVisible()).toBe(true)
     expect(menu.text()).toContain('demo.yllapitaja@example.com')
     expect(menu.text()).toContain('Ylläpitäjä')
+    expect(menu.find('a[href="/settings"]').text()).toBe('Asetukset')
 
     fetch.mockResolvedValue({ ok: true, status: 204, json: () => Promise.resolve(null) })
     await menu.find('button').trigger('click')

@@ -92,6 +92,13 @@ const router = createRouter({
       component: () => import('../views/ToolsView.vue'),
     },
     {
+      // meta.admin: only admins (see auth.js); the API checks the role too.
+      path: '/settings',
+      name: 'settings',
+      meta: { title: 'Asetukset', admin: true },
+      component: () => import('../views/SettingsView.vue'),
+    },
+    {
       // A Python module's page, drawn from its module.json. Modules with
       // routes of their own also have addresses like /news (moduleRoutes.js).
       path: '/tools/modules/:id',

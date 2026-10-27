@@ -102,6 +102,17 @@ describe('router', () => {
       expect(router.currentRoute.value.name).toBe('privacy')
     })
 
+    it('opens the settings only for admins', async () => {
+      await router.push('/settings')
+      expect(router.currentRoute.value.name).toBe('home')
+
+      stubFetch(200, { data: { name: 'Demoylläpitäjä', role: 'admin' } })
+      await demoLogin('admin')
+      await router.push('/settings')
+      expect(router.currentRoute.value.name).toBe('settings')
+      expect(document.title).toBe('Asetukset – JalaOps')
+    })
+
     it('sends someone already logged in from the login page to the app', async () => {
       await router.push('/login')
       expect(router.currentRoute.value.path).toBe('/')

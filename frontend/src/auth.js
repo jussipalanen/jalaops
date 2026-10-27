@@ -54,8 +54,9 @@ onUnauthorized(() => {
   }
 })
 
-// Pages need a login unless their route has meta.public. The login page
-// returns to the page that was asked for (?redirect=), e.g. a request's QR code.
+// Pages need a login unless their route has meta.public, and the admin role
+// with meta.admin. The login page returns to the page that was asked for
+// (?redirect=), e.g. a request's QR code.
 export function installAuthGuard(router) {
   router.beforeEach(async (to) => {
     if (to.meta.public) {
@@ -64,6 +65,10 @@ export function installAuthGuard(router) {
 
     if (!(await loadUser())) {
       return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
+    }
+
+    if (to.meta.admin && !isAdmin.value) {
+      return { name: 'home' }
     }
   })
 

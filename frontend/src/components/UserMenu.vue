@@ -1,11 +1,12 @@
 <script setup>
 import { computed, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
-import { logout, user } from '@/auth'
+import { RouterLink, useRouter } from 'vue-router'
+import { isAdmin, logout, user } from '@/auth'
 import { useDropdown } from '@/composables/useDropdown'
 
 // The logged-in user in the header: a round button with their initials, and
-// a menu with their name, email and role and the logout button.
+// a menu with their name, email and role, Asetukset for admins, and the
+// logout button.
 
 const router = useRouter()
 const menu = useTemplateRef('menu')
@@ -55,6 +56,14 @@ async function logOut() {
           <span class="badge" :class="user.role === 'admin' ? 'badge-new' : 'priority-low'">{{ user.role_label }}</span>
         </p>
       </div>
+      <RouterLink
+        v-if="isAdmin"
+        to="/settings"
+        class="flex min-h-11 w-full items-center px-4 font-semibold hover:bg-slate-100 lg:min-h-9 dark:hover:bg-slate-800"
+        @click="close"
+      >
+        Asetukset
+      </RouterLink>
       <button
         type="button"
         class="flex min-h-11 w-full cursor-pointer items-center px-4 font-semibold hover:bg-slate-100 lg:min-h-9 dark:hover:bg-slate-800"
