@@ -3,6 +3,8 @@ import { installAuthGuard, loadUser } from '@/auth'
 import { mobileAppsPage } from '@/features'
 import { pageTitle, SITE_TITLE } from '@/pageTitle'
 import HomeView from '../views/HomeView.vue'
+// Not lazy: logging out or an expired session opens it at once, without a download.
+import LoginView from '../views/LoginView.vue'
 import { useModuleRoutes } from './moduleRoutes'
 
 const router = createRouter({
@@ -19,7 +21,7 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       meta: { title: 'Kirjaudu', public: true, bare: true },
-      component: () => import('../views/LoginView.vue'),
+      component: LoginView,
       // Someone already logged in goes on to the app.
       beforeEnter: async () => ((await loadUser()) ? '/' : undefined),
     },
