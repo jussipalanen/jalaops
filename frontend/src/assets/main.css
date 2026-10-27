@@ -258,37 +258,10 @@
   }
 
   /* Messages */
-  /* The login page: a night sky drawn with static gradients only (no images,
-     blur or animation), so it paints once and costs nothing on phones. */
+  /* The login page: always dark, on a solid background. */
   .login-space {
-    @apply relative isolate min-h-dvh overflow-hidden bg-slate-950 text-slate-100;
+    @apply min-h-dvh bg-slate-950 text-slate-100;
     color-scheme: dark;
-    background-image:
-      /* Glows: the theme's color above, violet in the corner. */
-      radial-gradient(56rem 32rem at 50% -8rem, color-mix(in oklab, var(--color-primary-500) 28%, transparent), transparent 70%),
-      radial-gradient(36rem 28rem at 100% 100%, rgb(139 92 246 / 0.16), transparent 70%),
-      /* A planet's rim along the bottom edge. */
-      radial-gradient(
-        140rem 40rem at 50% calc(100% + 24rem),
-        #020617 69.6%,
-        color-mix(in oklab, var(--color-primary-400) 55%, transparent) 70%,
-        color-mix(in oklab, var(--color-primary-500) 12%, transparent) 72%,
-        transparent 78%
-      );
-  }
-
-  /* Stars: dots on tiles of different sizes, so they don't line up in a grid. */
-  .login-space::before {
-    @apply pointer-events-none absolute inset-0 -z-10;
-    content: '';
-    background-image:
-      radial-gradient(1px 1px at 24px 36px, rgb(255 255 255 / 0.8), transparent),
-      radial-gradient(1px 1px at 132px 84px, rgb(255 255 255 / 0.55), transparent),
-      radial-gradient(1.5px 1.5px at 188px 162px, rgb(255 255 255 / 0.9), transparent),
-      radial-gradient(1px 1px at 64px 196px, rgb(255 255 255 / 0.5), transparent),
-      radial-gradient(1px 1px at 250px 40px, rgb(255 255 255 / 0.7), transparent),
-      radial-gradient(1.5px 1.5px at 96px 120px, rgb(186 230 253 / 0.8), transparent);
-    background-size: 230px 230px, 310px 310px, 270px 270px, 190px 190px, 350px 350px, 410px 410px;
   }
 
   .alert-error {

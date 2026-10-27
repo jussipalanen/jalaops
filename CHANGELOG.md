@@ -14,7 +14,7 @@ Versions follow [semantic versioning](https://semver.org): until 1.0.0, a new mi
   - **Roles:** `admin` and `user` (`users.role`). Only admins turn modules on and off; in **Työkalut → Moduulit** other users see whether each one is on.
   - **Demo buttons:** **Kokeile käyttäjänä** and **Kokeile ylläpitäjänä** sign in as the shared demo accounts (Demokäyttäjä and Demoylläpitäjä) without a password (`POST /api/login/demo`). They're on in demo mode and local development (`DEMO_LOGIN`). In demo mode the users and sessions live in the SQLite demo data, so the demo still needs no database.
   - **First admin:** `ADMIN_EMAIL` and `ADMIN_PASSWORD` create an admin on start (`php artisan users:admin`) if no user has that email yet.
-  - **Login page:** fills the window without the header and footer, on a dark night sky drawn with CSS gradients only (no images, blur or animation, so it costs nothing on phones), and links to Tietoja and Tietosuoja.
+  - **Login page:** fills the window without the header and footer, on a solid dark background, and links to Tietoja and Tietosuoja.
   - **In the app:** the header shows the user's initials, with a menu that has their name, role and **Kirjaudu ulos**. The pages' links show only after logging in. After logging in, the app returns to the page that was asked for, such as a request opened from its QR code. An expired session opens the login page. Tietoja and Tietosuoja stay public.
 
 ### Changed
